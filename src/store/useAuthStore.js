@@ -20,6 +20,10 @@ const useAuthStore = create(
         });
       },
 
+      updateUser: (userData) => {
+        set({ user: userData });
+      },
+
       logout: () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
