@@ -3,13 +3,15 @@ import { persist } from 'zustand/middleware';
 
 const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
 
       login: (userData, accessToken, refreshToken) => {
+        // Token được lưu qua Zustand persist → localStorage key "auth-storage"
+        // Đồng thời lưu riêng để api.js interceptor đọc được trực tiếp
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         set({
@@ -37,6 +39,11 @@ const useAuthStore = create(
     }),
     {
       name: 'auth-storage',
+      // Chỉ persist user & isAuthenticated, không persist token (đã lưu riêng)
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
