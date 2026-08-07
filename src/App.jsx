@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Navbar from './components/Navbar';
+import AppLayout from './components/layout/AppLayout';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -12,6 +12,7 @@ import MyRecipesPage from './pages/MyRecipesPage';
 import RecipeFormPage from './pages/RecipeFormPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
+import PantryPage from './pages/PantryPage';
 import useAuthStore from './store/useAuthStore';
 
 const queryClient = new QueryClient({
@@ -31,14 +32,6 @@ const ProtectedRoute = ({ children }) => {
   }
   return children;
 };
-
-// Layout cho các trang đã đăng nhập: có Navbar ở trên
-const AppLayout = ({ children }) => (
-  <div className="min-h-screen bg-gray-50">
-    <Navbar />
-    {children}
-  </div>
-);
 
 function App() {
   return (
@@ -110,6 +103,17 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/pantry"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <PantryPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/inventory" element={<Navigate to="/pantry" replace />} />
           <Route
             path="/recipes/:id/edit"
             element={

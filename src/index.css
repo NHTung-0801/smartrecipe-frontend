@@ -1,1 +1,23 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles/animations.css";
+
+@theme {
+  --color-primary: var(--sr-primary);
+  --color-primary-container: var(--sr-primary-light);
+  --color-primary-fixed: #ffdad3;
+  --color-secondary: var(--sr-gold);
+  --color-secondary-container: var(--sr-gold-glow);
+  --color-on-secondary-container: var(--sr-on-surface);
+  --color-on-surface: var(--sr-on-surface);
+  --color-on-surface-variant: var(--sr-on-surface-variant);
+  --color-surface-container: var(--sr-surface-container);
+  --color-surface-container-high: var(--sr-surface-container-high);
+  --color-surface-container-lowest: #ffffff;
+  --color-outline-variant: var(--sr-outline-variant);
+  
+  --font-headline-lg: var(--sr-font-heading);
+  --font-headline-md: var(--sr-font-heading);
+  --font-body-md: var(--sr-font-body);
+  --font-label-md: var(--sr-font-body);
+}

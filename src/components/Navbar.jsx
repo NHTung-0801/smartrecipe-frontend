@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+﻿import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 
 export default function Navbar() {
@@ -22,7 +22,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-lg font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
-          <span className="text-2xl">🍳</span>
+          <span className="text-2xl">ðŸ³</span>
           <span className="hidden sm:inline">Smart Recipe</span>
         </Link>
 
@@ -36,7 +36,7 @@ export default function Navbar() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            🏠 <span className="hidden sm:inline">Trang chủ</span>
+            ðŸ  <span className="hidden sm:inline">Trang chá»§</span>
           </Link>
           <Link
             to="/recipes"
@@ -46,7 +46,7 @@ export default function Navbar() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            📖 <span className="hidden sm:inline">Công thức</span>
+            ðŸ“– <span className="hidden sm:inline">CÃ´ng thá»©c</span>
           </Link>
           <Link
             to="/recipes/new"
@@ -56,7 +56,17 @@ export default function Navbar() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            ➕ <span className="hidden sm:inline">Tạo mới</span>
+            âž• <span className="hidden sm:inline">Táº¡o má»›i</span>
+          </Link>
+          <Link
+            to="/pantry"
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isActive('/pantry')
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            ðŸ§º <span className="hidden sm:inline">Tá»§ nguyÃªn liá»‡u</span>
           </Link>
           <Link
             to={`/users/${user?.id}`}
@@ -66,7 +76,7 @@ export default function Navbar() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            👤 <span className="hidden sm:inline">Trang cá nhân</span>
+            ðŸ‘¤ <span className="hidden sm:inline">Trang cÃ¡ nhÃ¢n</span>
           </Link>
           <Link
             to="/profile"
@@ -76,7 +86,7 @@ export default function Navbar() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            ⚙️ <span className="hidden sm:inline">Cài đặt</span>
+            âš™ï¸ <span className="hidden sm:inline">CÃ i Ä‘áº·t</span>
           </Link>
         </div>
 
@@ -89,7 +99,7 @@ export default function Navbar() {
             onClick={handleLogout}
             className="px-3 py-1.5 text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
-            🚪 <span className="hidden sm:inline">Đăng xuất</span>
+            ðŸšª <span className="hidden sm:inline">ÄÄƒng xuáº¥t</span>
           </button>
         </div>
       </div>
