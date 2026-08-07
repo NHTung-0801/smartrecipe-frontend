@@ -1,0 +1,136 @@
+.wrapper {
+  position: relative;
+  width: 100px;
+  flex-shrink: 0;
+  border-left: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.wrapper.active {
+  background-color: rgba(161, 57, 35, 0.04);
+  border-left-color: rgba(161, 57, 35, 0.3);
+  box-shadow: inset 3px 0 6px -3px rgba(161, 57, 35, 0.15); /* Hiệu ứng sáng ngăn cách */
+}
+
+.input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: #a13923;
+  font-weight: 600;
+  text-align: center;
+  padding: 11px 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input::placeholder {
+  color: #d1d5db;
+  font-weight: 400;
+}
+
+.dropdownWrapper {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -1px; /* Căn thẳng hàng với viền phải của ô input */
+  width: 220px; /* Rộng hơn để chứa text dài */
+  background-color: #ffffff;
+  border: 1px solid rgba(222, 192, 185, 0.7);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(78, 43, 27, 0.12), 0 4px 6px rgba(0,0,0,0.05);
+  z-index: 100;
+  overflow: hidden;
+  animation: slideDown 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dropdown {
+  max-height: 165px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group {
+  margin: 0;
+  padding: 0;
+}
+
+.groupLabel {
+  padding: 10px 14px 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #a13923;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: #fbf6f4;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid rgba(222, 192, 185, 0.3);
+}
+
+.groupList {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.option {
+  padding: 9px 18px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.option:hover {
+  background-color: #fff4f0;
+  color: #a13923;
+  padding-left: 22px; /* Hiệu ứng thò thụt nhẹ khi hover */
+}
+
+.selected {
+  background-color: #a13923;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.selected:hover {
+  background-color: #8c301c;
+  color: #ffffff;
+  padding-left: 18px; /* Giữ nguyên khi đã chọn */
+}
+
+/* Custom scrollbar */
+.dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown::-webkit-scrollbar-thumb {
+  background: #d8c3ba;
+  border-radius: 10px;
+}
+.dropdown::-webkit-scrollbar-thumb:hover {
+  background: #b59b90;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
