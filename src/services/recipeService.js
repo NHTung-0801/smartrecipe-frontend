@@ -23,6 +23,18 @@ export const recipeService = {
     return response.data;
   },
 
+  changeStatus: async (id, status) => {
+    const response = await api.patch(`/recipes/${id}/status?status=${status}`);
+    return response.data;
+  },
+
+  exportToWord: async (id) => {
+    const response = await api.get(`/recipes/${id}/export/word`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
   // ==================== LISTING & SEARCH ====================
 
   getMyRecipes: async (page = 0, size = 10) => {

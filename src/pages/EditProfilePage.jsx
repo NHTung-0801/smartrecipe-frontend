@@ -2,12 +2,14 @@ import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Camera, User, Lock, Save, Loader2, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Camera, User, Lock, Save, Loader2, ArrowLeft, Share2, Utensils, Heart, Mail, BookText, Globe, MapPin, Shield, Trash2, ChevronRight, BookOpen, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
 import { userService } from '../services/userService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import s from '../styles/pages/EditProfilePage.module.css';
+import fx from '../styles/effects.module.css';
 
 const profileSchema = z.object({
   displayName: z.string().min(2, 'Tên hiển thị phải có ít nhất 2 ký tự').max(50, 'Tên quá dài'),
@@ -21,14 +23,42 @@ const passwordSchema = z.object({
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Mật khẩu xác nhận không khớp",
   path: ["confirmPassword"],
+}).refine((data) => data.oldPassword !== data.newPassword, {
+  message: "Mật khẩu mới không được trùng với mật khẩu cũ",
+  path: ["newPassword"],
 });
 
 const EditProfilePage = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
+
+  // Password Form
+  const { register: registerPassword, handleSubmit: handleSubmitPassword, reset: resetPassword, formState: { errors: passwordErrors } } = useForm({
+    resolver: zodResolver(passwordSchema)
+  });
+
+  const handleOpenPasswordModal = () => {
+    resetPassword();
+    setShowOldPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setIsPasswordModalOpen(true);
+  };
+
+  const handleClosePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+    resetPassword();
+    setShowOldPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
 
   // Fetch Profile
   const { data: profileData, isLoading: isLoadingProfile } = useQuery({
@@ -36,7 +66,6 @@ const EditProfilePage = () => {
     queryFn: userService.getProfile
   });
 
-  // Sync to store when data arrives
   React.useEffect(() => {
     if (profileData?.data) {
       updateUser(profileData.data);
@@ -46,7 +75,7 @@ const EditProfilePage = () => {
   const currentProfile = profileData?.data || user;
 
   // Profile Form
-  const { register: registerProfile, handleSubmit: handleSubmitProfile, reset: resetProfile, formState: { errors: profileErrors } } = useForm({
+  const { register: registerProfile, handleSubmit: handleSubmitProfile, reset: resetProfile, formState: { errors: profileErrors, isDirty } } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       displayName: '',
@@ -54,7 +83,6 @@ const EditProfilePage = () => {
     }
   });
 
-  // Sync form values khi dữ liệu profile từ API về
   React.useEffect(() => {
     if (currentProfile) {
       resetProfile({
@@ -63,11 +91,6 @@ const EditProfilePage = () => {
       });
     }
   }, [currentProfile, resetProfile]);
-
-  // Password Form
-  const { register: registerPassword, handleSubmit: handleSubmitPassword, reset: resetPassword, formState: { errors: passwordErrors } } = useForm({
-    resolver: zodResolver(passwordSchema)
-  });
 
   // Mutations
   const updateProfileMutation = useMutation({
@@ -86,7 +109,7 @@ const EditProfilePage = () => {
     mutationFn: userService.changePassword,
     onSuccess: (data) => {
       toast.success(data.message || 'Đổi mật khẩu thành công!');
-      resetPassword();
+      handleClosePasswordModal();
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Mật khẩu cũ không chính xác');
@@ -119,232 +142,239 @@ const EditProfilePage = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
-    // Check file type
     if (!file.type.startsWith('image/')) {
       toast.error('Vui lòng chọn một tệp hình ảnh hợp lệ');
       return;
     }
-    
-    // Check file size (e.g. max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Kích thước ảnh phải nhỏ hơn 5MB');
       return;
     }
-
     updateAvatarMutation.mutate(file);
   };
 
   if (isLoadingProfile && !currentProfile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
+      <div className="flex justify-center py-20">
+        <Loader2 className={`${fx.spinner} text-primary w-10 h-10`} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center text-gray-500 hover:text-emerald-600 transition-colors">
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Về trang chủ
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Hồ sơ cá nhân</h1>
-        </div>
-
-        <div className="bg-white shadow-xl shadow-emerald-900/5 rounded-2xl overflow-hidden flex flex-col md:flex-row">
-          
-          {/* Sidebar */}
-          <div className="w-full md:w-1/3 bg-gray-50/50 p-6 border-r border-gray-100">
-            <div className="flex flex-col items-center">
-              <div className="relative group mb-6">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-200">
-                  {currentProfile?.avatarUrl ? (
-                    <img 
-                      src={currentProfile.avatarUrl} 
-                      alt="Avatar" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-emerald-100 text-emerald-600">
-                      <User className="w-16 h-16" />
-                    </div>
-                  )}
+    <div className={s.pageContainer}>
+      
+      {/* Hero Section / Statistics */}
+      <section className={`${s.heroGrid} ${fx.stagger1}`}>
+        {/* User Profile Intro */}
+        <div className={s.profileIntro}>
+          <div className={s.avatarGroup} onClick={() => fileInputRef.current?.click()}>
+            <div className={s.avatarCircle}>
+              {currentProfile?.avatarUrl ? (
+                <img src={currentProfile.avatarUrl} alt="Avatar" className={s.avatarImg} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
+                  <User size={48} />
                 </div>
-                
-                {/* Upload Button Overlay */}
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={updateAvatarMutation.isPending}
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
-                >
-                  {updateAvatarMutation.isPending ? (
-                    <Loader2 className="w-8 h-8 text-white animate-spin" />
-                  ) : (
-                    <Camera className="w-8 h-8 text-white" />
-                  )}
-                </button>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  ref={fileInputRef} 
-                  onChange={handleAvatarChange}
-                  accept="image/*"
-                />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900">{currentProfile?.displayName || currentProfile?.username}</h2>
-              <p className="text-sm text-gray-500 mb-8">{currentProfile?.email}</p>
+              )}
             </div>
-
-            <nav className="space-y-2">
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${
-                  activeTab === 'profile' 
-                    ? 'bg-emerald-50 text-emerald-700 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <User className="w-5 h-5 mr-3" />
-                Thông tin chung
-              </button>
-              <button
-                onClick={() => setActiveTab('password')}
-                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${
-                  activeTab === 'password' 
-                    ? 'bg-emerald-50 text-emerald-700 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <Lock className="w-5 h-5 mr-3" />
-                Đổi mật khẩu
-              </button>
-            </nav>
+            <button className={s.btnCamera} disabled={updateAvatarMutation.isPending}>
+              {updateAvatarMutation.isPending ? <Loader2 size={20} className={fx.spinner} /> : <Camera size={20} />}
+            </button>
+            <input 
+              type="file" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={handleAvatarChange}
+              accept="image/*"
+            />
           </div>
-
-          {/* Content Area */}
-          <div className="w-full md:w-2/3 p-8 lg:p-12">
-            
-            {/* Profile Tab */}
-            {activeTab === 'profile' && (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">Thông tin chung</h3>
-                <form onSubmit={handleSubmitProfile(onProfileSubmit)} className="space-y-6">
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tên đăng nhập (Username)</label>
-                    <input 
-                      type="text" 
-                      value={currentProfile?.username || ''}
-                      disabled
-                      className="w-full px-4 py-3 rounded-xl bg-gray-100 border-transparent text-gray-500 cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tên hiển thị</label>
-                    <input 
-                      type="text" 
-                      {...registerProfile('displayName')}
-                      className={`w-full px-4 py-3 rounded-xl border ${profileErrors.displayName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-500'} bg-white transition-colors focus:ring-2 outline-none`}
-                      placeholder="Nhập tên hiển thị của bạn"
-                    />
-                    {profileErrors.displayName && <p className="mt-2 text-sm text-red-600">{profileErrors.displayName.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tiểu sử (Bio)</label>
-                    <textarea 
-                      {...registerProfile('bio')}
-                      rows="4"
-                      className={`w-full px-4 py-3 rounded-xl border ${profileErrors.bio ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-500'} bg-white transition-colors focus:ring-2 outline-none resize-none`}
-                      placeholder="Giới thiệu đôi nét về bản thân..."
-                    ></textarea>
-                    {profileErrors.bio && <p className="mt-2 text-sm text-red-600">{profileErrors.bio.message}</p>}
-                  </div>
-
-                  <div className="pt-4 flex justify-end">
-                    <button 
-                      type="submit" 
-                      disabled={updateProfileMutation.isPending}
-                      className="flex items-center px-6 py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all disabled:opacity-70"
-                    >
-                      {updateProfileMutation.isPending ? (
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="w-5 h-5 mr-2" />
-                      )}
-                      Lưu thay đổi
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* Password Tab */}
-            {activeTab === 'password' && (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">Đổi mật khẩu</h3>
-                <form onSubmit={handleSubmitPassword(onPasswordSubmit)} className="space-y-6">
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu hiện tại</label>
-                    <input 
-                      type="password" 
-                      {...registerPassword('oldPassword')}
-                      className={`w-full px-4 py-3 rounded-xl border ${passwordErrors.oldPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-500'} bg-white transition-colors focus:ring-2 outline-none`}
-                      placeholder="••••••••"
-                    />
-                    {passwordErrors.oldPassword && <p className="mt-2 text-sm text-red-600">{passwordErrors.oldPassword.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu mới</label>
-                    <input 
-                      type="password" 
-                      {...registerPassword('newPassword')}
-                      className={`w-full px-4 py-3 rounded-xl border ${passwordErrors.newPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-500'} bg-white transition-colors focus:ring-2 outline-none`}
-                      placeholder="••••••••"
-                    />
-                    {passwordErrors.newPassword && <p className="mt-2 text-sm text-red-600">{passwordErrors.newPassword.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
-                    <input 
-                      type="password" 
-                      {...registerPassword('confirmPassword')}
-                      className={`w-full px-4 py-3 rounded-xl border ${passwordErrors.confirmPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-500'} bg-white transition-colors focus:ring-2 outline-none`}
-                      placeholder="••••••••"
-                    />
-                    {passwordErrors.confirmPassword && <p className="mt-2 text-sm text-red-600">{passwordErrors.confirmPassword.message}</p>}
-                  </div>
-
-                  <div className="pt-4 flex justify-end">
-                    <button 
-                      type="submit" 
-                      disabled={changePasswordMutation.isPending}
-                      className="flex items-center px-6 py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all disabled:opacity-70"
-                    >
-                      {changePasswordMutation.isPending ? (
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      ) : (
-                        <Lock className="w-5 h-5 mr-2" />
-                      )}
-                      Đổi mật khẩu
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
+          
+          <h2 className={s.userName}>{currentProfile?.displayName || currentProfile?.username}</h2>
+          <p className={s.userBio}>{currentProfile?.bio || 'Đam mê ẩm thực & Sống khỏe'}</p>
+          
+          <div className={s.actionButtons}>
+            <button className={s.btnChangePhoto} onClick={() => fileInputRef.current?.click()}>
+              Đổi ảnh
+            </button>
+            <button className={s.btnShare}>
+              <Share2 size={18} />
+            </button>
           </div>
         </div>
-      </div>
+
+        {/* Bento Stats Cards */}
+        <div className={s.statsGrid}>
+          <div className={s.statCard}>
+            <div className={s.statCardGlow1} />
+            <div className={s.statHeader}>
+              <div className={`${s.statIcon} ${s.statIcon1}`}>
+                <BookOpen size={20} />
+              </div>
+              <span className={s.statChange}>+12% tháng này</span>
+            </div>
+            <div className={s.statBody}>
+              <span className={`${s.statNumber} ${s.statNumber1}`}>{currentProfile?.recipeCount || 0}</span>
+              <p className={s.statLabel}>Công thức đã tạo</p>
+            </div>
+          </div>
+
+          <div className={s.statCard}>
+            <div className={s.statCardGlow2} />
+            <div className={s.statHeader}>
+              <div className={`${s.statIcon} ${s.statIcon2}`}>
+                <Heart size={20} />
+              </div>
+              <span className={s.statChange}>Lượt yêu thích</span>
+            </div>
+            <div className={s.statBody}>
+              <span className={`${s.statNumber} ${s.statNumber2}`}>1.2k</span>
+              <p className={s.statLabel}>Lượt thích nhận được</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Profile Settings Form */}
+      <section className={`${s.formSection} ${fx.stagger2}`}>
+        <div className={s.formHeader}>
+          <div>
+            <h3 className={s.formTitle}>Thông tin cá nhân</h3>
+            <p className={s.formSubtitle}>Cập nhật chi tiết tài khoản của bạn tại đây.</p>
+          </div>
+          <button 
+            onClick={handleSubmitProfile(onProfileSubmit)}
+            disabled={!isDirty || updateProfileMutation.isPending}
+            className={s.btnSave}
+          >
+            {updateProfileMutation.isPending ? <Loader2 size={18} className={fx.spinner} /> : 'Lưu thay đổi'}
+          </button>
+        </div>
+
+        <form className={s.formGrid}>
+          {/* Name Input */}
+          <div className={s.fieldGroup}>
+            <label className={s.fieldLabel}>Họ và tên</label>
+            <div className={s.inputWrapper}>
+              <User className={s.inputIcon} size={18} />
+              <input 
+                type="text" 
+                {...registerProfile('displayName')}
+                className={s.inputField} 
+              />
+            </div>
+            {profileErrors.displayName && <p className={s.errorMessage}>{profileErrors.displayName.message}</p>}
+          </div>
+
+          {/* Email Input (Disabled/Read-only since API might not support changing email easily here) */}
+          <div className={s.fieldGroup}>
+            <label className={s.fieldLabel}>Email liên kết</label>
+            <div className={s.inputWrapper}>
+              <Mail className={s.inputIcon} size={18} />
+              <input 
+                type="email" 
+                value={currentProfile?.email || ''} 
+                disabled
+                className={`${s.inputField} opacity-60 cursor-not-allowed`} 
+              />
+            </div>
+          </div>
+
+          {/* Bio Input */}
+          <div className={s.fieldGroupFull}>
+            <label className={s.fieldLabel}>Tiểu sử</label>
+            <div className={s.inputWrapper}>
+              <BookText className={s.inputIconTop} size={18} />
+              <textarea 
+                {...registerProfile('bio')}
+                className={s.textareaField} 
+                rows="2"
+                placeholder="Chia sẻ đôi điều về bạn..."
+              />
+            </div>
+            {profileErrors.bio && <p className={s.errorMessage}>{profileErrors.bio.message}</p>}
+          </div>
+        </form>
+
+        {/* Additional Options */}
+        <div className={s.dangerZone}>
+          <div className={s.optionItem} onClick={handleOpenPasswordModal}>
+            <div className={s.optionContent}>
+              <div className={`${s.optionIcon} ${s.optionIcon1}`}>
+                <Shield size={24} />
+              </div>
+              <div>
+                <p className={`${s.optionTitle} ${s.optionTitle1}`}>Đổi mật khẩu</p>
+                <p className={s.optionDesc}>Bảo mật tài khoản của bạn</p>
+              </div>
+            </div>
+            <ChevronRight className={s.chevron} size={20} />
+          </div>
+
+          <div className={s.optionItem}>
+            <div className={s.optionContent}>
+              <div className={`${s.optionIcon} ${s.optionIcon2}`}>
+                <Trash2 size={24} />
+              </div>
+              <div>
+                <p className={`${s.optionTitle} ${s.optionTitle2}`}>Xóa tài khoản</p>
+                <p className={s.optionDesc}>Hành động này không thể hoàn tác</p>
+              </div>
+            </div>
+            <ChevronRight className={s.chevron} size={20} />
+          </div>
+        </div>
+      </section>
+
+      {/* Password Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-[sr-fadeIn_0.3s_ease-out_forwards]">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-[420px] shadow-2xl relative animate-[sr-slideUpFade_0.4s_ease-out_forwards]">
+            <h3 className="text-2xl font-bold text-on-surface mb-6">Đổi mật khẩu</h3>
+            <form onSubmit={handleSubmitPassword(onPasswordSubmit)} className="space-y-4">
+              <div className={s.fieldGroup}>
+                <label className={s.fieldLabel}>Mật khẩu cũ</label>
+                <div className={s.inputWrapper}>
+                  <Lock className={s.inputIcon} size={18} />
+                  <input type={showOldPassword ? "text" : "password"} {...registerPassword('oldPassword')} className={s.inputField} />
+                  <button type="button" className={s.eyeButton} onClick={() => setShowOldPassword(!showOldPassword)}>
+                    {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {passwordErrors.oldPassword && <p className={s.errorMessage}>{passwordErrors.oldPassword.message}</p>}
+              </div>
+              <div className={s.fieldGroup}>
+                <label className={s.fieldLabel}>Mật khẩu mới</label>
+                <div className={s.inputWrapper}>
+                  <Lock className={s.inputIcon} size={18} />
+                  <input type={showNewPassword ? "text" : "password"} {...registerPassword('newPassword')} className={s.inputField} />
+                  <button type="button" className={s.eyeButton} onClick={() => setShowNewPassword(!showNewPassword)}>
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {passwordErrors.newPassword && <p className={s.errorMessage}>{passwordErrors.newPassword.message}</p>}
+              </div>
+              <div className={s.fieldGroup}>
+                <label className={s.fieldLabel}>Xác nhận mật khẩu</label>
+                <div className={s.inputWrapper}>
+                  <Lock className={s.inputIcon} size={18} />
+                  <input type={showConfirmPassword ? "text" : "password"} {...registerPassword('confirmPassword')} className={s.inputField} />
+                  <button type="button" className={s.eyeButton} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {passwordErrors.confirmPassword && <p className={s.errorMessage}>{passwordErrors.confirmPassword.message}</p>}
+              </div>
+              <div className="flex gap-4 mt-8">
+                <button type="button" onClick={handleClosePasswordModal} className="flex-1 py-3 bg-surface-container-high rounded-xl font-label-md font-semibold text-on-surface hover:brightness-95 transition-all">Hủy</button>
+                <button type="submit" disabled={changePasswordMutation.isPending} className="flex-1 py-3 bg-primary rounded-xl font-label-md font-semibold text-white hover:brightness-110 active:scale-95 transition-all">
+                  {changePasswordMutation.isPending ? <Loader2 size={20} className={`${fx.spinner} mx-auto`} /> : 'Xác nhận'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

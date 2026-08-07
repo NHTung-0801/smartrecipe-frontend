@@ -27,7 +27,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Không cố gắng refresh token nếu API đang gọi là login (vì lúc này chưa có token)
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/login')) {
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry && !originalRequest.url.includes('/auth/login')) {
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refreshToken');
@@ -40,6 +40,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('auth-storage'); // Xóa state của zustand (nếu có)
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

@@ -38,5 +38,13 @@ export const tagService = {
   create: async (name) => {
     const response = await api.post('/tags', { name });
     return response.data;
+  },
+  update: async (id, name) => {
+    const response = await api.put(`/tags/${id}`, { name });
+    return response.data;
+  },
+  delete: async (id) => {
+    const response = await api.delete(`/tags/${id}`);
+    return response.data;
   }
 };
