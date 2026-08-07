@@ -1,0 +1,174 @@
+/* =============================================
+   HomePage.module.css
+   ============================================= */
+
+.pageContainer {
+  padding: 32px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1023px) {
+  .pageContainer { padding: 24px; }
+}
+
+/* Glass Panel General */
+.glassPanel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 32px;
+  box-shadow: 0px 10px 30px rgba(204, 88, 63, 0.06);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Welcome Banner */
+.welcomeBanner {
+  composes: glassPanel;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 200px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%), var(--sr-primary-container);
+}
+
+.welcomeTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--sr-on-surface);
+  margin-bottom: 8px;
+}
+
+.welcomeSubtitle {
+  font-family: var(--sr-font-body);
+  font-size: 16px;
+  color: var(--sr-on-surface-variant);
+  max-width: 600px;
+}
+
+/* Quick Actions */
+.quickActionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.actionBtn {
+  composes: glassPanel;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.actionBtn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 15px 35px rgba(204, 88, 63, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.actionIconWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sr-primary);
+  background-color: var(--sr-primary-container);
+}
+
+.actionIconWrap2 { color: var(--sr-secondary); background-color: var(--sr-secondary-container); }
+.actionIconWrap3 { color: var(--sr-tertiary); background-color: var(--sr-tertiary-container); }
+
+.actionLabel {
+  font-family: var(--sr-font-heading);
+  font-weight: 600;
+  color: var(--sr-on-surface);
+  font-size: 15px;
+}
+
+/* Section Header */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sr-on-surface);
+}
+
+.viewAllBtn {
+  font-family: var(--sr-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sr-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.viewAllBtn:hover {
+  text-decoration: underline;
+}
+
+/* Grid Layouts */
+.recipesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* Empty State */
+.emptyState {
+  composes: glassPanel;
+  padding: 64px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  background-color: var(--sr-surface-container-high);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sr-outline);
+  margin-bottom: 24px;
+}
+
+.emptyTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--sr-on-surface);
+  margin-bottom: 8px;
+}
+
+.emptyDesc {
+  font-family: var(--sr-font-body);
+  font-size: 15px;
+  color: var(--sr-on-surface-variant);
+  max-width: 400px;
+}

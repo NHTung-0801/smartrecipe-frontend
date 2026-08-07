@@ -1,0 +1,262 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #a39b97;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Header */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.progressBarContainer {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.progressBar {
+  height: 100%;
+  background-color: #a13923;
+  transition: width 0.3s ease;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.backButton:hover {
+  opacity: 0.8;
+}
+
+.headerTitle {
+  text-align: center;
+}
+
+.headerTitle h2 {
+  font-family: var(--sr-font-heading);
+  font-size: 18px;
+  margin: 0 0 4px 0;
+  font-weight: 700;
+}
+
+.headerTitle p {
+  font-size: 13px;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.timerButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.timerButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Body */
+.body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow: hidden;
+}
+
+.stepCard {
+  width: 100%;
+  max-width: 900px;
+  background: white;
+  border-radius: 16px;
+  display: flex;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  height: 500px;
+  position: relative;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.imageSection {
+  flex: 1.2;
+  position: relative;
+  background-color: #f5f5f5;
+}
+
+.stepImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stepBadge {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 48px;
+  height: 48px;
+  background-color: #a13923;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: var(--sr-font-heading);
+  box-shadow: 0 4px 10px rgba(161, 57, 35, 0.3);
+}
+
+.contentSection {
+  flex: 1;
+  background-color: #f4ece6;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  color: #3d271d;
+  overflow-y: auto;
+}
+
+.stepTitle {
+  font-family: var(--sr-font-heading);
+  color: #a13923;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stepSubtitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #8b6b55;
+}
+
+.stepDescription {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: auto;
+  white-space: pre-line;
+}
+
+.ingredientsList {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ingredientsList p {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navButton {
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.prevButton {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.prevButton:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.prevButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nextButton {
+  background-color: #a13923;
+  color: white;
+}
+
+.nextButton:hover {
+  background-color: #8b311e;
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s;
+}
+
+.dotActive {
+  background-color: #a13923;
+  width: 24px;
+  border-radius: 4px;
+}

@@ -1,0 +1,559 @@
+/* =============================================
+   RegisterPage.module.css — Page-specific Layout
+   ============================================= */
+
+/* ---------- Page Wrapper ---------- */
+.registerWrapper {
+  display: flex;
+  min-height: 100vh;
+  max-height: 100vh;
+  font-family: var(--sr-font-body);
+  color: var(--sr-on-surface);
+  overflow: hidden;
+  position: relative;
+  background: var(--sr-surface);
+}
+
+/* ---------- Hero Panel (Left) ---------- */
+.heroPanel {
+  display: none;
+  position: relative;
+  width: 50%;
+  z-index: 2;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 40px;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 4px 0 32px rgba(161, 57, 35, 0.05);
+}
+.heroPanel::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .heroPanel { display: flex; }
+}
+
+/* Background Image styling */
+.heroImageContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(12px) scale(1.1);
+  opacity: 0.7;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 248, 244, 0.85) 100%);
+  z-index: 1;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 520px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Brand */
+.brandHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brandIconSize {
+  width: 48px;
+  height: 48px;
+}
+
+.brandTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sr-primary);
+  letter-spacing: -0.01em;
+}
+
+/* Headline */
+.heroHeadline {
+  font-family: var(--sr-font-heading);
+  font-size: 42px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--sr-on-surface);
+  letter-spacing: -0.02em;
+}
+
+.heroDescription {
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--sr-on-surface-variant);
+  margin-top: 16px;
+}
+
+/* Feature Cards */
+.featureGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.featureCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.featureCard:hover {
+  transform: translateX(8px);
+}
+
+.featureIcon1 {
+  width: 44px;
+  height: 44px;
+  background: rgba(212, 168, 83, 0.2);
+  color: #b07d1e;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.featureIcon2 {
+  width: 44px;
+  height: 44px;
+  background: rgba(161, 57, 35, 0.15);
+  color: var(--sr-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.featureIcon3 {
+  width: 44px;
+  height: 44px;
+  background: rgba(46, 125, 50, 0.12);
+  color: #2e7d32;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.featureTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sr-on-surface);
+  margin-bottom: 4px;
+}
+
+.featureDesc {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--sr-on-surface-variant);
+}
+
+
+/* ---------- Form Panel (Right) ---------- */
+.formPanel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 20px;
+  position: relative;
+  z-index: 2;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.formPanel::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .formPanel {
+    width: 50%;
+    padding: 32px 40px;
+  }
+}
+
+.formContent {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Header */
+.formHeader {
+  text-align: center;
+}
+
+.welcomeTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 800;
+}
+
+@media (min-width: 1024px) {
+  .welcomeTitle {
+    font-size: 38px;
+    line-height: 46px;
+    letter-spacing: -0.02em;
+  }
+}
+
+.welcomeSubtitle {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--sr-on-surface-variant);
+}
+
+/* Glass card */
+.glassCard {
+  padding: 24px 20px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: visible;
+  transition: box-shadow 0.4s;
+}
+
+@media (min-width: 480px) {
+  .glassCard {
+    padding: 32px 28px;
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 1024px) {
+  .glassCard {
+    padding: 40px 32px;
+  }
+}
+
+.glassCardGlow {
+  border-radius: 30px;
+  pointer-events: none;
+}
+
+/* Form elements */
+.formInner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+.fieldGroup .errorMessage {
+  min-height: 18px;
+  margin-top: 2px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--sr-on-surface-variant);
+  padding: 0 4px;
+}
+
+/* Input fields */
+.inputWrapper {
+  position: relative;
+  border-radius: 16px;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sr-outline);
+  font-size: 18px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s;
+}
+
+.inputWrapper:focus-within .inputIcon {
+  color: var(--sr-primary);
+}
+
+.inputField {
+  width: 100%;
+  padding: 12px 16px 12px 42px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid var(--sr-outline-variant);
+  border-radius: 14px;
+  font-family: var(--sr-font-body);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--sr-on-surface);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.inputField::placeholder {
+  color: rgba(139, 113, 108, 0.45);
+}
+
+.inputField:focus {
+  border-color: var(--sr-primary);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 0 0 3px rgba(161, 57, 35, 0.12),
+    0 4px 12px rgba(161, 57, 35, 0.06);
+}
+
+.inputFieldPassword {
+  composes: inputField;
+  padding-right: 48px;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sr-outline);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.25s;
+}
+
+.togglePassword:hover {
+  color: var(--sr-primary);
+  background: rgba(161, 57, 35, 0.06);
+}
+
+.errorMessage {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--sr-error);
+  padding: 0 4px;
+  animation: sr-shakeError 0.4s ease;
+  min-height: 0;
+}
+
+/* Server Error */
+.serverError {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(186, 26, 26, 0.08);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+  border-radius: 12px;
+  color: var(--sr-error);
+  font-size: 13px;
+  font-weight: 500;
+  animation: sr-slideUpFade 0.3s ease both;
+}
+
+/* Password Strength */
+.strengthBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px 0;
+}
+
+.strengthTrack {
+  flex: 1;
+  height: 4px;
+  background: var(--sr-outline-variant);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strengthFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+.strengthLabel {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Terms */
+.termsRow {
+  padding: 2px;
+  margin-top: 2px;
+}
+
+.termsCheckWrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.termsCheckbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.termsCheckmark {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--sr-outline-variant);
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.termsCheckWrapper:hover .termsCheckmark {
+  border-color: var(--sr-primary);
+}
+
+.termsCheckbox:checked + .termsCheckmark {
+  background: var(--sr-primary);
+  border-color: var(--sr-primary);
+  color: var(--sr-on-primary);
+  box-shadow: 0 0 0 4px rgba(161, 57, 35, 0.15);
+}
+
+.termsLabel {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--sr-on-surface-variant);
+}
+
+/* Social grid layout */
+.socialGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Login link */
+.registerLink {
+  text-align: center;
+  padding: 8px 0 12px;
+  flex-shrink: 0;
+}
+
+.registerText {
+  font-size: 15px;
+  color: var(--sr-on-surface-variant);
+}
+
+/* Footer links */
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0 8px;
+  margin-top: auto;
+  animation: sr-slideUpFade 0.6s 0.8s ease-out both;
+  flex-shrink: 0;
+}
+
+.footerLink {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sr-outline);
+  text-decoration: none;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footerLink:hover {
+  color: var(--sr-primary);
+}
+
+.registerAnchor {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--sr-primary);
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.3s;
+}
+
+/* Mobile branding */
+.mobileBrand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  animation: sr-slideUpFade 0.5s ease-out both;
+}
+
+@media (min-width: 1024px) {
+  .mobileBrand { display: none; }
+}
+
+.mobileBrandIconSize {
+  width: 44px;
+  height: 44px;
+}
+
+.mobileBrandTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sr-primary);
+}

@@ -1,0 +1,470 @@
+/* =============================================
+   effects.module.css — Smart Recipe Reusable Effects
+   CSS Module classes for visual effects.
+   Import in any component: import fx from '…/styles/effects.module.css'
+   ============================================= */
+
+/* ─────────── Animated Background ─────────── */
+.animatedBg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(161, 57, 35, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(212, 168, 83, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, var(--sr-surface, #fff8f4) 0%, var(--sr-surface-container-high, #f1e6df) 100%);
+}
+
+/* ─────────── Aurora Background (Premium) ─────────── */
+.auroraWrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--sr-surface);
+}
+
+.auroraBg {
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 90deg at 50% 50%,
+    rgba(161, 57, 35, 0.05) 0%,
+    rgba(212, 168, 83, 0.05) 25%,
+    rgba(255, 248, 244, 0) 50%,
+    rgba(194, 81, 56, 0.05) 75%,
+    rgba(161, 57, 35, 0.05) 100%
+  );
+  filter: blur(100px);
+  animation: sr-spin 30s linear infinite;
+}
+
+.auroraGlow1 {
+  position: absolute;
+  top: -20%; right: -10%;
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, rgba(161, 57, 35, 0.15) 0%, transparent 60%);
+  filter: blur(80px);
+  animation: sr-auroraFlow 12s ease-in-out infinite;
+}
+
+.auroraGlow2 {
+  position: absolute;
+  bottom: -20%; left: -10%;
+  width: 70vw; height: 70vw;
+  background: radial-gradient(circle, rgba(212, 168, 83, 0.12) 0%, transparent 60%);
+  filter: blur(90px);
+  animation: sr-auroraFlow 15s ease-in-out infinite reverse;
+}
+
+.auroraGlow3 {
+  position: absolute;
+  top: 30%; left: 30%;
+  width: 50vw; height: 50vw;
+  background: radial-gradient(circle, rgba(222, 192, 185, 0.15) 0%, transparent 60%);
+  filter: blur(70px);
+  animation: sr-auroraFlow 18s ease-in-out infinite 2s;
+}
+
+/* ─────────── Blob Background ─────────── */
+.blobWrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--sr-surface);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: sr-float 8s ease-in-out infinite;
+}
+
+.blob1 {
+  composes: blob;
+  top: -10%; right: -5%;
+  width: 45vw; height: 45vw;
+  background: radial-gradient(circle, rgba(161, 57, 35, 0.12) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+.blob2 {
+  composes: blob;
+  top: 40%; left: -10%;
+  width: 35vw; height: 35vw;
+  background: radial-gradient(circle, rgba(212, 168, 83, 0.1) 0%, transparent 70%);
+  animation-delay: -3s;
+  animation-duration: 12s;
+}
+
+.blob3 {
+  composes: blob;
+  bottom: -15%; right: 20%;
+  width: 40vw; height: 40vw;
+  background: radial-gradient(circle, rgba(194, 81, 56, 0.1) 0%, transparent 70%);
+  animation-delay: -5s;
+  animation-duration: 10s;
+}
+
+/* ─────────── Floating Gradient Orbs ─────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  animation: sr-orbFloat 12s ease-in-out infinite;
+}
+
+.orb1 {
+  composes: orb;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(161, 57, 35, 0.12), transparent 70%);
+  top: -10%;
+  right: 10%;
+  animation-delay: 0s;
+}
+
+.orb2 {
+  composes: orb;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(212, 168, 83, 0.1), transparent 70%);
+  bottom: -5%;
+  left: 20%;
+  animation-delay: -4s;
+}
+
+.orb3 {
+  composes: orb;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(194, 81, 56, 0.08), transparent 70%);
+  top: 50%;
+  right: 40%;
+  animation-delay: -8s;
+}
+
+/* ─────────── Floating Particles ─────────── */
+.particleCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: sr-particleRise linear forwards;
+}
+
+.particleWarm {
+  composes: particle;
+  background: rgba(161, 57, 35, 0.15);
+}
+
+.particleGold {
+  composes: particle;
+  background: rgba(212, 168, 83, 0.2);
+}
+
+.particleSoft {
+  composes: particle;
+  background: rgba(222, 192, 185, 0.2);
+}
+
+/* ─────────── Glassmorphism Panel ─────────── */
+.glassPanel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 8px 32px rgba(161, 57, 35, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glassPanelHover:hover {
+  animation: sr-glowPulse 3s ease-in-out infinite;
+}
+
+/* Light variant for overlaying on dark images */
+.glassPanelLight {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* ─────────── Glow Border (rotate trick) ─────────── */
+.glowBorder {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(161, 57, 35, 0.15) 10%,
+    rgba(212, 168, 83, 0.1) 20%,
+    transparent 30%,
+    transparent 100%
+  );
+  z-index: -1;
+  animation: sr-glowRotate 8s linear infinite;
+}
+
+/* ─────────── Shimmer Overlay ─────────── */
+.shimmerOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08) 45%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.08) 55%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: sr-shimmerSlide 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─────────── Gradient Text ─────────── */
+.gradientText {
+  background: linear-gradient(135deg, var(--sr-primary), var(--sr-primary-light), var(--sr-gold));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: sr-gradientShift 4s ease-in-out infinite;
+}
+
+/* ─────────── Staggered Entrance ─────────── */
+.stagger1 { animation: sr-slideUpFade 0.6s 0.1s ease-out both; }
+.stagger2 { animation: sr-slideUpFade 0.6s 0.25s ease-out both; }
+.stagger3 { animation: sr-slideUpFade 0.6s 0.4s ease-out both; }
+.stagger4 { animation: sr-slideUpFade 0.6s 0.55s ease-out both; }
+.stagger5 { animation: sr-slideUpFade 0.6s 0.7s ease-out both; }
+
+/* ─────────── Click Ripple ─────────── */
+.ripple {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  animation: sr-ripple 0.6s ease-out forwards;
+}
+
+/* ─────────── Submit Button (Primary CTA) ─────────── */
+.btnPrimary {
+  width: 100%;
+  padding: 15px 24px;
+  background: linear-gradient(135deg, var(--sr-primary), var(--sr-primary-light));
+  color: var(--sr-on-primary);
+  font-family: var(--sr-font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(161, 57, 35, 0.25);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btnPrimary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.btnPrimary:hover::before {
+  left: 100%;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(161, 57, 35, 0.35);
+}
+
+.btnPrimary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 16px rgba(161, 57, 35, 0.2);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─────────── Social Button ─────────── */
+.btnSocial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid var(--sr-outline-variant);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-family: var(--sr-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sr-on-surface-variant);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btnSocial::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(161, 57, 35, 0.06) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.btnSocial:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(161, 57, 35, 0.2);
+  color: var(--sr-on-surface);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.btnSocial:hover::after {
+  opacity: 1;
+}
+
+.btnSocialIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.btnSocialText {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─────────── Spinner ─────────── */
+.spinner {
+  animation: sr-spin 0.8s linear infinite;
+  width: 20px;
+  height: 20px;
+}
+
+/* ─────────── Error Shake ─────────── */
+.errorShake {
+  animation: sr-shakeError 0.4s ease;
+}
+
+/* ─────────── Animated Underline Link ─────────── */
+.linkUnderline {
+  position: relative;
+}
+
+.linkUnderline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--sr-primary);
+  transition: width 0.3s ease;
+}
+
+.linkUnderline:hover::after {
+  width: 100%;
+}
+
+/* Gradient version */
+.linkUnderlineGradient {
+  position: relative;
+}
+
+.linkUnderlineGradient::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--sr-primary), var(--sr-gold));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+  border-radius: 1px;
+}
+
+.linkUnderlineGradient:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ─────────── Divider ─────────── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 0;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sr-outline-variant), transparent);
+}
+
+.dividerText {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sr-outline);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* ─────────── Brand Icon ─────────── */
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--sr-primary), var(--sr-primary-light));
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(161, 57, 35, 0.4);
+  transform: rotate(-6deg);
+  color: white;
+  animation: sr-brandPulse 3s ease-in-out infinite;
+}

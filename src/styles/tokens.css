@@ -1,0 +1,38 @@
+/* =============================================
+   tokens.css — Smart Recipe Design System
+   Global CSS custom properties for colors, fonts, spacing.
+   Import once in index.css → available everywhere.
+   ============================================= */
+
+:root {
+  /* ── Brand Colors ── */
+  --sr-primary: #a13923;
+  --sr-primary-light: #c25138;
+  --sr-primary-glow: rgba(161, 57, 35, 0.35);
+  --sr-on-primary: #ffffff;
+
+  /* ── Surface & Background ── */
+  --sr-surface: #fff8f4;
+  --sr-surface-container: #f6ece5;
+  --sr-surface-container-high: #f1e6df;
+
+  /* ── Text ── */
+  --sr-on-surface: #1f1b17;
+  --sr-on-surface-variant: #57423d;
+
+  /* ── Borders & Outlines ── */
+  --sr-outline: #8b716c;
+  --sr-outline-variant: #dec0b9;
+
+  /* ── Accent ── */
+  --sr-gold: #d4a853;
+  --sr-gold-glow: rgba(212, 168, 83, 0.25);
+
+  /* ── Semantic ── */
+  --sr-error: #ba1a1a;
+  --sr-success: #2e7d32;
+
+  /* ── Typography ── */
+  --sr-font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --sr-font-body: 'Be Vietnam Pro', system-ui, sans-serif;
+}

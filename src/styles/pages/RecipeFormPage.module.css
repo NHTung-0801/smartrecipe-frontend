@@ -1,0 +1,735 @@
+/* =============================================
+   RecipeFormPage.module.css
+   ============================================= */
+
+.pageContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 48px 80px 48px;
+  min-height: calc(100vh - 80px);
+}
+
+@media (max-width: 1023px) {
+  .pageContainer { padding: 24px 24px 80px 24px; }
+}
+
+/* Header Area */
+.headerArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--sr-on-surface-variant);
+  font-family: var(--sr-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background-color: var(--sr-surface-container-high);
+  color: var(--sr-on-surface);
+}
+
+.pageTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--sr-primary);
+  margin: 0;
+}
+
+.pageSubtitle {
+  font-family: var(--sr-font-body);
+  font-size: 15px;
+  color: var(--sr-on-surface-variant);
+  margin-top: 4px;
+}
+
+.saveDraftBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  background-color: var(--sr-surface-container-high);
+  color: var(--sr-on-surface);
+  font-family: var(--sr-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--sr-outline-variant);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveDraftBtn:hover {
+  background-color: var(--sr-outline-variant);
+}
+
+/* Stepper */
+.stepperWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 48px;
+  padding: 0 40px;
+}
+
+.stepperLine {
+  position: absolute;
+  top: 16px;
+  left: 60px;
+  right: 60px;
+  height: 4px;
+  background-color: var(--sr-surface-container-high);
+  z-index: 1;
+  border-radius: 2px;
+}
+
+.stepperProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--sr-primary);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.stepItem {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.stepIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--sr-surface-container-high);
+  color: var(--sr-on-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  border: 4px solid var(--sr-surface); /* to cut the line behind */
+}
+
+.stepItem.active .stepIcon {
+  background-color: var(--sr-primary);
+  color: var(--sr-on-primary);
+  box-shadow: 0 0 0 4px var(--sr-primary-glow);
+}
+
+.stepItem.completed .stepIcon {
+  background-color: var(--sr-primary);
+  color: var(--sr-on-primary);
+}
+
+.stepLabel {
+  font-family: var(--sr-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sr-on-surface-variant);
+  transition: color 0.3s ease;
+}
+
+.stepItem.active .stepLabel,
+.stepItem.completed .stepLabel {
+  color: var(--sr-primary);
+}
+
+/* Common Panels */
+.panel {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.panelTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--sr-primary);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Form Controls */
+.formGroup {
+  margin-bottom: 24px;
+}
+
+.formLabel {
+  display: block;
+  font-family: var(--sr-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sr-on-surface);
+  margin-bottom: 8px;
+}
+
+.formInput,
+.formSelect,
+.formTextarea {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--sr-outline-variant);
+  background-color: rgba(255, 255, 255, 0.6);
+  font-family: var(--sr-font-body);
+  font-size: 15px;
+  color: var(--sr-on-surface);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.formInput:focus,
+.formSelect:focus,
+.formTextarea:focus {
+  border-color: var(--sr-primary);
+  background-color: #fff;
+  box-shadow: 0 0 0 4px var(--sr-primary-glow);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Drag Drop Zone */
+.dragDropZone {
+  border: 2px dashed var(--sr-outline-variant);
+  border-radius: 16px;
+  padding: 40px 24px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dragDropZone:hover {
+  border-color: var(--sr-primary);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.dragIcon {
+  color: var(--sr-primary);
+  background-color: var(--sr-surface-container);
+  padding: 16px;
+  border-radius: 50%;
+}
+
+.dragText {
+  font-family: var(--sr-font-body);
+  font-size: 15px;
+  color: var(--sr-on-surface-variant);
+}
+
+.imagePreviewWrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-color: #fff;
+}
+
+.imagePreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.removeImageBtn:hover {
+  background-color: var(--sr-error);
+}
+
+/* Grid Layouts for Basics */
+.basicsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+@media (max-width: 767px) {
+  .basicsGrid { grid-template-columns: 1fr; }
+}
+
+/* Two Columns for Ingredients & Review */
+.twoColGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+@media (max-width: 1023px) {
+  .twoColGrid { grid-template-columns: 1fr; }
+}
+
+/* Ingredients */
+.addIngredientForm {
+  background-color: var(--sr-surface);
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid rgba(161, 57, 35, 0.1);
+}
+
+.ingrRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.btnAddIngredient {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--sr-primary);
+  color: var(--sr-on-primary);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--sr-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btnAddIngredient:hover {
+  background-color: var(--sr-primary-light);
+}
+
+.btnAddIngredient:disabled {
+  background-color: var(--sr-outline-variant);
+  cursor: not-allowed;
+}
+
+.ingredientListPanel {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.ingredientListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ingredientCount {
+  font-size: 14px;
+  color: var(--sr-on-surface-variant);
+}
+
+.ingredientCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--sr-surface);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.ingredientCard:hover {
+  border-color: var(--sr-primary-glow);
+}
+
+.ingrCardIcon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--sr-surface-container);
+  color: var(--sr-on-surface-variant);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ingrCardInfo {
+  flex: 1;
+}
+
+.ingrCardName {
+  font-family: var(--sr-font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sr-on-surface);
+}
+
+.ingrCardAmount {
+  font-size: 13px;
+  color: var(--sr-on-surface-variant);
+  margin-top: 4px;
+}
+
+.btnRemove {
+  background: none;
+  border: none;
+  color: var(--sr-outline);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.btnRemove:hover {
+  color: var(--sr-error);
+  background-color: rgba(186, 26, 26, 0.1);
+}
+
+/* Steps */
+.stepList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.stepCard {
+  display: flex;
+  gap: 20px;
+  background-color: var(--sr-surface);
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(161, 57, 35, 0.1);
+  position: relative;
+}
+
+.stepNumberDrag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--sr-outline);
+}
+
+.stepNumberBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--sr-primary-container);
+  color: var(--sr-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: var(--sr-font-heading);
+}
+
+.stepContentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.btnRemoveStep {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.btnAddMedia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background-color: var(--sr-surface-container);
+  color: var(--sr-on-surface-variant);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--sr-outline-variant);
+  cursor: not-allowed; /* As planned, just visual for now */
+  width: fit-content;
+  opacity: 0.7;
+}
+
+.btnAddStepRow {
+  margin-top: 16px;
+  border: 1.5px dashed var(--sr-primary-glow);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+
+.btnAddStep {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--sr-primary);
+  font-family: var(--sr-font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btnAddStep:hover { opacity: 0.8; }
+.btnAddStepIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--sr-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Visibility */
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1.5px solid var(--sr-outline-variant);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--sr-surface);
+}
+
+.radioLabel:hover {
+  border-color: var(--sr-primary-glow);
+}
+
+.radioLabel input:checked + .radioContent {
+  /* handled via js class maybe */
+}
+
+.radioLabel.selected {
+  border-color: var(--sr-primary);
+  background-color: var(--sr-primary-glow);
+}
+
+.radioIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--sr-outline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.radioLabel.selected .radioIcon {
+  border-color: var(--sr-primary);
+}
+.radioIconInner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--sr-primary);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+.radioLabel.selected .radioIconInner {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.radioText {
+  flex: 1;
+}
+.radioTitle {
+  display: block;
+  font-family: var(--sr-font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sr-on-surface);
+  margin-bottom: 4px;
+}
+.radioDesc {
+  display: block;
+  font-size: 13px;
+  color: var(--sr-on-surface-variant);
+}
+
+/* Tags */
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.tagBtn {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  background-color: var(--sr-surface-container);
+  color: var(--sr-on-surface-variant);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.tagBtn:hover {
+  background-color: var(--sr-surface-container-high);
+}
+
+.tagBtn.selected {
+  background-color: var(--sr-primary);
+  color: var(--sr-on-primary);
+}
+
+/* Summary Card */
+.summaryCard {
+  background-color: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+}
+
+.summaryImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background-color: var(--sr-surface-container);
+}
+
+.summaryContent {
+  padding: 24px;
+}
+
+.summaryTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--sr-on-surface);
+  margin-bottom: 24px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--sr-surface-container-high);
+  font-size: 14px;
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+}
+
+.summaryLabel {
+  color: var(--sr-on-surface-variant);
+}
+
+.summaryValue {
+  font-weight: 600;
+  color: var(--sr-on-surface);
+}
+
+.badgeDifficulty {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  background-color: rgba(212, 168, 83, 0.2);
+  color: #a47d2c;
+}
+
+/* Footer Actions */
+.footerActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(161, 57, 35, 0.1);
+}
+
+.btnNext {
+  padding: 14px 32px;
+  background-color: var(--sr-primary);
+  color: var(--sr-on-primary);
+  border: none;
+  border-radius: 9999px;
+  font-family: var(--sr-font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px var(--sr-primary-glow);
+  transition: all 0.2s ease;
+}
+
+.btnNext:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--sr-primary-glow);
+}
+
+.btnNext:disabled {
+  background-color: var(--sr-outline-variant);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}

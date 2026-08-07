@@ -1,0 +1,46 @@
+/* =============================================
+   AppLayout.module.css — Global Dashboard Layout
+   ============================================= */
+
+.appContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--sr-background);
+  color: var(--sr-on-surface);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Sidebar Wrapper */
+.sidebarWrapper {
+  width: 256px; /* w-64 */
+  flex-shrink: 0;
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .sidebarWrapper { display: block; }
+}
+
+/* Main Content Wrapper */
+.mainWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevent overflow */
+  position: relative;
+  z-index: 10;
+}
+
+/* Content Area */
+.contentArea {
+  flex: 1;
+  padding-top: 80px; /* Space for TopHeader (h-20) */
+  min-height: calc(100vh - 80px);
+}
+
+@media (max-width: 1023px) {
+  .contentArea {
+    padding-bottom: 80px; /* Space for mobile bottom nav */
+  }
+}

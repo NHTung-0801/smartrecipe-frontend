@@ -1,0 +1,538 @@
+/* =============================================
+   LoginPage.module.css — Page-specific Layout Only
+   All shared effects → src/styles/effects.module.css
+   All keyframes      → src/styles/animations.css
+   All design tokens  → src/styles/tokens.css
+   ============================================= */
+
+/* ---------- Page Wrapper ---------- */
+.loginWrapper {
+  display: flex;
+  min-height: 100vh;
+  max-height: 100vh;
+  font-family: var(--sr-font-body);
+  color: var(--sr-on-surface);
+  overflow: hidden;
+  position: relative;
+  background: var(--sr-surface);
+}
+
+/* ---------- Hero Panel (Left) ---------- */
+.heroPanel {
+  display: none;
+  position: relative;
+  width: 50%;
+  overflow: hidden;
+  z-index: 2;
+}
+
+@media (min-width: 1024px) {
+  .heroPanel { display: flex; }
+}
+
+.heroImageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: sr-heroZoomIn 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.heroPanel:hover .heroImage {
+  transform: scale(1.06);
+}
+
+/* Gradient overlays on hero */
+.heroOverlayTop {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background:
+    linear-gradient(180deg, rgba(31, 27, 23, 0.3) 0%, transparent 30%),
+    linear-gradient(to right, transparent 50%, rgba(255, 248, 244, 0.15) 100%);
+  pointer-events: none;
+}
+
+.heroOverlayBottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  z-index: 5;
+  background: linear-gradient(to top, rgba(31, 27, 23, 0.45), transparent);
+  pointer-events: none;
+}
+
+/* Brand overlay */
+.brandOverlay {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: sr-slideDownFade 0.8s 0.3s ease-out both;
+}
+
+.brandIconSize {
+  width: 50px;
+  height: 50px;
+}
+
+.brandTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.brandSubtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Quote overlay */
+.quoteOverlay {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  right: 40px;
+  z-index: 20;
+  animation: sr-slideUpFade 0.8s 0.6s ease-out both;
+}
+
+.quoteCard {
+  padding: 28px;
+  border-radius: 24px;
+  max-width: 420px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.quoteCard:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.quoteText {
+  font-size: 17px;
+  line-height: 28px;
+  font-style: italic;
+  color: var(--sr-on-surface-variant);
+}
+
+.quoteAuthorLine {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quoteAuthorDash {
+  height: 2px;
+  width: 28px;
+  background: linear-gradient(90deg, var(--sr-primary), var(--sr-gold));
+  border-radius: 1px;
+}
+
+.quoteAuthorName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sr-primary);
+}
+
+/* ---------- Form Panel (Right) ---------- */
+.formPanel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 20px;
+  position: relative;
+  z-index: 2;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.formPanel::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .formPanel {
+    width: 50%;
+    padding: 40px 48px;
+  }
+}
+
+.formContent {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Header */
+.formHeader {
+  text-align: center;
+}
+
+.welcomeTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 800;
+}
+
+@media (min-width: 1024px) {
+  .welcomeTitle {
+    font-size: 38px;
+    line-height: 46px;
+    letter-spacing: -0.02em;
+  }
+}
+
+.welcomeSubtitle {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--sr-on-surface-variant);
+}
+
+/* Glass card */
+.glassCard {
+  padding: 24px 20px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: visible;
+  transition: box-shadow 0.4s;
+}
+
+@media (min-width: 480px) {
+  .glassCard {
+    padding: 32px 28px;
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 1024px) {
+  .glassCard {
+    padding: 40px 32px;
+  }
+}
+
+.glassCardGlow {
+  border-radius: 30px;
+}
+
+/* Form elements */
+.formInner {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+.fieldGroup .errorMessage {
+  min-height: 18px;
+  margin-top: 2px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--sr-on-surface-variant);
+  padding: 0 4px;
+}
+
+.fieldLabelRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.forgotLink {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sr-primary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Input fields */
+.inputWrapper {
+  position: relative;
+  border-radius: 16px;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sr-outline);
+  font-size: 20px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s;
+}
+
+.inputWrapper:focus-within .inputIcon {
+  color: var(--sr-primary);
+}
+
+.inputField {
+  width: 100%;
+  padding: 16px 18px 16px 52px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid var(--sr-outline-variant);
+  border-radius: 16px;
+  font-family: var(--sr-font-body);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--sr-on-surface);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+@media (min-width: 1024px) {
+  .inputField {
+    padding: 18px 18px 18px 54px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
+.inputField::placeholder {
+  color: rgba(139, 113, 108, 0.45);
+}
+
+.inputField:focus {
+  border-color: var(--sr-primary);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 0 0 3px rgba(161, 57, 35, 0.12),
+    0 4px 12px rgba(161, 57, 35, 0.06);
+}
+
+.inputFieldPassword {
+  composes: inputField;
+  padding-right: 52px;
+}
+
+@media (min-width: 1024px) {
+  .inputFieldPassword {
+    padding-right: 54px;
+  }
+}
+
+.togglePassword {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sr-outline);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.25s;
+}
+
+.togglePassword:hover {
+  color: var(--sr-primary);
+  background: rgba(161, 57, 35, 0.06);
+}
+
+.errorMessage {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--sr-error);
+  padding: 0 4px;
+  animation: sr-shakeError 0.4s ease;
+  /* Reserve space to prevent layout shift */
+  min-height: 0;
+}
+
+/* Remember me */
+.rememberRow {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.rememberCheckWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rememberCheckbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.rememberCheckmark {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--sr-outline-variant);
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.rememberCheckWrapper:hover .rememberCheckmark {
+  border-color: var(--sr-primary);
+}
+
+.rememberCheckbox:checked + .rememberCheckmark {
+  background: var(--sr-primary);
+  border-color: var(--sr-primary);
+  color: var(--sr-on-primary);
+  box-shadow: 0 0 0 4px rgba(161, 57, 35, 0.15);
+}
+
+.rememberLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sr-on-surface-variant);
+}
+
+/* Server Error */
+.serverError {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(186, 26, 26, 0.08);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+  border-radius: 12px;
+  color: var(--sr-error);
+  font-size: 13px;
+  font-weight: 500;
+  animation: sr-slideUpFade 0.3s ease both;
+}
+
+/* Social grid layout */
+.socialGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Register link */
+.registerLink {
+  text-align: center;
+  padding: 8px 0 12px;
+  flex-shrink: 0;
+}
+
+.registerText {
+  font-size: 15px;
+  color: var(--sr-on-surface-variant);
+}
+
+.registerAnchor {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--sr-primary);
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.3s;
+}
+
+/* Footer links */
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0 8px;
+  margin-top: auto;
+  animation: sr-slideUpFade 0.6s 0.8s ease-out both;
+  flex-shrink: 0;
+}
+
+.footerLink {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sr-outline);
+  text-decoration: none;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footerLink:hover {
+  color: var(--sr-primary);
+}
+
+/* Mobile branding */
+.mobileBrand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  animation: sr-slideUpFade 0.5s ease-out both;
+}
+
+@media (min-width: 1024px) {
+  .mobileBrand { display: none; }
+}
+
+.mobileBrandIconSize {
+  width: 44px;
+  height: 44px;
+}
+
+.mobileBrandTitle {
+  font-family: var(--sr-font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sr-primary);
+}
