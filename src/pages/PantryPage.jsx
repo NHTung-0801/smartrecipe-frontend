@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, PackageOpen, Plus, RefreshCw, ScanLine, SearchX } from 'lucide-react';
+import { AlertCircle, PackageOpen, Plus, RefreshCw, ScanLine, SearchX, ShoppingCart } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { pantryService } from '../services/pantryService';
+import { groceryService } from '../services/groceryService';
 import PantrySummaryBar from '../components/pantry/PantrySummaryBar';
 import ExpiryAlertBanner from '../components/pantry/ExpiryAlertBanner';
 import PantryGrid from '../components/pantry/PantryGrid';
@@ -15,6 +17,7 @@ const filters = [['ALL', 'Tất cả'], ['EXPIRING_SOON', 'Sắp hết hạn'], 
 const getError = (error) => error?.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.';
 
 export default function PantryPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState('ALL');
   const [addModal, setAddModal] = useState({ open: false, item: null });
@@ -24,38 +27,21 @@ export default function PantryPage() {
   const pantryQuery = useQuery({ queryKey: ['pantry', filter], queryFn: () => pantryService.getPantry(filter) });
   const summaryQuery = useQuery({ queryKey: ['pantry-summary'], queryFn: pantryService.getSummary });
   
-  // Logic gộp nguyên liệu cùng tên và đơn vị để tính tổng
+  // Backend trả từng lot. Giữ nguyên lot và sắp xếp FEFO (hết hạn gần nhất trước).
   const rawGroups = pantryQuery.data?.data || {};
   const groups = {};
   let itemCount = 0;
 
   Object.entries(rawGroups).forEach(([aisle, items]) => {
-    const mergedMap = new Map();
-    items.forEach(item => {
-      const unit = item.ingredient?.baseUnit || 'g';
-      const key = `${item.ingredient?.name?.toLowerCase()}_${unit}`;
-      
-      if (mergedMap.has(key)) {
-        const existing = mergedMap.get(key);
-        existing.quantityAvailable += item.quantityAvailable;
-        if (!existing.ids) existing.ids = [existing.id];
-        existing.ids.push(item.id);
-        // Giữ lại hạn sử dụng gần nhất
-        if (item.expiryDate) {
-          if (!existing.expiryDate || new Date(item.expiryDate) < new Date(existing.expiryDate)) {
-            existing.expiryDate = item.expiryDate;
-            existing.daysUntilExpiry = item.daysUntilExpiry;
-            existing.status = item.status;
-          }
-        }
-      } else {
-        mergedMap.set(key, { ...item, ids: [item.id] });
-      }
+    const sortedLots = [...items].sort((a, b) => {
+      if (!a.expiryDate && !b.expiryDate) return (a.ingredient?.name || '').localeCompare(b.ingredient?.name || '', 'vi');
+      if (!a.expiryDate) return 1;
+      if (!b.expiryDate) return -1;
+      return a.expiryDate.localeCompare(b.expiryDate);
     });
-    const mergedItems = Array.from(mergedMap.values());
-    if (mergedItems.length > 0) {
-      groups[aisle] = mergedItems;
-      itemCount += mergedItems.length;
+    if (sortedLots.length > 0) {
+      groups[aisle] = sortedLots;
+      itemCount += sortedLots.length;
     }
   });
 
@@ -97,6 +83,17 @@ export default function PantryPage() {
     onError: (error) => toast.error(getError(error)),
   });
 
+  const generateGroceryMutation = useMutation({
+    mutationFn: () => groceryService.generateFromPantry(),
+    onSuccess: (res) => {
+      toast.success('Đã tạo danh sách đi chợ từ tủ nguyên liệu!');
+      const listId = res?.data?.id;
+      if (listId) navigate(`/grocery?list=${listId}`);
+      else navigate('/grocery');
+    },
+    onError: (error) => toast.error(getError(error)),
+  });
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleViewDetail = (item) => setDetailModal({ open: true, item });
@@ -105,9 +102,8 @@ export default function PantryPage() {
   const handleDetailDelete = async (item) => {
     try {
       setIsDeleting(true);
-      const idsToDelete = item.ids || [item.id];
-      await Promise.all(idsToDelete.map(id => pantryService.removeItem(id)));
-      toast.success('Đã xóa nguyên liệu khỏi tủ.');
+      await pantryService.removeItem(item.id);
+      toast.success('Đã xóa lot nguyên liệu khỏi tủ.');
       setDetailModal({ open: false, item: null });
       refresh();
     } catch (error) {
@@ -125,17 +121,30 @@ export default function PantryPage() {
   return (
     <div className={s.page}>
       <header className={s.pageHeader}>
-        <div><span className={s.pageEyebrow}>Không gian bếp của bạn</span><h1>Tủ nguyên liệu</h1><p>Theo dõi độ tươi, số lượng và tận dụng mọi nguyên liệu tốt hơn.</p></div>
-        <div className={s.headerActions}><button type="button" className={s.scanButton} title="Tính năng đang phát triển"><ScanLine size={19} /> Quét mã</button><button type="button" className={s.addButton} onClick={() => setAddModal({ open: true, item: null })}><Plus size={20} /> Thêm nguyên liệu</button></div>
+        <div>
+          <h1>Sẵn sàng nấu nướng chưa, Chef?</h1>
+          <p>Theo dõi độ tươi, số lượng và tận dụng mọi nguyên liệu tốt hơn.</p>
+        </div>
+        <div className={s.headerActions}>
+          <button type="button" className={s.refreshButton} onClick={refresh} aria-label="Làm mới" title="Làm mới dữ liệu">
+            <RefreshCw size={17} className={pantryQuery.isFetching ? s.spinning : ''} />
+          </button>
+          <button type="button" className={s.scanButton} title="Tính năng đang phát triển"><ScanLine size={19} /> Quét mã</button>
+          <button
+            type="button"
+            className={s.generateListButton}
+            onClick={() => generateGroceryMutation.mutate()}
+            disabled={generateGroceryMutation.isPending}
+            title="Tạo danh sách đi chợ từ nguyên liệu sắp hết/hết hạn"
+          >
+            <ShoppingCart size={18} /> {generateGroceryMutation.isPending ? 'Đang tạo...' : 'Tạo danh sách đi chợ'}
+          </button>
+          <button type="button" className={s.addButton} onClick={() => setAddModal({ open: true, item: null })}><Plus size={20} /> Thêm nguyên liệu</button>
+        </div>
       </header>
 
       <PantrySummaryBar summary={summary} activeFilter={filter} onFilterChange={setFilter} />
       <ExpiryAlertBanner summary={summary} onCleanup={cleanup} isCleaning={cleanupMutation.isPending} />
-
-      <div className={s.contentToolbar}>
-        <div className={s.filterTabs}>{filters.map(([value, label]) => <button type="button" key={value} className={filter === value ? s.filterActive : ''} onClick={() => setFilter(value)}>{label}</button>)}</div>
-        <button type="button" className={s.refreshButton} onClick={refresh} aria-label="Làm mới"><RefreshCw size={17} className={pantryQuery.isFetching ? s.spinning : ''} /></button>
-      </div>
 
       {loading ? <PantrySkeleton /> : pantryQuery.isError ? (
         <div className={s.stateCard}><AlertCircle size={40} /><h2>Không thể tải tủ nguyên liệu</h2><p>{getError(pantryQuery.error)}</p><button type="button" onClick={() => pantryQuery.refetch()}><RefreshCw size={17} /> Thử lại</button></div>

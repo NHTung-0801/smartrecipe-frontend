@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { CalendarDays, Gauge, Hash, Package, Save, Trash2, X } from 'lucide-react';
 import s from '../../styles/pages/PantryPage.module.css';
 import ConfirmModal from '../ui/ConfirmModal';
+import { getIngredientIcon } from './PantryItemCard';
 
-const icons = ['🥬', '🥕', '🍅', '🥩', '🥛', '🧀', '🌾', '🫙'];
 const formatDate = (date) => date
   ? new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(`${date}T00:00:00`))
   : 'Không giới hạn';
@@ -45,8 +45,8 @@ export default function PantryDetailModal({ isOpen, item, onClose, onSave, onDel
   const status = item.status || 'FRESH';
   const sc = statusConfig[status] || statusConfig.FRESH;
   const isLow = item.lowStockThreshold != null && Number(item.quantityAvailable) <= Number(item.lowStockThreshold);
-  const icon = icons[(ingredient.id || 0) % icons.length];
   const aisleName = item.aisleName || ingredient.aisle?.name || 'Chưa phân loại';
+  const icon = getIngredientIcon(ingredient.name, aisleName);
 
   const handleSave = () => {
     onSave({
@@ -54,6 +54,7 @@ export default function PantryDetailModal({ isOpen, item, onClose, onSave, onDel
       quantityAvailable: Number(form.quantityAvailable),
       lowStockThreshold: form.lowStockThreshold === '' ? null : Number(form.lowStockThreshold),
       expiryDate: item.expiryDate || null,
+      unit,
     });
   };
 
@@ -171,7 +172,7 @@ export default function PantryDetailModal({ isOpen, item, onClose, onSave, onDel
       <ConfirmModal
         isOpen={showConfirm}
         title="Xóa nguyên liệu"
-        message={`Bạn có chắc chắn muốn xóa "${ingredient.name}" khỏi tủ nguyên liệu?`}
+        message={`Bạn có chắc chắn muốn xóa lot "${ingredient.name}" (hạn ${formatDate(item.expiryDate)}) khỏi tủ?`}
         confirmText="Xóa khỏi tủ"
         isDestructive={true}
         isLoading={isDeleting}

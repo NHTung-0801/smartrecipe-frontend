@@ -89,10 +89,11 @@ export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, is
               onSelect={(ingredient) => setForm((current) => ({ 
                 ...current, 
                 ingredient, 
-                unit: ingredient.baseUnit,
-                aisleId: ingredient.aisle?.id ?? current.aisleId 
+                unit: ingredient?.baseUnit || current.unit,
+                aisleId: ingredient?.aisle?.id ?? current.aisleId 
               }))} 
               placeholder="Gõ tên nguyên liệu..." 
+              selectedAisleId={form.aisleId}
             />
           </div>
 

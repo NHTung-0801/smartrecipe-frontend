@@ -62,7 +62,7 @@ export default function MyRecipesPage() {
       {/* Header */}
       <div className={s.headerSection}>
         <div>
-          <h1 className={s.pageTitle}>Công thức của tôi</h1>
+          <h1 className={s.pageTitle}>Sáng tạo món ngon</h1>
           <p className={s.pageSubtitle}>Khám phá và quản lý bộ sưu tập ẩm thực cá nhân của bạn.</p>
         </div>
         <Link to="/recipes/new" className={s.btnCreate}>

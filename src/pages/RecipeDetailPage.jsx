@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { recipeService } from '../services/recipeService';
+import { groceryService } from '../services/groceryService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
 import { 
@@ -33,6 +34,7 @@ export default function RecipeDetailPage() {
   const [cloning, setCloning] = useState(false);
   const [isCookingMode, setIsCookingMode] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [addingToGrocery, setAddingToGrocery] = useState(false);
   
   // Trạng thái các checkbox nguyên liệu
   const [checkedIngredients, setCheckedIngredients] = useState({});
@@ -86,6 +88,21 @@ export default function RecipeDetailPage() {
       toast.error('Có lỗi xảy ra khi clone');
     } finally {
       setCloning(false);
+    }
+  };
+
+  const handleAddToGroceryList = async () => {
+    try {
+      setAddingToGrocery(true);
+      const res = await groceryService.addRecipeItems(id);
+      toast.success('Đã thêm nguyên liệu vào danh sách đi chợ!');
+      const listId = res?.data?.id;
+      if (listId) navigate(`/grocery?list=${listId}`);
+      else navigate('/grocery');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Không thể thêm vào danh sách đi chợ');
+    } finally {
+      setAddingToGrocery(false);
     }
   };
 
@@ -253,10 +270,11 @@ export default function RecipeDetailPage() {
             </div>
 
             <button 
-              className="w-full py-3.5 rounded-full border-2 border-[#a13923] text-[#a13923] font-semibold text-[15px] flex items-center justify-center gap-2 hover:bg-[#fff9f8] transition-colors"
-              onClick={() => toast.info('Tính năng giỏ hàng đang được phát triển!')}
+              className="w-full py-3.5 rounded-full bg-[#059669] text-white font-semibold text-[15px] flex items-center justify-center gap-2 hover:bg-[#047857] transition-colors disabled:opacity-60"
+              onClick={handleAddToGroceryList}
+              disabled={addingToGrocery}
             >
-              <ShoppingCart size={18} /> Thêm vào giỏ hàng
+              <ShoppingCart size={18} /> {addingToGrocery ? 'Đang thêm...' : 'Thêm vào danh sách đi chợ'}
             </button>
           </div>
         </div>
