@@ -1,29 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import s from './UnitAutocomplete.module.css';
 
-const UNIT_GROUPS = [
-  {
-    label: 'Khối lượng',
-    options: ['g (gram)', 'kg']
-  },
-  {
-    label: 'Thể tích',
-    options: ['ml', 'lít']
-  },
-  {
-    label: 'Đếm được',
-    options: ['quả/trái', 'củ', 'tép', 'bó', 'con', 'lát', 'nhánh']
-  },
-  {
-    label: 'Đong đếm',
-    options: ['thìa cafe (tsp)', 'thìa canh (tbsp)', 'chén/bát', 'hộp', 'lon', 'gói', 'túi']
-  }
+const COMMON_UNITS = [
+  'g', 'kg', 'ml', 'l', 'tbsp', 'tsp', 'cup', 'oz', 'lb',
+  'cái', 'quả', 'củ', 'nhánh', 'mớ', 'bó', 'túi', 'hộp', 'lon',
+  'chén', 'muỗng', 'miếng', 'lát', 'cây', 'gói', 'chai',
 ];
 
-export default function UnitAutocomplete({ value, onChange, placeholder = 'Đơn vị' }) {
+export default function UnitAutocomplete({ value, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState(value || '');
   const wrapperRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     setQuery(value || '');
@@ -39,50 +26,61 @@ export default function UnitAutocomplete({ value, onChange, placeholder = 'Đơn
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Không cần filteredUnits nữa vì ta chỉ hiện fixed list
+  const filtered = COMMON_UNITS.filter((u) =>
+    u.toLowerCase().includes(query.toLowerCase())
+  );
 
   const handleSelect = (unit) => {
     setQuery(unit);
-    onChange(unit);
     setIsOpen(false);
+    onChange?.(unit);
   };
 
-  const handleChange = (e) => {
-    // Không cho phép gõ trực tiếp nữa, chỉ dùng để đọc
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    setIsOpen(true);
+    onChange?.(val);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setIsOpen(false);
+      onChange?.(query);
+    }
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
   };
 
   return (
-    <div className={`${s.wrapper} ${isOpen ? s.active : ''}`} ref={wrapperRef}>
+    <div ref={wrapperRef} className="relative flex-shrink-0">
       <input
+        ref={inputRef}
         type="text"
-        className={s.input}
         value={query}
-        readOnly
-        onClick={() => setIsOpen(!isOpen)}
-        placeholder={placeholder}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onFocus={() => setIsOpen(true)}
+        placeholder="đơn vị"
+        className="w-20 px-2.5 py-2 border border-gray-300 rounded-r-lg bg-gray-50 text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        autoComplete="off"
       />
-      
-      {isOpen && (
-        <div className={s.dropdownWrapper}>
-          <ul className={s.dropdown}>
-            {UNIT_GROUPS.map((group) => (
-              <li key={group.label} className={s.group}>
-                <div className={s.groupLabel}>{group.label}</div>
-                <ul className={s.groupList}>
-                  {group.options.map((unit) => (
-                    <li
-                      key={unit}
-                      className={`${s.option} ${query === unit ? s.selected : ''}`}
-                      onClick={() => handleSelect(unit)}
-                    >
-                      {unit}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </div>
+      {isOpen && filtered.length > 0 && (
+        <ul className="absolute z-50 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto w-24">
+          {filtered.map((unit) => (
+            <li
+              key={unit}
+              onClick={() => handleSelect(unit)}
+              className={`px-3 py-1.5 text-sm cursor-pointer transition-colors hover:bg-orange-50 hover:text-orange-700 text-gray-700 ${
+                unit === value ? 'bg-orange-50 text-orange-600 font-medium' : ''
+              }`}
+            >
+              {unit}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Search, Bell, Heart, Menu } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
@@ -6,11 +6,11 @@ import s from '../../styles/layout/TopHeader.module.css';
 
 const getPageTitle = (pathname) => {
   if (pathname === '/') return 'Dashboard';
-  if (pathname.startsWith('/recipes')) return 'CÃ´ng thá»©c';
-  if (pathname.startsWith('/inventory')) return 'Kho nguyÃªn liá»‡u';
-  if (pathname.startsWith('/list')) return 'Danh sÃ¡ch mua sáº¯m';
-  if (pathname.startsWith('/profile')) return 'CÃ i Ä‘áº·t TÃ i khoáº£n';
-  if (pathname.startsWith('/users')) return 'Há»“ sÆ¡ ngÆ°á»i dÃ¹ng';
+  if (pathname.startsWith('/recipes')) return 'Công thức của tôi';
+  if (pathname.startsWith('/pantry') || pathname.startsWith('/inventory')) return 'Tủ nguyên liệu';
+  if (pathname.startsWith('/list')) return 'Danh sách mua sắm';
+  if (pathname.startsWith('/profile')) return 'Cài đặt tài khoản';
+  if (pathname.startsWith('/users')) return 'Hồ sơ người dùng';
   return 'Smart Recipe';
 };
 
@@ -35,7 +35,7 @@ const TopHeader = ({ toggleSidebar }) => {
           <Search size={18} className={s.searchIcon} />
           <input 
             type="text" 
-            placeholder="TÃ¬m kiáº¿m..." 
+            placeholder="Tìm kiếm..."
             className={s.searchInput}
           />
         </div>

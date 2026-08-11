@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, PackageSearch, ShoppingCart, Settings, Plus, UtensilsCrossed } from 'lucide-react';
 import s from '../../styles/layout/Sidebar.module.css';
@@ -10,7 +10,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Recipes', path: '/recipes', icon: <BookOpen size={20} /> },
     { name: 'Tủ nguyên liệu', path: '/pantry', icon: <PackageSearch size={20} /> },
-    { name: 'Shopping List', path: '/list', icon: <ShoppingCart size={20} /> },
+    { name: 'Đi chợ', path: '/grocery', icon: <ShoppingCart size={20} /> },
     { name: 'Settings', path: '/profile', icon: <Settings size={20} /> },
   ];
 

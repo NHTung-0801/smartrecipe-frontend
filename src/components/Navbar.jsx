@@ -66,7 +66,17 @@ export default function Navbar() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            ðŸ§º <span className="hidden sm:inline">Tá»§ nguyÃªn liá»‡u</span>
+            🧺 <span className="hidden sm:inline">Tủ nguyên liệu</span>
+          </Link>
+          <Link
+            to="/grocery"
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isActive('/grocery')
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            🛒 <span className="hidden sm:inline">Đi chợ</span>
           </Link>
           <Link
             to={`/users/${user?.id}`}

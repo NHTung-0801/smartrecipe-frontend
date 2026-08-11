@@ -8,7 +8,7 @@ import { ingredientService } from '../../services/ingredientService';
  * @param {string} props.placeholder - placeholder text
  * @param {Object} props.defaultValue - giá trị mặc định { id, name }
  */
-const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên liệu...', defaultValue }) => {
+const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên liệu...', defaultValue, selectedAisleId = null }) => {
   const [query, setQuery] = useState(defaultValue?.name || '');
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +19,7 @@ const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên l
   const debounceRef = useRef(null);
 
   useEffect(() => {
-    if (defaultValue && defaultValue.name) {
+    if (defaultValue?.name) {
       setQuery(defaultValue.name);
     }
   }, [defaultValue]);
@@ -67,6 +67,10 @@ const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên l
     const value = e.target.value;
     setQuery(value);
 
+    if (onSelect && value !== defaultValue?.name) {
+      onSelect(null);
+    }
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
@@ -95,7 +99,8 @@ const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên l
         caloriesPer100g: 0,
         protein: 0,
         fat: 0,
-        carbs: 0
+        carbs: 0,
+        aisleId: selectedAisleId ? Number(selectedAisleId) : null
       };
       const response = await ingredientService.create(newIngredient);
       const createdIngredient = response.data;
