@@ -8,7 +8,7 @@ import { ingredientService } from '../../services/ingredientService';
  * @param {string} props.placeholder - placeholder text
  * @param {Object} props.defaultValue - giá trị mặc định { id, name }
  */
-const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên liệu...', defaultValue, selectedAisleId = null }) => {
+const IngredientAutocomplete = ({ onSelect, onInputChange, placeholder = 'Tìm kiếm nguyên liệu...', defaultValue, selectedAisleId = null, selectedUnit = 'g' }) => {
   const [query, setQuery] = useState(defaultValue?.name || '');
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -66,6 +66,7 @@ const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên l
   const handleInputChange = (e) => {
     const value = e.target.value;
     setQuery(value);
+    if (onInputChange) onInputChange(value);
 
     if (onSelect && value !== defaultValue?.name) {
       onSelect(null);
@@ -89,28 +90,12 @@ const IngredientAutocomplete = ({ onSelect, placeholder = 'Tìm kiếm nguyên l
     }
   };
 
-  const handleCreateNew = async () => {
+  const handleCreateNew = (e) => {
+    if (e) e.preventDefault();
     if (!query.trim()) return;
-    setCreating(true);
-    try {
-      const newIngredient = {
-        name: query.trim(),
-        baseUnit: 'g',
-        caloriesPer100g: 0,
-        protein: 0,
-        fat: 0,
-        carbs: 0,
-        aisleId: selectedAisleId ? Number(selectedAisleId) : null
-      };
-      const response = await ingredientService.create(newIngredient);
-      const createdIngredient = response.data;
-      handleSelect(createdIngredient);
-    } catch (error) {
-      console.error('Lỗi tạo nguyên liệu mới:', error);
-      alert('Không thể tạo nguyên liệu mới!');
-    } finally {
-      setCreating(false);
-    }
+    
+    // Tạo nháp, việc lưu vào DB sẽ do modal cha (lúc bấm Save) đảm nhiệm để lấy đúng đơn vị
+    handleSelect({ name: query.trim() });
   };
 
   const handleKeyDown = (e) => {

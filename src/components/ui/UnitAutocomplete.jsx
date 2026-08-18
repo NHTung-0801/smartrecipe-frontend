@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 
 const COMMON_UNITS = [
-  'g', 'kg', 'ml', 'l', 'tbsp', 'tsp', 'cup', 'oz', 'lb',
-  'cái', 'quả', 'củ', 'nhánh', 'mớ', 'bó', 'túi', 'hộp', 'lon',
-  'chén', 'muỗng', 'miếng', 'lát', 'cây', 'gói', 'chai',
+  'g', 'kg', 'ml', 'l',
+  'muỗng cà phê', 'muỗng canh', 'chén',
+  'cái', 'quả', 'củ', 'nhánh', 'mớ', 'bó', 
+  'túi', 'hộp', 'lon', 'gói', 'chai',
+  'miếng', 'lát', 'cây'
 ];
 
-export default function UnitAutocomplete({ value, onChange }) {
+export default function UnitAutocomplete({ value, onChange, className, inputClassName }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState(value || '');
   const wrapperRef = useRef(null);
@@ -55,7 +57,7 @@ export default function UnitAutocomplete({ value, onChange }) {
   };
 
   return (
-    <div ref={wrapperRef} className="relative flex-shrink-0">
+    <div ref={wrapperRef} className={`relative flex-shrink-0 ${className || ''}`}>
       <input
         ref={inputRef}
         type="text"
@@ -64,11 +66,11 @@ export default function UnitAutocomplete({ value, onChange }) {
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(true)}
         placeholder="đơn vị"
-        className="w-20 px-2.5 py-2 border border-gray-300 rounded-r-lg bg-gray-50 text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        className={inputClassName || "w-20 px-2.5 py-2 border border-gray-300 rounded-r-lg bg-gray-50 text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"}
         autoComplete="off"
       />
       {isOpen && filtered.length > 0 && (
-        <ul className="absolute z-50 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto w-24">
+        <ul className="absolute z-50 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-32 overflow-y-auto w-24">
           {filtered.map((unit) => (
             <li
               key={unit}

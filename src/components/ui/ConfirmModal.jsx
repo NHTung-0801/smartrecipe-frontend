@@ -22,26 +22,26 @@ export default function ConfirmModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+      <div className="relative bg-surface rounded-[24px] shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200 border border-outline-variant/20">
         {/* Icon */}
         <div
           className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4 ${
-            isDestructive ? 'bg-red-100' : 'bg-emerald-100'
+            isDestructive ? 'bg-primary/15' : 'bg-primary/10'
           }`}
         >
           <AlertTriangle
             size={24}
-            className={isDestructive ? 'text-red-600' : 'text-emerald-600'}
+            className="text-primary"
           />
         </div>
 
         {/* Title */}
-        <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+        <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
           {title}
         </h3>
 
         {/* Message */}
-        <p className="text-sm text-gray-500 text-center mb-6">{message}</p>
+        <p className="text-base text-gray-600 text-center mb-8 leading-relaxed">{message}</p>
 
         {/* Actions */}
         <div className="flex gap-3">
@@ -49,7 +49,7 @@ export default function ConfirmModal({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 text-sm font-bold text-gray-700 bg-surface-container-high hover:bg-surface-container-highest rounded-xl transition-all disabled:opacity-50 shadow-sm active:translate-y-0.5 border border-outline-variant/10"
           >
             {cancelText}
           </button>
@@ -57,11 +57,7 @@ export default function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${
-              isDestructive
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-emerald-600 hover:bg-emerald-700'
-            }`}
+            className="flex-1 px-4 py-2.5 text-sm font-bold text-white rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:translate-y-0.5 bg-primary hover:brightness-90"
           >
             {isLoading && (
               <svg
