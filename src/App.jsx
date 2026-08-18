@@ -14,6 +14,7 @@ import RecipeDetailPage from './pages/RecipeDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
 import PantryPage from './pages/PantryPage';
 import GroceryPage from './pages/GroceryPage';
+import GroceryHistoryPage from './pages/GroceryHistoryPage';
 import useAuthStore from './store/useAuthStore';
 
 const queryClient = new QueryClient({
@@ -110,6 +111,16 @@ function App() {
               <ProtectedRoute>
                 <AppLayout>
                   <PantryPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/grocery/history"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <GroceryHistoryPage />
                 </AppLayout>
               </ProtectedRoute>
             }
