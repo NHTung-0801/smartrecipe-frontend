@@ -65,11 +65,10 @@ export default function PantryGrid({ groups = {}, onViewDetail }) {
                 </div>
                 <span className={s.itemCount}>{items.length} nguyên liệu</span>
               </header>
-              
               {items.length > 0 ? (
                 <div className={gridClass}>
                   {items.map((item, index) => (
-                    <PantryItemCard key={item.id} item={item} index={index} onViewDetail={onViewDetail} compact={true} />
+                    <PantryItemCard key={item.id} item={item} index={index} onViewDetail={onViewDetail} variant={category.name === 'Sữa & Trứng' ? 'tile' : 'list'} />
                   ))}
                 </div>
               ) : (

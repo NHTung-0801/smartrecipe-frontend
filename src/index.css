@@ -11,13 +11,21 @@
   --color-on-secondary-container: var(--sr-on-surface);
   --color-on-surface: var(--sr-on-surface);
   --color-on-surface-variant: var(--sr-on-surface-variant);
+  --color-surface: var(--sr-surface);
   --color-surface-container: var(--sr-surface-container);
   --color-surface-container-high: var(--sr-surface-container-high);
   --color-surface-container-lowest: #ffffff;
   --color-outline-variant: var(--sr-outline-variant);
+  --color-error: var(--sr-error);
   
   --font-headline-lg: var(--sr-font-heading);
   --font-headline-md: var(--sr-font-heading);
   --font-body-md: var(--sr-font-body);
   --font-label-md: var(--sr-font-body);
 }
+@media print { 
+  .pdf-hide-close { 
+    display: none !important; 
+  } 
+}  
+ 

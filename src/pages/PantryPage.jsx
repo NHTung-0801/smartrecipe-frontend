@@ -11,6 +11,7 @@ import PantryGrid from '../components/pantry/PantryGrid';
 import AddPantryItemModal from '../components/pantry/AddPantryItemModal';
 import PantryDetailModal from '../components/pantry/PantryDetailModal';
 import ConfirmModal from '../components/ui/ConfirmModal';
+import GenerateListModal from '../components/grocery/GenerateListModal';
 import s from '../styles/pages/PantryPage.module.css';
 
 const filters = [['ALL', 'Tất cả'], ['EXPIRING_SOON', 'Sắp hết hạn'], ['EXPIRED', 'Đã hết hạn'], ['LOW_STOCK', 'Sắp hết']];
@@ -22,6 +23,7 @@ export default function PantryPage() {
   const [filter, setFilter] = useState('ALL');
   const [addModal, setAddModal] = useState({ open: false, item: null });
   const [detailModal, setDetailModal] = useState({ open: false, item: null });
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [showCleanupConfirm, setShowCleanupConfirm] = useState(false);
 
   const pantryQuery = useQuery({ queryKey: ['pantry', filter], queryFn: () => pantryService.getPantry(filter) });
@@ -129,17 +131,20 @@ export default function PantryPage() {
           <button type="button" className={s.refreshButton} onClick={refresh} aria-label="Làm mới" title="Làm mới dữ liệu">
             <RefreshCw size={17} className={pantryQuery.isFetching ? s.spinning : ''} />
           </button>
-          <button type="button" className={s.scanButton} title="Tính năng đang phát triển"><ScanLine size={19} /> Quét mã</button>
+          <button type="button" className={`${s.scanButton} ${s.expandableBtn}`} title="Tính năng đang phát triển">
+            <ScanLine size={19} /> <span>Quét mã</span>
+          </button>
           <button
             type="button"
-            className={s.generateListButton}
-            onClick={() => generateGroceryMutation.mutate()}
-            disabled={generateGroceryMutation.isPending}
-            title="Tạo danh sách đi chợ từ nguyên liệu sắp hết/hết hạn"
+            className={`${s.generateListButton} ${s.expandableBtn}`}
+            onClick={() => setShowGenerateModal(true)}
+            title="Tạo danh sách đi chợ từ thực đơn tuần"
           >
-            <ShoppingCart size={18} /> {generateGroceryMutation.isPending ? 'Đang tạo...' : 'Tạo danh sách đi chợ'}
+            <ShoppingCart size={18} /> <span>Lên danh sách đi chợ</span>
           </button>
-          <button type="button" className={s.addButton} onClick={() => setAddModal({ open: true, item: null })}><Plus size={20} /> Thêm nguyên liệu</button>
+          <button type="button" className={`${s.addButton} ${s.expandableBtn}`} onClick={() => setAddModal({ open: true, item: null })}>
+            <Plus size={20} /> <span>Thêm nguyên liệu</span>
+          </button>
         </div>
       </header>
 
@@ -166,6 +171,12 @@ export default function PantryPage() {
         isLoading={cleanupMutation.isPending}
         onConfirm={() => cleanupMutation.mutate()}
         onCancel={() => setShowCleanupConfirm(false)}
+      />
+
+      <GenerateListModal
+        isOpen={showGenerateModal}
+        onClose={() => setShowGenerateModal(false)}
+        onSuccess={refresh}
       />
     </div>
   );

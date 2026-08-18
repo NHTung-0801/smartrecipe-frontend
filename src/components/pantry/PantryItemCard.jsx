@@ -45,7 +45,7 @@ export function getIngredientIcon(name, aisleName) {
   return '📦';
 }
 
-export default function PantryItemCard({ item, onViewDetail, index = 0, compact = false }) {
+export default function PantryItemCard({ item, onViewDetail, index = 0, variant = 'default' }) {
   const isLow = item.lowStockThreshold != null && Number(item.quantityAvailable) <= Number(item.lowStockThreshold);
   const status = item.status || 'FRESH';
   const unit = item.ingredient?.baseUnit || 'đơn vị';
@@ -59,29 +59,50 @@ export default function PantryItemCard({ item, onViewDetail, index = 0, compact 
 
   return (
     <article
-      className={`${s.itemCard} ${s[`card${status}`]} ${isLow ? s.cardLow : ''} ${compact ? s.compactCard : ''}`}
+      className={`${s.itemCard} ${s[`card${status}`]} ${isLow ? s.cardLow : ''} ${variant === 'tile' ? s.tileCard : variant === 'list' ? s.listCard : ''}`}
       style={{ animationDelay: `${index * 55}ms` }}
       onClick={() => onViewDetail(item)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onViewDetail(item)}
     >
-      <div className={s.cardTop}>
-        <span className={s.ingredientIcon}>{icon}</span>
-        <span className={`${s.statusBadge} ${s[`badge${status}`]} ${isLow && status === 'FRESH' ? s.badgeLow : ''}`}><span />{statusText}</span>
-      </div>
-      <div className={s.cardBody}>
-        <div className={s.cardTitleRow}>
-          <h3>{item.ingredient?.name || 'Nguyên liệu'}</h3>
-          <div className={s.quantity}><strong>{Number(item.quantityAvailable).toLocaleString('vi-VN')}</strong> <span>{unit}</span></div>
-        </div>
-        <div className={s.expiry}><CalendarDays size={15} /> Hạn dùng: {formatDate(item.expiryDate)}</div>
-        {item.lowStockThreshold != null && <div className={s.stockTrack} title={`Ngưỡng cảnh báo: ${item.lowStockThreshold} ${unit}`}><span style={{ width: `${Math.min(100, Number(item.quantityAvailable) / Math.max(Number(item.lowStockThreshold), 1) * 50)}%` }} /></div>}
-      </div>
-      <div className={s.cardActions}>
-        <button type="button" className={s.viewDetailBtn} onClick={(e) => { e.stopPropagation(); onViewDetail(item); }}><Eye size={16} /> <span>Xem chi tiết</span></button>
-      </div>
-      <PackageOpen className={s.cardWatermark} size={65} />
+      {variant === 'tile' ? (
+        <>
+          <div className={s.tileIcon}>{icon}</div>
+          <h3 className={s.tileTitle}>{item.ingredient?.name || 'Nguyên liệu'}</h3>
+          <div className={`${s.tileStatus} ${s[`tileStatus${status}`]} ${isLow && status === 'FRESH' ? s.tileStatusLow : ''}`}>
+            <span className={s.dot} />
+            {Number(item.quantityAvailable) === 0 ? 'Hết hàng' : `${Number(item.quantityAvailable).toLocaleString('vi-VN')} ${unit}`}
+          </div>
+        </>
+      ) : variant === 'list' ? (
+        <>
+          <div className={s.listIcon}>{icon}</div>
+          <span className={s.listTitleName}>{item.ingredient?.name || 'Nguyên liệu'}</span>
+          <span className={s.listQuantity}><strong>{Number(item.quantityAvailable).toLocaleString('vi-VN')}</strong> {unit}</span>
+          <div className={s.listExpiry}><CalendarDays size={14} /> {formatDate(item.expiryDate)}</div>
+          <button type="button" className={s.viewDetailBtn} onClick={(e) => { e.stopPropagation(); onViewDetail(item); }}><Eye size={16} /></button>
+        </>
+      ) : (
+        <>
+          <div className={s.cardTop}>
+            <span className={s.ingredientIcon}>{icon}</span>
+            <span className={`${s.statusBadge} ${s[`badge${status}`]} ${isLow && status === 'FRESH' ? s.badgeLow : ''}`}><span />{statusText}</span>
+          </div>
+          <div className={s.cardBody}>
+            <div className={s.cardTitleRow}>
+              <h3>{item.ingredient?.name || 'Nguyên liệu'}</h3>
+              <div className={s.quantity}><strong>{Number(item.quantityAvailable).toLocaleString('vi-VN')}</strong> <span>{unit}</span></div>
+            </div>
+            <div className={s.expiry}><CalendarDays size={15} /> Hạn dùng: {formatDate(item.expiryDate)}</div>
+            {item.lowStockThreshold != null && <div className={s.stockTrack} title={`Ngưỡng cảnh báo: ${item.lowStockThreshold} ${unit}`}><span style={{ width: `${Math.min(100, Number(item.quantityAvailable) / Math.max(Number(item.lowStockThreshold), 1) * 50)}%` }} /></div>}
+          </div>
+          <div className={s.cardActions}>
+            <button type="button" className={s.viewDetailBtn} onClick={(e) => { e.stopPropagation(); onViewDetail(item); }}><Eye size={16} /> <span>Xem chi tiết</span></button>
+          </div>
+          <PackageOpen className={s.cardWatermark} size={65} />
+        </>
+      )}
     </article>
   );
 }
