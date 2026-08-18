@@ -3,31 +3,33 @@ import { CalendarDays, PackagePlus, Save, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import IngredientAutocomplete from '../ui/IngredientAutocomplete';
 import UnitAutocomplete from '../ui/UnitAutocomplete';
-import { aisleService } from '../../services/ingredientService';
+import { aisleService, ingredientService } from '../../services/ingredientService';
 import s from '../../styles/pages/PantryPage.module.css';
 
-const emptyForm = { ingredient: null, quantityAvailable: '', lowStockThreshold: '', expiryDate: '', unit: '', aisleId: '' };
+const emptyForm = { ingredient: null, quantityAvailable: '', lowStockThreshold: '0', expiryDate: '', unit: '', aisleId: '' };
 
-export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, isSaving }) {
+export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, aisles }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const aislesQuery = useQuery({
     queryKey: ['aisles'],
     queryFn: () => aisleService.getAll(),
     staleTime: 5 * 60 * 1000,
-    enabled: isOpen,
+    enabled: isOpen && !aisles,
   });
-  const aisles = aislesQuery.data?.data || [];
+  const actualAisles = aisles || aislesQuery.data?.data || [];
 
   useEffect(() => {
     if (!isOpen) return;
     setForm(item ? { 
       ingredient: item.ingredient, 
       quantityAvailable: item.quantityAvailable ?? '', 
-      lowStockThreshold: item.lowStockThreshold ?? '', 
+      lowStockThreshold: item.lowStockThreshold ?? '0', 
       expiryDate: item.expiryDate ?? '',
-      unit: item.ingredient?.baseUnit || '',
+      unit: item.unit || item.ingredient?.baseUnit || '',
       aisleId: item.ingredient?.aisle?.id ?? '',
     } : emptyForm);
     setError('');
@@ -43,18 +45,46 @@ export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, is
 
   if (!isOpen) return null;
   const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
-    if (!form.ingredient?.id) return setError('Vui lòng chọn một nguyên liệu trong danh sách.');
+    const ingredientName = form.ingredient?.name || searchTerm;
+    if (!form.ingredient?.id && !ingredientName?.trim()) return setError('Vui lòng chọn hoặc nhập tên nguyên liệu.');
     if (!form.quantityAvailable || Number(form.quantityAvailable) <= 0) return setError('Số lượng phải lớn hơn 0.');
     setError('');
-    onSubmit({ 
-      ingredientId: form.ingredient.id, 
-      quantityAvailable: Number(form.quantityAvailable), 
-      lowStockThreshold: form.lowStockThreshold === '' ? null : Number(form.lowStockThreshold), 
-      expiryDate: form.expiryDate || null,
-      unit: form.unit || form.ingredient.baseUnit
-    });
+    
+    try {
+      setLoading(true);
+      let finalIngredientId = form.ingredient?.id;
+      let finalUnit = form.unit || form.ingredient?.baseUnit || 'g';
+
+      if (!finalIngredientId && ingredientName?.trim()) {
+         const newIng = {
+           name: ingredientName.trim(),
+           baseUnit: finalUnit,
+           caloriesPer100g: 0,
+           protein: 0,
+           fat: 0,
+           carbs: 0,
+           aisleId: form.aisleId ? Number(form.aisleId) : null
+         };
+         const response = await ingredientService.create(newIng);
+         finalIngredientId = response.data?.id || response.id; 
+      }
+
+      await onSubmit({ 
+        ingredientId: finalIngredientId, 
+        quantityAvailable: Number(form.quantityAvailable), 
+        lowStockThreshold: form.lowStockThreshold === '' ? null : Number(form.lowStockThreshold), 
+        expiryDate: form.expiryDate || null,
+        unit: finalUnit
+      });
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.message || err.message || 'Đã xảy ra lỗi, vui lòng thử lại';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,7 +96,6 @@ export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, is
           <button type="button" className={s.modalClose} onClick={onClose} aria-label="Đóng"><X size={21} /></button>
         </header>
         <form onSubmit={submit} className={s.modalForm}>
-          {/* Loại (Aisle) */}
           <div className={s.formGroup}>
             <label>Loại</label>
             <select
@@ -75,12 +104,11 @@ export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, is
               onChange={(e) => setForm(f => ({ ...f, aisleId: e.target.value }))}
             >
               <option value="">— Tất cả loại —</option>
-              {aisles.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              {actualAisles.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
             <small>Chọn loại để lọc nhanh danh sách nguyên liệu.</small>
           </div>
 
-          {/* Nguyên liệu */}
           <div className={s.formGroup}>
             <label>Nguyên liệu <b>*</b></label>
             <IngredientAutocomplete 
@@ -88,34 +116,34 @@ export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, is
               defaultValue={form.ingredient} 
               onSelect={(ingredient) => setForm((current) => ({ 
                 ...current, 
-                ingredient, 
+                ingredient: ingredient || null, 
                 unit: ingredient?.baseUnit || current.unit,
                 aisleId: ingredient?.aisle?.id ?? current.aisleId 
               }))} 
+              onInputChange={(val) => setSearchTerm(val)}
               placeholder="Gõ tên nguyên liệu..." 
               selectedAisleId={form.aisleId}
+              selectedUnit={form.unit}
             />
           </div>
 
-          {/* Số lượng + Ngưỡng */}
           <div className={s.formRow}>
             <div className={s.formGroup}>
               <label>Số lượng <b>*</b></label>
               <div className={s.inputWithUnit}>
                 <input type="number" min="0.01" step="0.01" value={form.quantityAvailable} onChange={update('quantityAvailable')} placeholder="0" />
-                <UnitAutocomplete value={form.unit || form.ingredient?.baseUnit} onChange={(unit) => setForm(c => ({...c, unit}))} />
+                <UnitAutocomplete value={form.unit || form.ingredient?.baseUnit} onChange={(unit) => setForm(c => ({...c, unit}))} inputClassName={s.unitInput} />
               </div>
             </div>
             <div className={s.formGroup}>
               <label>Ngưỡng cảnh báo</label>
               <div className={s.inputWithUnit}>
                 <input type="number" min="0" step="0.01" value={form.lowStockThreshold} onChange={update('lowStockThreshold')} placeholder="Tùy chọn" />
-                <UnitAutocomplete value={form.unit || form.ingredient?.baseUnit} onChange={(unit) => setForm(c => ({...c, unit}))} />
+                <UnitAutocomplete value={form.unit || form.ingredient?.baseUnit} onChange={(unit) => setForm(c => ({...c, unit}))} inputClassName={s.unitInput} />
               </div>
             </div>
           </div>
 
-          {/* Hạn sử dụng */}
           <div className={s.formGroup}>
             <label>Hạn sử dụng</label>
             <div className={s.dateInput}>
@@ -126,7 +154,12 @@ export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, is
           </div>
 
           {error && <p className={s.formError}>{error}</p>}
-          <footer className={s.modalFooter}><button type="button" className={s.cancelButton} onClick={onClose}>Hủy</button><button type="submit" className={s.saveButton} disabled={isSaving}><Save size={18} /> {isSaving ? 'Đang lưu...' : item ? 'Lưu thay đổi' : 'Thêm vào tủ'}</button></footer>
+          <footer className={s.modalFooter}>
+            <button type="button" className={s.cancelButton} onClick={onClose}>Hủy</button>
+            <button type="submit" className={s.saveButton} disabled={loading}>
+              <Save size={18} /> {loading ? 'Đang lưu...' : item ? 'Lưu thay đổi' : 'Thêm vào tủ'}
+            </button>
+          </footer>
         </form>
       </div>
     </div>

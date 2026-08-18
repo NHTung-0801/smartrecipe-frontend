@@ -1,160 +1,162 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { PackagePlus, Save, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import IngredientAutocomplete from '../ui/IngredientAutocomplete';
-import styles from './AddGroceryItemModal.module.css';
+import UnitAutocomplete from '../ui/UnitAutocomplete';
+import { aisleService, ingredientService } from '../../services/ingredientService';
+import s from '../../styles/pages/PantryPage.module.css';
+
+const emptyForm = { ingredient: null, quantity: '', unit: '', aisleId: '' };
 
 const AddGroceryItemModal = ({ isOpen, onClose, onSubmit, listId, editingItem = null }) => {
-  const [ingredientId, setIngredientId] = useState(null);
-  const [ingredientName, setIngredientName] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [unit, setUnit] = useState('');
+  const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const aislesQuery = useQuery({
+    queryKey: ['aisles'],
+    queryFn: () => aisleService.getAll(),
+    staleTime: 5 * 60 * 1000,
+    enabled: isOpen,
+  });
+  const aisles = aislesQuery.data?.data || [];
 
   useEffect(() => {
     if (editingItem) {
-      setIngredientId(editingItem.ingredientId);
-      setIngredientName(editingItem.ingredientName);
-      setQuantity(editingItem.finalToBuy != null ? editingItem.finalToBuy : editingItem.quantity);
-      setUnit(editingItem.unit || '');
+      setForm({
+        ingredient: { id: editingItem.ingredientId, name: editingItem.ingredient?.name || editingItem.ingredientName },
+        quantity: editingItem.totalNeeded || editingItem.quantity || '',
+        unit: editingItem.unit || '',
+        aisleId: editingItem.ingredient?.aisleId || ''
+      });
     } else {
-      resetForm();
+      setForm(emptyForm);
     }
+    setError('');
   }, [editingItem, isOpen]);
 
-  const resetForm = () => {
-    setIngredientId(null);
-    setIngredientName('');
-    setQuantity('');
-    setUnit('');
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const closeOnEscape = (event) => event.key === 'Escape' && onClose();
+    document.addEventListener('keydown', closeOnEscape);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', closeOnEscape); document.body.style.overflow = ''; };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
+
+  const submit = async (event) => {
+    event.preventDefault();
+    
+    const ingredientName = form.ingredient?.name || searchTerm;
+    
+    if (!form.ingredient?.id && !ingredientName?.trim()) return setError('Vui lòng chọn hoặc nhập tên nguyên liệu.');
+    if (!form.quantity || Number(form.quantity) <= 0) return setError('Số lượng phải lớn hơn 0.');
     setError('');
-  };
-
-  const handleClose = () => {
-    resetForm();
-    onClose();
-  };
-
-  const handleSelectIngredient = (ingredient) => {
-    if (ingredient) {
-      setIngredientId(ingredient.id);
-      setIngredientName(ingredient.name);
-      setUnit(ingredient.baseUnit || '');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (!ingredientId) {
-      setError('Vui lòng chọn nguyên liệu');
-      return;
-    }
-
-    const qty = parseFloat(quantity);
-    if (!quantity || isNaN(qty) || qty <= 0) {
-      setError('Vui lòng nhập số lượng hợp lệ');
-      return;
-    }
-
-    if (!unit.trim()) {
-      setError('Vui lòng nhập đơn vị');
-      return;
-    }
-
-    setLoading(true);
+    
     try {
-      await onSubmit({
-        ingredientId,
-        quantity: qty,
-        unit: unit.trim(),
-      });
-      resetForm();
+      setLoading(true);
+      let finalIngredientId = form.ingredient?.id;
+      let finalUnit = form.unit || form.ingredient?.baseUnit || 'g';
+      
+      // Auto-create ingredient if not exists
+      if (!finalIngredientId && ingredientName?.trim()) {
+         const newIng = {
+           name: ingredientName.trim(),
+           baseUnit: finalUnit,
+           caloriesPer100g: 0,
+           protein: 0,
+           fat: 0,
+           carbs: 0,
+           aisleId: form.aisleId ? Number(form.aisleId) : null
+         };
+         const response = await ingredientService.create(newIng);
+         // extract ID from ApiResponse wrapper if needed
+         finalIngredientId = response.data?.id || response.id; 
+      }
+      
+      const data = {
+        ingredientId: finalIngredientId,
+        quantity: Number(form.quantity),
+        unit: finalUnit
+      };
+      
+      await onSubmit(data);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
+      console.error(err);
+      const msg = err.response?.data?.message || err.message || 'Đã xảy ra lỗi, vui lòng thử lại';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className={styles.overlay} onClick={handleClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className={styles.header}>
-          <h3 className={styles.title}>
-            {editingItem ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu'}
-          </h3>
-          <button className={styles.closeBtn} onClick={handleClose} aria-label="Đóng">
-            <X size={18} />
-          </button>
-        </div>
+    <div className={s.modalOverlay} role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <div className={s.modal} role="dialog" aria-modal="true" aria-labelledby="grocery-modal-title">
+        <header className={s.modalHeader}>
+          <div className={s.modalTitleIcon}><PackagePlus size={23} /></div>
+          <div><span>{editingItem ? 'Cập nhật danh sách' : 'Thêm vào danh sách'}</span><h2 id="grocery-modal-title">{editingItem ? 'Chỉnh sửa nguyên liệu' : 'Thêm nguyên liệu mới'}</h2></div>
+          <button type="button" className={s.modalClose} onClick={onClose} aria-label="Đóng"><X size={21} /></button>
+        </header>
+        
+        <form onSubmit={submit} className={s.modalForm}>
+          {/* Loại (Aisle) */}
+          <div className={s.formGroup}>
+            <label>Loại</label>
+            <select
+              className={s.categorySelect}
+              value={form.aisleId}
+              onChange={(e) => setForm(f => ({ ...f, aisleId: e.target.value }))}
+            >
+              <option value="">— Tất cả loại —</option>
+              {aisles.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+            <small>Chọn loại để lọc nhanh danh sách nguyên liệu.</small>
+          </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Ingredient Autocomplete */}
-          <div className={styles.field}>
-            <label className={styles.label}>Nguyên liệu</label>
-            <IngredientAutocomplete
-              onSelect={handleSelectIngredient}
-              placeholder="Tìm kiếm nguyên liệu..."
-              defaultValue={editingItem ? { id: editingItem.ingredientId, name: editingItem.ingredientName } : null}
+          {/* Nguyên liệu */}
+          <div className={s.formGroup}>
+            <label>Nguyên liệu <b>*</b></label>
+            <IngredientAutocomplete 
+              key={editingItem?.id || 'new'} 
+              defaultValue={form.ingredient} 
+              onSelect={(ingredient) => setForm((current) => ({ 
+                ...current, 
+                ingredient: ingredient || null,
+                unit: ingredient?.baseUnit || current.unit,
+                aisleId: ingredient?.aisle?.id ?? current.aisleId 
+              }))}
+              onInputChange={(val) => setSearchTerm(val)}
+              placeholder="Gõ tên nguyên liệu..." 
+              selectedAisleId={form.aisleId}
             />
           </div>
 
-          {/* Quantity & Unit */}
-          <div className={styles.row}>
-            <div className={styles.field} style={{ flex: 1 }}>
-              <label className={styles.label}>Số lượng</label>
-              <input
-                type="number"
-                className={styles.input}
-                placeholder="VD: 500"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                min="0.01"
-                step="any"
-                required
-              />
+          {/* Số lượng */}
+          <div className={s.formRow}>
+            <div className={s.formGroup}>
+              <label>Số lượng <b>*</b></label>
+              <div className={s.inputWithUnit}>
+                <input type="number" min="0.01" step="any" value={form.quantity} onChange={update('quantity')} placeholder="VD: 500" />
+                <UnitAutocomplete value={form.unit || form.ingredient?.baseUnit} onChange={(unit) => setForm(c => ({...c, unit}))} inputClassName={s.unitInput} />
+              </div>
             </div>
-            <div className={styles.field} style={{ flex: 1 }}>
-              <label className={styles.label}>Đơn vị</label>
-              <input
-                type="text"
-                className={styles.input}
-                placeholder="VD: g, ml, quả..."
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                required
-              />
-            </div>
+            {/* Cột ẩn để cân bằng formRow */}
+            <div className={s.formGroup} style={{ visibility: 'hidden', height: 0, padding: 0 }}></div>
           </div>
 
-          {/* Error */}
-          {error && <p className={styles.error}>{error}</p>}
-
-          {/* Actions */}
-          <div className={styles.actions}>
-            <button type="button" className={styles.cancelBtn} onClick={handleClose} disabled={loading}>
-              Hủy
+          {error && <p className={s.formError}>{error}</p>}
+          <footer className={s.modalFooter}>
+            <button type="button" className={s.cancelButton} onClick={onClose}>Hủy</button>
+            <button type="submit" className={s.saveButton} disabled={loading}>
+              <Save size={18} /> {loading ? 'Đang lưu...' : editingItem ? 'Lưu thay đổi' : 'Thêm vào danh sách'}
             </button>
-            <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 size={16} className={styles.spin} />
-                  Đang xử lý...
-                </>
-              ) : editingItem ? (
-                'Cập nhật'
-              ) : (
-                'Thêm'
-              )}
-            </button>
-          </div>
+          </footer>
         </form>
       </div>
     </div>
