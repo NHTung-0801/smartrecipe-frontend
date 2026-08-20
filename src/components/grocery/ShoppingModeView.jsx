@@ -203,15 +203,22 @@ const ShoppingModeView = ({
                       onChange={() => onToggleItem(item)}
                       className={`w-6 h-6 rounded-md border-2 border-outline-variant text-primary focus:ring-primary transition-all cursor-pointer flex-shrink-0 ${styles.customCheckbox}`}
                     />
-                    <span
-                      className={`flex-1 text-sm font-semibold transition-all ${
-                        item.isBought
-                          ? 'line-through text-on-surface-variant/60'
-                          : 'text-on-surface'
-                      }`}
-                    >
-                      {item.ingredient?.name || 'Không tên'}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span
+                        className={`block text-sm font-semibold transition-all ${
+                          item.isBought
+                            ? 'line-through text-on-surface-variant/60'
+                            : 'text-on-surface'
+                        }`}
+                      >
+                        {item.ingredient?.name || 'Không tên'}
+                      </span>
+                      {item.isManual && (
+                        <span className="inline-block mt-0.5 text-[10px] font-bold px-1.5 py-0.5 bg-secondary/10 text-secondary rounded">
+                          Nguyên liệu thêm
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs font-bold px-2.5 py-1 bg-surface-container rounded-lg text-on-surface-variant whitespace-nowrap">
                       {item.finalToBuy != null ? item.finalToBuy : item.totalNeeded}
                       {item.unit ? ` ${item.unit}` : ''}

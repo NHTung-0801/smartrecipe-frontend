@@ -21,9 +21,18 @@ const GroceryItemRow = ({ item, onToggle, onEdit, onRemove }) => {
             {item.ingredient?.name || 'Không tên'}
           </p>
           {/* Note or Subtext if needed. Using aisleName or static text for now if empty */}
-          <p className="text-sm text-on-surface-variant truncate">
-            {item.pantryDeducted > 0 && `(Đã có ${item.pantryDeducted} trong tủ)`}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            {item.pantryDeducted > 0 && (
+              <p className="text-[11px] text-on-surface-variant truncate">
+                (Đã có {item.pantryDeducted} trong tủ)
+              </p>
+            )}
+            {item.isManual && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-secondary/10 text-secondary rounded">
+                Nguyên liệu thêm
+              </span>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">

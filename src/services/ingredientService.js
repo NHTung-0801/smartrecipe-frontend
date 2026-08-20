@@ -21,6 +21,10 @@ export const ingredientService = {
     const response = await api.post('/ingredients', ingredientData);
     return response.data;
   },
+  updateAisle: async (id, aisleId) => {
+    const response = await api.patch(`/ingredients/${id}/aisle`, { aisleId });
+    return response.data;
+  },
 };
 
 export const aisleService = {

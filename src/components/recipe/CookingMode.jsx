@@ -3,6 +3,9 @@ import { createPortal } from 'react-dom';
 import { ArrowLeft, Clock, PackageOpen, ChevronLeft, ChevronRight, Soup } from 'lucide-react';
 import s from '../../styles/components/CookingMode.module.css';
 
+import { toast } from 'react-toastify';
+import api from '../../services/api';
+
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200';
 
 const CookingMode = ({ recipe, onClose }) => {
@@ -41,16 +44,17 @@ const CookingMode = ({ recipe, onClose }) => {
   const steps = recipe.steps;
   const currentStep = steps[currentStepIndex];
   const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100;
-  
-  // Try to parse pseudo-title from instruction
-  const textParts = currentStep.instruction.split(/(?<=\.)\s/);
-  const pseudoTitle = textParts[0];
-  const desc = textParts.slice(1).join(' ') || textParts[0]; // if no dot, just show full text as desc
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
     } else {
+      try {
+        await api.post(`/recipes/${recipe.id}/cook`);
+        toast.success('Chúc mừng bạn đã hoàn thành món ăn! Đã lưu vào sổ tay nấu ăn.');
+      } catch (error) {
+        console.error('Failed to log cook session', error);
+      }
       onClose();
     }
   };
@@ -105,14 +109,11 @@ const CookingMode = ({ recipe, onClose }) => {
           
           <div className={s.contentSection}>
             <h4 className={s.stepTitle}>
-              {currentStepIndex === 0 ? 'CHUẨN BỊ' : 'THỰC HIỆN'}
+              {currentStep.title || (currentStepIndex === 0 ? 'CHUẨN BỊ' : 'THỰC HIỆN')}
             </h4>
-            {textParts.length > 1 && (
-              <h3 className={s.stepSubtitle}>{pseudoTitle}</h3>
-            )}
             
             <div className={s.stepDescription}>
-              {desc}
+              {currentStep.instruction}
             </div>
             
             {/* Optional: Show ingredient hint on first step or similar */}

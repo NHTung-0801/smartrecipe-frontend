@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { recipeService } from '../services/recipeService';
 import { groceryService } from '../services/groceryService';
+import { pantryService } from '../services/pantryService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
 import { 
-  Heart, Share2, Copy, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock
+  Heart, Share2, Copy, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer
 } from 'lucide-react';
 import s from '../styles/pages/RecipeDetailPage.module.css';
 import CookingMode from '../components/recipe/CookingMode';
@@ -20,6 +21,18 @@ function formatTime(minutes) {
   const m = minutes % 60;
   return m > 0 ? `${h}h ${m}ph` : `${h}h`;
 }
+
+const CHEF_TIPS = [
+  "Nướng gừng và hành tím trước khi cho vào nước dùng để tạo mùi thơm đặc trưng.",
+  "Luôn vớt bọt thường xuyên để nước dùng được trong trẻo.",
+  "Chần xương qua nước sôi có pha chút muối để khử mùi hôi hiệu quả.",
+  "Để món xào giòn ngon, hãy để chảo thật nóng trước khi cho nguyên liệu vào.",
+  "Thêm một chút muối khi luộc rau sẽ giúp rau giữ được màu xanh bắt mắt.",
+  "Ướp thịt với một chút dầu ăn sẽ giúp gia vị thấm đều và thịt mềm hơn.",
+  "Khi chiên, hãy rắc một ít bột mì vào chảo dầu để dầu không bị bắn.",
+  "Sử dụng nước đá lạnh để sốc nhiệt rau củ sau khi luộc sẽ giúp rau giòn hơn.",
+  "Để chanh vắt được nhiều nước, hãy lăn nhẹ chanh trên mặt bàn trước khi cắt."
+];
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -38,27 +51,67 @@ export default function RecipeDetailPage() {
   
   // Trạng thái các checkbox nguyên liệu
   const [checkedIngredients, setCheckedIngredients] = useState({});
+  const [pantryMap, setPantryMap] = useState({});
+  const [randomTips, setRandomTips] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const r = await recipeService.getById(id);
+        const [r, similarRes, pantryRes] = await Promise.all([
+          recipeService.getById(id),
+          recipeService.getPublicRecipes(0, 3),
+          currentUser ? pantryService.getPantry() : Promise.resolve(null)
+        ]);
+        
         setRecipe(r);
         setIsLiked(r.isLiked || false);
         setLikeCount(r.likeCount || 0);
-
-        // Fetch similar recipes
-        const similarRes = await recipeService.getPublicRecipes(0, 3);
         setSimilarRecipes(similarRes.content || []);
+
+        // Xử lý thông tin tủ nguyên liệu
+        const pMap = {};
+        if (pantryRes && pantryRes.data) {
+          Object.values(pantryRes.data).flat().forEach(pi => {
+            if (pi.ingredient && pi.ingredient.id) {
+              const current = pMap[pi.ingredient.id] || 0;
+              pMap[pi.ingredient.id] = current + (pi.quantityAvailable || 0);
+            }
+          });
+        }
+        setPantryMap(pMap);
+
+        // Đánh dấu tự động các nguyên liệu đã đủ số lượng trong tủ
+        const initialChecked = {};
+        if (r.ingredients) {
+          r.ingredients.forEach((ing, idx) => {
+             const available = pMap[ing.ingredientId] || 0;
+             if (available >= ing.amount) {
+                 initialChecked[idx] = true;
+             }
+          });
+        }
+        setCheckedIngredients(initialChecked);
       } catch (err) {
-        toast.error('Không thể tải công thức');
+        toast.error('Lỗi: ' + (err.response?.data?.message || err.message || err));
+        console.error(err);
         navigate('/recipes');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
+
+    // Randomize tips initially
+    const shuffled = [...CHEF_TIPS].sort(() => 0.5 - Math.random());
+    setRandomTips(shuffled.slice(0, 3));
+
+    // Rotate tips every 10 seconds
+    const interval = setInterval(() => {
+      setRandomTips([...CHEF_TIPS].sort(() => 0.5 - Math.random()).slice(0, 3));
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [id, navigate]);
 
   const handleLike = async () => {
@@ -94,9 +147,9 @@ export default function RecipeDetailPage() {
   const handleAddToGroceryList = async () => {
     try {
       setAddingToGrocery(true);
-      const res = await groceryService.addRecipeItems(id);
+      const res = await groceryService.generateFromRecipe(id);
       toast.success('Đã thêm nguyên liệu vào danh sách đi chợ!');
-      const listId = res?.data?.id;
+      const listId = res?.id;
       if (listId) navigate(`/grocery?list=${listId}`);
       else navigate('/grocery');
     } catch (err) {
@@ -168,9 +221,49 @@ export default function RecipeDetailPage() {
               </div>
               
               <h1 className={s.title}>{recipe.title}</h1>
-              <p className={s.description} style={{ marginBottom: 0 }}>
+              <p className={s.description} style={{ marginBottom: '24px' }}>
                 {recipe.description || 'Hương vị tuyệt hảo đậm đà, mang đậm bản sắc truyền thống.'}
               </p>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Chuẩn bị */}
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#3d271d]/40 backdrop-blur-md border border-white/20 text-white shadow-xl">
+                  <Clock size={20} className="text-white/90" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase font-bold text-white/70 tracking-wider">Chuẩn bị</span>
+                    <span className="text-sm font-bold">{formatTime(recipe.prepTime)}</span>
+                  </div>
+                </div>
+
+                {/* Nấu */}
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#3d271d]/40 backdrop-blur-md border border-white/20 text-white shadow-xl">
+                  <Timer size={20} className="text-white/90" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase font-bold text-white/70 tracking-wider">Nấu</span>
+                    <span className="text-sm font-bold">{formatTime(recipe.cookTime)}</span>
+                  </div>
+                </div>
+
+                {/* Độ khó */}
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#3d271d]/40 backdrop-blur-md border border-white/20 text-white shadow-xl">
+                  <BarChart size={20} className="text-white/90" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase font-bold text-white/70 tracking-wider">Độ khó</span>
+                    <span className="text-sm font-bold">
+                      {recipe.difficulty === 'EASY' ? 'Dễ nấu' : recipe.difficulty === 'MEDIUM' ? 'Trung bình' : recipe.difficulty === 'HARD' ? 'Khó' : 'Trung bình'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Khẩu phần */}
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#3d271d]/40 backdrop-blur-md border border-white/20 text-white shadow-xl">
+                  <Users size={20} className="text-white/90" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase font-bold text-white/70 tracking-wider">Khẩu phần</span>
+                    <span className="text-sm font-bold">{recipe.baseServings || 4} người</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-3 mb-2 shrink-0">
@@ -188,7 +281,7 @@ export default function RecipeDetailPage() {
                 <div 
                   className={`px-5 h-10 rounded-full font-semibold text-sm flex items-center gap-2 transition-colors cursor-default
                     ${recipe.status === 'PUBLIC' 
-                      ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-900/20' 
+                      ? 'bg-[#a13923] text-white shadow-lg shadow-[#a13923]/30' 
                       : 'bg-gray-700/90 text-white shadow-lg shadow-gray-900/20'
                     }`}
                 >
@@ -205,53 +298,28 @@ export default function RecipeDetailPage() {
         </div>
       </section>
 
-      {/* 2. NUTRITION & TIME CARDS */}
-      <section className={s.nutritionGrid}>
-        <div className={s.nutriCard}>
-          <span className={s.nutriLabel}>Chuẩn bị</span>
-          <span className={s.nutriValue} style={{ color: '#a13923' }}>
-            {formatTime(recipe.prepTime)}
-          </span>
-        </div>
-        <div className={s.nutriCard}>
-          <span className={s.nutriLabel}>Nấu</span>
-          <span className={s.nutriValue} style={{ color: '#a13923' }}>
-            {formatTime(recipe.cookTime)}
-          </span>
-        </div>
-        <div className={s.nutriCard}>
-          <span className={s.nutriLabel}>Calories</span>
-          <span className={s.nutriValue} style={{ color: '#d94833' }}>{nutrition.caloriesPerServing} kcal</span>
-        </div>
-        <div className={s.nutriCard}>
-          <span className={s.nutriLabel}>Protein</span>
-          <span className={s.nutriValue} style={{ color: '#8b6b55' }}>{nutrition.proteinPerServing}g</span>
-        </div>
-        <div className={s.nutriCard}>
-          <span className={s.nutriLabel}>Carbs</span>
-          <span className={s.nutriValue} style={{ color: '#687858' }}>{nutrition.carbsPerServing}g</span>
-        </div>
-        <div className={s.nutriCard}>
-          <span className={s.nutriLabel}>Fat</span>
-          <span className={s.nutriValue} style={{ color: '#b99a6d' }}>{nutrition.fatPerServing}g</span>
-        </div>
-      </section>
-
-      {/* 3. MAIN SPLIT CONTENT */}
+      {/* MAIN SPLIT CONTENT */}
       <section className={s.mainContent}>
         
         {/* LEFT COLUMN: INGREDIENTS */}
         <div className="space-y-6">
           <div className={s.ingredientsContainer}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className={s.sectionTitle} style={{ marginBottom: 0 }}>
-                <List className="text-[#a13923]" size={24} /> Nguyên liệu
+              <h2 className="font-heading text-[26px] font-bold text-[#3d271d] flex items-center gap-2" style={{ marginBottom: 0 }}>
+                <List size={24} className="text-[#a13923]" />
+                Nguyên liệu
               </h2>
-              <span className="px-3 py-1 bg-[#efebe7] text-[#5c3e33] rounded-full text-xs font-semibold">{recipe.baseServings || 4} người ăn</span>
+              <span className="px-3 py-1 bg-[#efebe7] text-[#a13923] rounded-full text-sm font-semibold">
+                {recipe.ingredients?.length || 0} mục
+              </span>
             </div>
 
-            <div className="flex flex-col mb-8">
-              {recipe.ingredients?.map((ing, idx) => (
+            <div className="flex flex-col mb-6">
+              {recipe.ingredients?.map((ing, idx) => {
+                const available = pantryMap[ing.ingredientId] || 0;
+                const isSufficient = available >= ing.amount;
+                
+                return (
                 <div 
                   key={idx} 
                   className={`${s.ingredientItem} ${checkedIngredients[idx] ? s.checked : ''}`}
@@ -261,21 +329,44 @@ export default function RecipeDetailPage() {
                     <div className={s.checkbox}>✓</div>
                     <span className="font-medium text-gray-800">{ing.ingredientName}</span>
                   </div>
-                  <span className="text-gray-500 font-semibold">{ing.amount} {ing.unit}</span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-gray-500 font-semibold">{ing.amount} {ing.unit}</span>
+                    {currentUser && !checkedIngredients[idx] && (
+                      <span className={`text-[11px] font-medium mt-1 px-2 py-0.5 rounded-md ${available > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-500'}`}>
+                        {available > 0 ? `Chỉ có ${available} ${ing.unit}` : 'Chưa có trong tủ'}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              ))}
+                );
+              })}
               {(!recipe.ingredients || recipe.ingredients.length === 0) && (
                 <p className="text-gray-400 italic">Chưa có nguyên liệu</p>
               )}
             </div>
 
             <button 
-              className="w-full py-3.5 rounded-full bg-[#059669] text-white font-semibold text-[15px] flex items-center justify-center gap-2 hover:bg-[#047857] transition-colors disabled:opacity-60"
+              className="w-full py-3 rounded-2xl bg-[#efebe7] text-[#8b6b55] font-bold text-[15px] flex items-center justify-center gap-2 hover:bg-[#e4dfd9] transition-colors disabled:opacity-60"
               onClick={handleAddToGroceryList}
               disabled={addingToGrocery}
             >
-              <ShoppingCart size={18} /> {addingToGrocery ? 'Đang thêm...' : 'Thêm vào danh sách đi chợ'}
+              <ShoppingCart size={18} /> {addingToGrocery ? 'Đang thêm...' : 'Thêm vào danh sách mua sắm'}
             </button>
+          </div>
+
+          {/* CHEF TIPS */}
+          <div className="bg-[#fcf9f5] rounded-[24px] p-7 border border-[#f0e8df] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group cursor-default">
+            <h3 className="font-heading text-[19px] font-bold text-[#3d271d] mb-5 flex items-center gap-2 group-hover:text-[#a13923] transition-colors">
+              <Lightbulb size={20} className="text-[#a13923] group-hover:scale-110 transition-transform" /> Mẹo từ đầu bếp
+            </h3>
+            <ul className="space-y-4">
+              {randomTips.map((tip, idx) => (
+                <li key={idx} className="flex gap-3 text-[15px] text-[#5c3e33] hover:text-[#3d271d] transition-colors">
+                  <span className="text-[#a13923] text-[20px] leading-[22px] font-bold">•</span>
+                  <span className="leading-relaxed">{tip}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
@@ -297,30 +388,27 @@ export default function RecipeDetailPage() {
 
           <div className={s.timeline}>
             {recipe.steps?.map((step, idx) => {
-              // Extract first sentence as pseudo-title if possible
-              const textParts = step.instruction.split(/(?<=\.)\s/);
-              const pseudoTitle = textParts[0];
-              const desc = textParts.slice(1).join(' ');
-
               return (
-                <div key={idx} className={s.stepItem}>
-                  <div className={s.stepNumber}>{step.stepNumber || idx + 1}</div>
-                  <div className={s.stepCard}>
+                <div key={idx} className={`${s.stepItem} group`}>
+                  <div className={`${s.stepNumber} transition-all duration-300 group-hover:bg-[#a13923] group-hover:text-white group-hover:scale-110 group-hover:shadow-[0_0_0_10px_#fcfaf8,0_4px_10px_rgba(161,57,35,0.3)]`}>
+                    {step.stepNumber || idx + 1}
+                  </div>
+                  <div className={`${s.stepCard} transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg border border-transparent group-hover:border-[#a13923]/10`}>
                     <div className={s.stepCardText}>
-                      {desc ? (
+                      {step.title ? (
                         <>
-                          <h4 className={s.stepTitle}>{pseudoTitle}</h4>
-                          <p className={s.stepDesc}>{desc}</p>
+                          <h4 className={`${s.stepTitle} transition-colors duration-300 group-hover:text-[#a13923]`}>{step.title}</h4>
+                          <p className={s.stepDesc}>{step.instruction}</p>
                         </>
                       ) : (
-                        <p className={s.stepDesc} style={{ fontSize: '16px', fontWeight: 500, color: '#3d271d' }}>{step.instruction}</p>
+                        <p className={`${s.stepDesc} transition-colors duration-300 group-hover:text-[#a13923]`} style={{ fontSize: '16px', fontWeight: 500, color: '#3d271d' }}>{step.instruction}</p>
                       )}
                     </div>
                     {step.imageUrl ? (
-                      <img src={step.imageUrl} alt={`Bước ${idx + 1}`} className={s.stepCardImage} />
+                      <img src={step.imageUrl} alt={`Bước ${idx + 1}`} className={`${s.stepCardImage} transition-transform duration-500 group-hover:scale-105`} />
                     ) : (
-                      <div className={s.stepCardImage}>
-                        <Soup size={32} opacity={0.6} />
+                      <div className={`${s.stepCardImage} transition-transform duration-500 group-hover:scale-105`}>
+                        <Soup size={32} opacity={0.6} className="transition-all duration-300 group-hover:opacity-100 group-hover:text-[#a13923]" />
                       </div>
                     )}
                   </div>

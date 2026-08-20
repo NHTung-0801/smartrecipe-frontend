@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, Gauge, Hash, Package, Save, Trash2, X } from 'lucide-react';
+import { CalendarDays, Gauge, Hash, Package, Save, Trash2, X, Tags } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { aisleService } from '../../services/ingredientService';
 import s from '../../styles/pages/PantryPage.module.css';
 import ConfirmModal from '../ui/ConfirmModal';
 import { getIngredientIcon } from './PantryItemCard';
@@ -16,7 +18,16 @@ const statusConfig = {
 
 export default function PantryDetailModal({ isOpen, item, onClose, onSave, onDelete, isSaving, isDeleting }) {
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ quantityAvailable: '', lowStockThreshold: '' });
+  const [form, setForm] = useState({ quantityAvailable: '', lowStockThreshold: '', aisleId: '' });
+  const [isUpdatingAisle, setIsUpdatingAisle] = useState(false);
+
+  const aislesQuery = useQuery({
+    queryKey: ['aisles'],
+    queryFn: () => aisleService.getAll(),
+    staleTime: 5 * 60 * 1000,
+    enabled: isOpen && editing,
+  });
+  const aisles = aislesQuery.data?.data || [];
 
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -25,6 +36,7 @@ export default function PantryDetailModal({ isOpen, item, onClose, onSave, onDel
     setForm({
       quantityAvailable: item.quantityAvailable ?? '',
       lowStockThreshold: item.lowStockThreshold ?? '',
+      aisleId: item.ingredient?.aisle?.id ?? '',
     });
     setEditing(false);
     setShowConfirm(false);
@@ -45,10 +57,22 @@ export default function PantryDetailModal({ isOpen, item, onClose, onSave, onDel
   const status = item.status || 'FRESH';
   const sc = statusConfig[status] || statusConfig.FRESH;
   const isLow = item.lowStockThreshold != null && Number(item.quantityAvailable) <= Number(item.lowStockThreshold);
+  const currentAisleId = ingredient.aisle?.id;
   const aisleName = item.aisleName || ingredient.aisle?.name || 'Chưa phân loại';
   const icon = getIngredientIcon(ingredient.name, aisleName);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (form.aisleId !== (currentAisleId ?? '')) {
+      try {
+        setIsUpdatingAisle(true);
+        await ingredientService.updateAisle(ingredient.id, form.aisleId === '' ? null : Number(form.aisleId));
+      } catch (err) {
+        console.error("Lỗi cập nhật phân loại:", err);
+      } finally {
+        setIsUpdatingAisle(false);
+      }
+    }
+    
     onSave({
       ingredientId: ingredient.id,
       quantityAvailable: Number(form.quantityAvailable),
@@ -132,6 +156,21 @@ export default function PantryDetailModal({ isOpen, item, onClose, onSave, onDel
                 </div>
               )}
             </div>
+
+            {/* Loại (Aisle) */}
+            {editing && (
+              <div className={s.detailField} style={{ gridColumn: '1 / -1' }}>
+                <div className={s.detailFieldLabel}><Tags size={14} /> Quầy hàng / Phân loại</div>
+                <select
+                  className={s.detailFieldInput}
+                  value={form.aisleId}
+                  onChange={(e) => setForm(f => ({ ...f, aisleId: e.target.value }))}
+                >
+                  <option value="">— Chưa phân loại —</option>
+                  {aisles.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              </div>
+            )}
 
             {/* Đơn vị */}
             <div className={s.detailField}>

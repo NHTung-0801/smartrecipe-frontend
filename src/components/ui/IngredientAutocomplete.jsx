@@ -18,11 +18,11 @@ const IngredientAutocomplete = ({ onSelect, onInputChange, placeholder = 'Tìm k
   const wrapperRef = useRef(null);
   const debounceRef = useRef(null);
 
+  const defaultName = defaultValue?.name || '';
+  
   useEffect(() => {
-    if (defaultValue?.name) {
-      setQuery(defaultValue.name);
-    }
-  }, [defaultValue]);
+    setQuery(defaultName);
+  }, [defaultName]);
 
   // Cleanup debounce timer khi component unmount
   useEffect(() => {
@@ -68,8 +68,8 @@ const IngredientAutocomplete = ({ onSelect, onInputChange, placeholder = 'Tìm k
     setQuery(value);
     if (onInputChange) onInputChange(value);
 
-    if (onSelect && value !== defaultValue?.name) {
-      onSelect(null);
+    if (onSelect) {
+      onSelect({ name: value, id: null });
     }
 
     if (debounceRef.current) {
@@ -90,13 +90,7 @@ const IngredientAutocomplete = ({ onSelect, onInputChange, placeholder = 'Tìm k
     }
   };
 
-  const handleCreateNew = (e) => {
-    if (e) e.preventDefault();
-    if (!query.trim()) return;
-    
-    // Tạo nháp, việc lưu vào DB sẽ do modal cha (lúc bấm Save) đảm nhiệm để lấy đúng đơn vị
-    handleSelect({ name: query.trim() });
-  };
+  // Removed handleCreateNew since we just use the free text value
 
   const handleKeyDown = (e) => {
     if (!isOpen || suggestions.length === 0) return;
@@ -208,20 +202,6 @@ const IngredientAutocomplete = ({ onSelect, onInputChange, placeholder = 'Tìm k
             </li>
           ))}
           
-          {/* Option to create a new ingredient if it doesn't match exactly */}
-          {!suggestions.some((ing) => ing.name.toLowerCase() === query.trim().toLowerCase()) && (
-            <li
-              onClick={creating ? null : handleCreateNew}
-              className={`px-4 py-2.5 cursor-pointer flex items-center gap-2 transition-colors border-t border-gray-100 text-orange-600 hover:bg-orange-50 ${creating ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span className="font-medium">
-                {creating ? 'Đang tạo...' : `Tạo mới nguyên liệu: "${query.trim()}"`}
-              </span>
-            </li>
-          )}
         </ul>
       )}
 

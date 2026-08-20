@@ -28,7 +28,7 @@ const AddGroceryItemModal = ({ isOpen, onClose, onSubmit, listId, editingItem = 
         ingredient: { id: editingItem.ingredientId, name: editingItem.ingredient?.name || editingItem.ingredientName },
         quantity: editingItem.totalNeeded || editingItem.quantity || '',
         unit: editingItem.unit || '',
-        aisleId: editingItem.ingredient?.aisleId || ''
+        aisleId: editingItem.ingredient?.aisle?.id || editingItem.ingredient?.aisleId || ''
       });
     } else {
       setForm(emptyForm);

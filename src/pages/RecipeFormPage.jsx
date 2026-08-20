@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { 
+import {
   ArrowLeft, Camera, X, Plus, Trash2, Clock, Zap, Check, Image as ImageIcon, Sparkles, Edit2, Globe, Lock, Tag, Eye, List
 } from 'lucide-react';
 
@@ -17,7 +17,7 @@ const DIFFICULTIES = [
 ];
 
 const EMPTY_INGREDIENT = { ingredientId: null, ingredientName: '', amount: '', unit: 'g' };
-const EMPTY_STEP = { stepNumber: 1, instruction: '' };
+const EMPTY_STEP = { stepNumber: 1, title: '', instruction: '', imageFile: null, imagePreview: null };
 
 const STEPS = [
   { id: 1, title: 'Details', label: 'Thông tin cơ bản' },
@@ -34,13 +34,13 @@ export default function RecipeFormPage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [currentStep, setCurrentStep] = useState(1);
-  
+
   // Data
   const [allTags, setAllTags] = useState([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  
+
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -54,10 +54,11 @@ export default function RecipeFormPage() {
     difficulty: 'EASY',
   });
 
-  const [ingredients, setIngredients] = useState([{ ...EMPTY_INGREDIENT }]);
+  const [ingredients, setIngredients] = useState([]);
+  const [currentIngredient, setCurrentIngredient] = useState({ ...EMPTY_INGREDIENT });
   const [steps, setSteps] = useState([{ ...EMPTY_STEP }]);
   const [selectedTagIds, setSelectedTagIds] = useState([]);
-  
+
   // Tag management states
   const [newTagName, setNewTagName] = useState('');
   const [editingTagId, setEditingTagId] = useState(null);
@@ -83,7 +84,7 @@ export default function RecipeFormPage() {
           cookTime: recipe.cookTime || '',
           difficulty: recipe.difficulty || 'EASY',
         });
-        
+
         if (recipe.imageUrl) setImagePreview(recipe.imageUrl);
 
         if (recipe.ingredients && recipe.ingredients.length > 0) {
@@ -101,7 +102,10 @@ export default function RecipeFormPage() {
           setSteps(
             recipe.steps.map((s, i) => ({
               stepNumber: s.stepNumber || i + 1,
+              title: s.title || '',
               instruction: s.instruction || '',
+              imageFile: null,
+              imagePreview: s.imageUrl || null,
             }))
           );
         }
@@ -152,33 +156,34 @@ export default function RecipeFormPage() {
   };
 
   // --- Ingredients ---
-  const handleIngredientSelect = (index, ingredient) => {
-    const updated = [...ingredients];
-    updated[index] = {
-      ...updated[index],
+  const handleCurrentIngredientSelect = (ingredient) => {
+    setCurrentIngredient(prev => ({
+      ...prev,
       ingredientId: ingredient ? ingredient.id : null,
       ingredientName: ingredient ? ingredient.name : '',
-      unit: ingredient ? ingredient.baseUnit || '' : updated[index].unit,
-    };
-    setIngredients(updated);
+      unit: ingredient ? (ingredient.baseUnit || 'g') : prev.unit,
+    }));
   };
 
-  const handleIngredientChange = (index, field, value) => {
-    const updated = [...ingredients];
-    updated[index] = { ...updated[index], [field]: value };
-    setIngredients(updated);
+  const handleCurrentIngredientChange = (field, value) => {
+    setCurrentIngredient(prev => ({ ...prev, [field]: value }));
   };
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { ...EMPTY_INGREDIENT }]);
+    if (!currentIngredient.ingredientId && (!currentIngredient.ingredientName || !currentIngredient.ingredientName.trim())) {
+      toast.error('Vui lòng chọn hoặc nhập tên nguyên liệu');
+      return;
+    }
+    if (!currentIngredient.amount || parseFloat(currentIngredient.amount) <= 0) {
+      toast.error('Vui lòng nhập số lượng lớn hơn 0');
+      return;
+    }
+    setIngredients([...ingredients, currentIngredient]);
+    setCurrentIngredient({ ...EMPTY_INGREDIENT });
   };
 
   const removeIngredient = (index) => {
     setIngredients(ingredients.filter((_, i) => i !== index));
-    if (ingredients.length === 1) {
-      // If deleting the last one, just clear it
-      setIngredients([{ ...EMPTY_INGREDIENT }]);
-    }
   };
 
   // --- Steps ---
@@ -189,7 +194,7 @@ export default function RecipeFormPage() {
   };
 
   const addStep = () => {
-    setSteps([...steps, { stepNumber: steps.length + 1, instruction: '' }]);
+    setSteps([...steps, { stepNumber: steps.length + 1, title: '', instruction: '', imageFile: null, imagePreview: null }]);
   };
 
   const removeStep = (index) => {
@@ -249,26 +254,14 @@ export default function RecipeFormPage() {
       }
     }
     if (step === 2) {
-      for (let i = 0; i < ingredients.length; i++) {
-        const ing = ingredients[i];
-        if (ing.ingredientId || ing.amount || ing.ingredientName) {
-          if (!ing.ingredientId) {
-            toast.error(`Dòng ${i + 1}: Vui lòng chọn nguyên liệu hợp lệ từ danh sách`);
-            return false;
-          }
-          if (!ing.amount || parseFloat(ing.amount) <= 0) {
-            toast.error(`Dòng ${i + 1}: Vui lòng nhập số lượng`);
-            return false;
-          }
-        }
+      if (currentIngredient.ingredientId || (currentIngredient.ingredientName && currentIngredient.ingredientName.trim())) {
+        toast.error('Bạn đang nhập dở nguyên liệu, vui lòng bấm "Thêm" hoặc xóa tên nguyên liệu đi');
+        return false;
       }
-      // Remove empty rows before proceeding
-      const filled = ingredients.filter(i => i.ingredientId);
-      if (filled.length === 0) {
+      if (ingredients.length === 0) {
         toast.error('Vui lòng thêm ít nhất 1 nguyên liệu');
         return false;
       }
-      setIngredients(filled);
     }
     if (step === 3) {
       for (let i = 0; i < steps.length; i++) {
@@ -311,13 +304,15 @@ export default function RecipeFormPage() {
         cookTime: form.cookTime ? parseInt(form.cookTime) : 0,
         difficulty: form.difficulty || 'EASY',
         tagIds: selectedTagIds,
-        ingredients: ingredients.filter(i => i.ingredientId).map((ing) => ({
-          ingredientId: ing.ingredientId,
+        ingredients: ingredients.filter(i => i.ingredientId || (i.ingredientName && i.ingredientName.trim())).map((ing) => ({
+          ingredientId: ing.ingredientId || null,
+          ingredientName: ing.ingredientName?.trim() || null,
           amount: parseFloat(ing.amount),
           unit: ing.unit.trim(),
         })),
         steps: steps.filter(s => s.instruction.trim()).map((s, i) => ({
           stepNumber: s.stepNumber || i + 1,
+          title: s.title?.trim() || null,
           instruction: s.instruction.trim(),
         })),
       };
@@ -333,7 +328,7 @@ export default function RecipeFormPage() {
         toast.success(finalStatus === 'DRAFT' ? 'Đã lưu bản nháp' : 'Đăng công thức thành công! 🎉');
       }
 
-      // Upload image
+      // Upload recipe cover image
       if (recipeId && imageFile) {
         setUploadingImage(true);
         try {
@@ -342,6 +337,18 @@ export default function RecipeFormPage() {
           toast.warning('Lưu thành công nhưng tải ảnh bìa thất bại.');
         } finally {
           setUploadingImage(false);
+        }
+      }
+
+      // Upload step images
+      if (recipeId) {
+        const stepsWithImages = steps.filter(s => s.imageFile && s.instruction.trim());
+        for (const step of stepsWithImages) {
+          try {
+            await recipeService.uploadStepImage(recipeId, step.stepNumber, step.imageFile);
+          } catch (err) {
+            toast.warning(`Tải ảnh bước ${step.stepNumber} thất bại.`);
+          }
         }
       }
 
@@ -365,7 +372,7 @@ export default function RecipeFormPage() {
 
   return (
     <div className={s.pageContainer}>
-      
+
       {/* HEADER */}
       <div className={s.headerArea}>
         <div className="flex items-center gap-4">
@@ -374,8 +381,8 @@ export default function RecipeFormPage() {
             {isEdit ? 'Chỉnh sửa công thức' : 'Tạo công thức mới'}
           </button>
         </div>
-        <button 
-          onClick={() => handleSave('DRAFT')} 
+        <button
+          onClick={() => handleSave('DRAFT')}
           disabled={loading}
           className={s.saveDraftBtn}
         >
@@ -386,18 +393,18 @@ export default function RecipeFormPage() {
       {/* STEPPER */}
       <div className={s.stepperWrapper}>
         <div className={s.stepperLine}>
-          <div 
-            className={s.stepperProgress} 
+          <div
+            className={s.stepperProgress}
             style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
           />
         </div>
         {STEPS.map((step) => {
           const isActive = currentStep === step.id;
           const isCompleted = currentStep > step.id;
-          
+
           return (
-            <div 
-              key={step.id} 
+            <div
+              key={step.id}
               className={`${s.stepItem} ${isActive ? s.active : ''} ${isCompleted ? s.completed : ''}`}
               onClick={() => {
                 if (isCompleted || isActive) return; // Prevent skipping ahead freely
@@ -418,7 +425,7 @@ export default function RecipeFormPage() {
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className={s.panel}>
             <h2 className={s.panelTitle}>Thông tin cơ bản</h2>
-            
+
             <div className={s.formGroup}>
               <label className={s.formLabel}>Tên công thức *</label>
               <input
@@ -489,7 +496,7 @@ export default function RecipeFormPage() {
 
             <div className={s.formGroup}>
               <label className={s.formLabel}>Ảnh bìa món ăn</label>
-              <div 
+              <div
                 className={s.dragDropZone}
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -500,7 +507,7 @@ export default function RecipeFormPage() {
                   onChange={handleImageFileChange}
                   className="hidden"
                 />
-                
+
                 {imagePreview ? (
                   <div className={s.imagePreviewWrapper}>
                     <img src={imagePreview} alt="Preview" className={s.imagePreview} />
@@ -529,86 +536,75 @@ export default function RecipeFormPage() {
           </div>
         </div>
       )}
-
       {/* STEP 2: INGREDIENTS */}
       {currentStep === 2 && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className={s.panel}>
             <h2 className={s.panelTitle}>Chuẩn bị nguyên liệu</h2>
-            
+
             <div className={s.twoColGrid}>
               {/* Form Add */}
               <div className={s.addIngredientForm}>
                 <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <List size={20} className="text-[#a13923]"/> Thêm nguyên liệu
+                  <List size={20} className="text-[#a13923]" /> Thêm nguyên liệu
                 </h3>
-                
-                {ingredients.map((ing, index) => (
-                  <div key={index} className="mb-6 pb-6 border-b border-gray-200 last:border-0 last:pb-0 last:mb-0">
-                    <div className="mb-3">
-                      <label className="text-xs font-semibold text-gray-500 mb-1 block">Tên nguyên liệu</label>
-                      <IngredientAutocomplete
-                        placeholder="VD: Thịt bò tươi..."
-                        defaultValue={ing.ingredientId ? { id: ing.ingredientId, name: ing.ingredientName } : null}
-                        onSelect={(selected) => handleIngredientSelect(index, selected)}
+
+                <div className="mb-6 pb-6 border-b border-gray-200">
+                  <div className="mb-3">
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Tên nguyên liệu</label>
+                    <IngredientAutocomplete
+                      placeholder="VD: Thịt bò tươi..."
+                      defaultValue={currentIngredient.ingredientId ? { id: currentIngredient.ingredientId, name: currentIngredient.ingredientName } : (currentIngredient.ingredientName ? { name: currentIngredient.ingredientName } : null)}
+                      onSelect={(selected) => handleCurrentIngredientSelect(selected)}
+                    />
+                  </div>
+
+                  <div className={s.ingrRow}>
+                    <div className="flex-1">
+                      <label className="text-xs font-semibold text-gray-500 mb-1 block">Số lượng</label>
+                      <input
+                        type="number"
+                        value={currentIngredient.amount}
+                        onChange={(e) => handleCurrentIngredientChange('amount', e.target.value)}
+                        placeholder="1"
+                        className={s.formInput}
                       />
                     </div>
-                    
-                    <div className={s.ingrRow}>
-                      <div className="flex-1">
-                        <label className="text-xs font-semibold text-gray-500 mb-1 block">Số lượng</label>
-                        <input
-                          type="number"
-                          value={ing.amount}
-                          onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                          placeholder="1"
-                          className={s.formInput}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-xs font-semibold text-gray-500 mb-1 block">Đơn vị</label>
-                        <select
-                          value={ing.unit}
-                          onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                          className={s.formSelect}
-                        >
-                          <optgroup label="Khối lượng">
-                            <option value="g">g (gram)</option>
-                            <option value="kg">kg</option>
-                          </optgroup>
-                          <optgroup label="Thể tích">
-                            <option value="ml">ml</option>
-                            <option value="l">lít</option>
-                          </optgroup>
-                          <optgroup label="Đếm được">
-                            <option value="quả">quả/trái</option>
-                            <option value="củ">củ</option>
-                            <option value="tép">tép</option>
-                            <option value="bó">bó</option>
-                            <option value="con">con</option>
-                            <option value="lát">lát</option>
-                          </optgroup>
-                          <optgroup label="Đong đếm">
-                            <option value="thìa cafe">thìa cafe (tsp)</option>
-                            <option value="thìa canh">thìa canh (tbsp)</option>
-                            <option value="chén">chén/bát</option>
-                          </optgroup>
-                        </select>
-                      </div>
+                    <div className="flex-1">
+                      <label className="text-xs font-semibold text-gray-500 mb-1 block">Đơn vị</label>
+                      <select
+                        value={currentIngredient.unit}
+                        onChange={(e) => handleCurrentIngredientChange('unit', e.target.value)}
+                        className={s.formSelect}
+                      >
+                        <optgroup label="Khối lượng">
+                          <option value="g">g (gram)</option>
+                          <option value="kg">kg</option>
+                        </optgroup>
+                        <optgroup label="Thể tích">
+                          <option value="ml">ml</option>
+                          <option value="l">lít</option>
+                        </optgroup>
+                        <optgroup label="Đếm được">
+                          <option value="quả">quả/trái</option>
+                          <option value="củ">củ</option>
+                          <option value="tép">tép</option>
+                          <option value="bó">bó</option>
+                          <option value="con">con</option>
+                          <option value="lát">lát</option>
+                        </optgroup>
+                        <optgroup label="Đong đếm">
+                          <option value="thìa cafe">thìa cafe (tsp)</option>
+                          <option value="thìa canh">thìa canh (tbsp)</option>
+                          <option value="chén">chén/bát</option>
+                        </optgroup>
+                      </select>
                     </div>
-                    
-                    {ingredients.length > 1 && (
-                      <div className="flex justify-end mt-2">
-                        <button type="button" onClick={() => removeIngredient(index)} className="text-sm text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
-                          <Trash2 size={14}/> Xóa dòng này
-                        </button>
-                      </div>
-                    )}
                   </div>
-                ))}
+                </div>
 
                 <button type="button" onClick={addIngredient} className={s.btnAddIngredient}>
-                  <Plus size={18} /> Thêm nguyên liệu khác
+                  <Plus size={18} /> Thêm vào danh sách
                 </button>
               </div>
 
@@ -616,24 +612,34 @@ export default function RecipeFormPage() {
               <div className={s.ingredientListPanel}>
                 <div className={s.ingredientListHeader}>
                   <h3 className="font-semibold text-gray-800 text-lg">Danh sách đã thêm</h3>
-                  <span className={s.ingredientCount}>{ingredients.filter(i => i.ingredientId).length} nguyên liệu</span>
+                  <span className={s.ingredientCount}>{ingredients.length} nguyên liệu</span>
                 </div>
-                
+
                 <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
-                  {ingredients.filter(i => i.ingredientId).length === 0 ? (
+                  {ingredients.length === 0 ? (
                     <div className="text-center text-gray-400 py-10">
-                      Chưa có nguyên liệu nào.<br/>Hãy thêm ở form bên cạnh.
+                      Chưa có nguyên liệu nào.<br />Hãy điền form bên cạnh rồi ấn Thêm.
                     </div>
                   ) : (
-                    ingredients.filter(i => i.ingredientId).map((ing, i) => (
-                      <div key={i} className={s.ingredientCard}>
-                        <div className={s.ingrCardIcon}>
-                          <span className="font-bold text-lg text-gray-400">#</span>
+                    ingredients.map((ing, i) => (
+                      <div key={i} className={`${s.ingredientCard} flex items-center justify-between`}>
+                        <div className="flex items-center gap-3">
+                          <div className={s.ingrCardIcon}>
+                            <span className="font-bold text-lg text-gray-400">#</span>
+                          </div>
+                          <div className={s.ingrCardInfo}>
+                            <div className={s.ingrCardName}>{ing.ingredientName}</div>
+                            <div className={s.ingrCardAmount}>{ing.amount} {ing.unit}</div>
+                          </div>
                         </div>
-                        <div className={s.ingrCardInfo}>
-                          <div className={s.ingrCardName}>{ing.ingredientName}</div>
-                          <div className={s.ingrCardAmount}>{ing.amount} {ing.unit}</div>
-                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => removeIngredient(i)}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50"
+                          title="Xóa nguyên liệu này"
+                        >
+                          <Trash2 size={16}/>
+                        </button>
                       </div>
                     ))
                   )}
@@ -650,15 +656,23 @@ export default function RecipeFormPage() {
           <div className={s.panel}>
             <h2 className={s.panelTitle}>Các bước nấu ăn</h2>
             <p className="text-gray-500 text-sm mb-6">Chia nhỏ công thức của bạn thành các hướng dẫn dễ theo dõi.</p>
-            
+
             <div className={s.stepList}>
               {steps.map((step, index) => (
                 <div key={index} className={s.stepCard}>
                   <div className={s.stepNumberDrag}>
                     <div className={s.stepNumberBadge}>{step.stepNumber}</div>
                   </div>
-                  
+
                   <div className={s.stepContentArea}>
+                    <input
+                      type="text"
+                      value={step.title || ''}
+                      onChange={(e) => handleStepChange(index, 'title', e.target.value)}
+                      placeholder={`Tiêu đề bước ${step.stepNumber} (VD: Sơ chế nguyên liệu)`}
+                      className={s.formInput}
+                      style={{ marginBottom: '8px', fontWeight: 600 }}
+                    />
                     <textarea
                       value={step.instruction}
                       onChange={(e) => handleStepChange(index, 'instruction', e.target.value)}
@@ -666,16 +680,57 @@ export default function RecipeFormPage() {
                       className={s.formTextarea}
                       style={{ minHeight: '80px' }}
                     />
-                    
-                    {/* Visual only placeholder for Add Photo/Video */}
-                    <button type="button" className={s.btnAddMedia} title="Tính năng đang cập nhật">
-                      <ImageIcon size={14}/> Thêm ảnh/video minh họa
-                    </button>
+
+                    {/* Step image upload */}
+                    {step.imagePreview ? (
+                      <div style={{ position: 'relative', marginTop: '8px' }}>
+                        <img
+                          src={step.imagePreview}
+                          alt={`Bước ${step.stepNumber}`}
+                          style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '12px' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = [...steps];
+                            updated[index] = { ...updated[index], imageFile: null, imagePreview: null };
+                            setSteps(updated);
+                          }}
+                          style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className={s.btnAddMedia} style={{ cursor: 'pointer' }}>
+                        <ImageIcon size={14} /> Thêm ảnh minh họa
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            if (file.size > 5 * 1024 * 1024) {
+                              toast.error('Kích thước ảnh tối đa 5MB');
+                              return;
+                            }
+                            const updated = [...steps];
+                            updated[index] = {
+                              ...updated[index],
+                              imageFile: file,
+                              imagePreview: URL.createObjectURL(file)
+                            };
+                            setSteps(updated);
+                          }}
+                        />
+                      </label>
+                    )}
                   </div>
 
-                  <button 
-                    type="button" 
-                    onClick={() => removeStep(index)} 
+                  <button
+                    type="button"
+                    onClick={() => removeStep(index)}
                     className={`${s.btnRemoveStep} ${steps.length <= 1 ? 'opacity-30 cursor-not-allowed' : 'text-gray-400 hover:text-red-500'}`}
                   >
                     <X size={20} />
@@ -686,7 +741,7 @@ export default function RecipeFormPage() {
 
             <div className={s.btnAddStepRow}>
               <button type="button" onClick={addStep} className={s.btnAddStep}>
-                <div className={s.btnAddStepIcon}><Plus size={24}/></div>
+                <div className={s.btnAddStepIcon}><Plus size={24} /></div>
                 Thêm bước tiếp theo
               </button>
             </div>
@@ -700,7 +755,7 @@ export default function RecipeFormPage() {
           <div className={s.panel}>
             <h2 className={s.panelTitle}>Hoàn tất công thức!</h2>
             <p className="text-gray-500 text-sm mb-8">Thêm một số thông tin phụ để công thức của bạn dễ tìm kiếm hơn.</p>
-            
+
             <div className={s.twoColGrid}>
               <div className="space-y-6">
                 {/* Tags */}
@@ -708,14 +763,14 @@ export default function RecipeFormPage() {
                   <h3 className="text-[17px] font-semibold text-[#3d271d] mb-4 flex items-center gap-2">
                     <Tag className="text-[#a13923]" size={20} /> Thẻ phân loại
                   </h3>
-                  
+
                   <div className="flex gap-2 mb-4">
-                    <input 
-                      type="text" 
-                      value={newTagName} 
-                      onChange={e => setNewTagName(e.target.value)} 
+                    <input
+                      type="text"
+                      value={newTagName}
+                      onChange={e => setNewTagName(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleCreateTag()}
-                      placeholder="Nhập thẻ mới (VD: Bữa sáng, Chay...)" 
+                      placeholder="Nhập thẻ mới (VD: Bữa sáng, Chay...)"
                       className={`${s.formInput} py-2`}
                     />
                     <button type="button" onClick={handleCreateTag} className="px-5 bg-[#a13923] text-white rounded-xl hover:bg-[#8b311e] font-semibold transition-colors">
@@ -728,54 +783,53 @@ export default function RecipeFormPage() {
                       {allTags.map((tag) => {
                         const selected = selectedTagIds.includes(tag.id);
                         const isEditing = editingTagId === tag.id;
-                        
+
                         if (isEditing) {
                           return (
                             <div key={tag.id} className="flex items-center gap-1 bg-white border border-[#a13923] rounded-full px-3 py-1.5 shadow-sm">
-                              <input 
-                                autoFocus 
-                                type="text" 
-                                value={editingTagName} 
-                                onChange={e => setEditingTagName(e.target.value)} 
-                                onKeyDown={e => e.key === 'Enter' && handleUpdateTag(tag.id)} 
-                                className="outline-none text-sm w-24 px-1 bg-transparent text-[#a13923] font-medium" 
+                              <input
+                                autoFocus
+                                type="text"
+                                value={editingTagName}
+                                onChange={e => setEditingTagName(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleUpdateTag(tag.id)}
+                                className="outline-none text-sm w-24 px-1 bg-transparent text-[#a13923] font-medium"
                               />
-                              <button type="button" onClick={() => handleUpdateTag(tag.id)} className="text-[#a13923] hover:text-[#8b311e]"><Check size={16}/></button>
-                              <button type="button" onClick={() => setEditingTagId(null)} className="text-gray-400 hover:text-red-500"><X size={16}/></button>
+                              <button type="button" onClick={() => handleUpdateTag(tag.id)} className="text-[#a13923] hover:text-[#8b311e]"><Check size={16} /></button>
+                              <button type="button" onClick={() => setEditingTagId(null)} className="text-gray-400 hover:text-red-500"><X size={16} /></button>
                             </div>
                           );
                         }
 
                         return (
-                          <div 
+                          <div
                             key={tag.id}
                             type="button"
                             onClick={() => toggleTag(tag.id)}
-                            className={`group flex items-center gap-2 px-4 py-2 rounded-full text-[15px] font-semibold transition-all cursor-pointer ${
-                              selected
+                            className={`group flex items-center gap-2 px-4 py-2 rounded-full text-[15px] font-semibold transition-all cursor-pointer ${selected
                                 ? 'bg-[#a13923] text-white shadow-md'
                                 : 'bg-[#eeebe7] text-[#5c3e33] hover:bg-[#e4ddd6]'
-                            }`}
+                              }`}
                           >
                             <span style={{ fontFamily: 'var(--sr-font-body)' }}>{tag.name}</span>
                             <span className="font-light text-lg leading-none mt-[-2px]">{selected ? '×' : '+'}</span>
-                            
+
                             <div className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-1 pl-2 border-l ${selected ? 'border-white/30' : 'border-[#5c3e33]/20'}`}>
-                              <button 
-                                type="button" 
-                                onClick={(e) => { e.stopPropagation(); setEditingTagId(tag.id); setEditingTagName(tag.name); }} 
-                                className={`hover:scale-110 transition-transform ${selected ? 'text-white/70 hover:text-white' : 'text-[#5c3e33]/60 hover:text-[#5c3e33]'}`} 
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setEditingTagId(tag.id); setEditingTagName(tag.name); }}
+                                className={`hover:scale-110 transition-transform ${selected ? 'text-white/70 hover:text-white' : 'text-[#5c3e33]/60 hover:text-[#5c3e33]'}`}
                                 title="Sửa"
                               >
-                                <Edit2 size={14}/>
+                                <Edit2 size={14} />
                               </button>
-                              <button 
-                                type="button" 
-                                onClick={(e) => handleDeleteTag(tag.id, e)} 
-                                className={`hover:scale-110 transition-transform ${selected ? 'text-white/70 hover:text-[#ffb4ab]' : 'text-[#5c3e33]/60 hover:text-red-600'}`} 
+                              <button
+                                type="button"
+                                onClick={(e) => handleDeleteTag(tag.id, e)}
+                                className={`hover:scale-110 transition-transform ${selected ? 'text-white/70 hover:text-[#ffb4ab]' : 'text-[#5c3e33]/60 hover:text-red-600'}`}
                                 title="Xóa"
                               >
-                                <Trash2 size={14}/>
+                                <Trash2 size={14} />
                               </button>
                             </div>
                           </div>
@@ -793,11 +847,11 @@ export default function RecipeFormPage() {
                   </h3>
                   <div className={s.radioGroup}>
                     <label className={`${s.radioLabel} ${form.status === 'PUBLIC' ? s.selected : ''}`}>
-                      <div className={s.radioIcon}><div className={s.radioIconInner}/></div>
-                      <input 
-                        type="radio" 
-                        name="visibility" 
-                        value="PUBLIC" 
+                      <div className={s.radioIcon}><div className={s.radioIconInner} /></div>
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value="PUBLIC"
                         checked={form.status === 'PUBLIC'}
                         onChange={() => handleFormChange('status', 'PUBLIC')}
                         className="hidden"
@@ -810,11 +864,11 @@ export default function RecipeFormPage() {
                     </label>
 
                     <label className={`${s.radioLabel} ${form.status === 'PRIVATE' ? s.selected : ''}`}>
-                      <div className={s.radioIcon}><div className={s.radioIconInner}/></div>
-                      <input 
-                        type="radio" 
-                        name="visibility" 
-                        value="PRIVATE" 
+                      <div className={s.radioIcon}><div className={s.radioIconInner} /></div>
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value="PRIVATE"
                         checked={form.status === 'PRIVATE'}
                         onChange={() => handleFormChange('status', 'PRIVATE')}
                         className="hidden"
@@ -832,31 +886,31 @@ export default function RecipeFormPage() {
               {/* Summary Card */}
               <div>
                 <div className={s.summaryCard}>
-                  <img 
-                    src={imagePreview || "https://placehold.co/600x400/f6ece5/a13923?text=Smart+Recipe"} 
-                    alt="Preview" 
-                    className={s.summaryImage} 
+                  <img
+                    src={imagePreview || "https://placehold.co/600x400/f6ece5/a13923?text=Smart+Recipe"}
+                    alt="Preview"
+                    className={s.summaryImage}
                   />
                   <div className={s.summaryContent}>
                     <h3 className={s.summaryTitle}>{form.title || 'Công thức chưa có tên'}</h3>
-                    
+
                     <div className="space-y-1">
                       <div className={s.summaryRow}>
                         <span className={s.summaryLabel}>Nguyên liệu</span>
-                        <span className={s.summaryValue}>{ingredients.filter(i=>i.ingredientId).length} mục</span>
+                        <span className={s.summaryValue}>{ingredients.filter(i => i.ingredientId).length} mục</span>
                       </div>
                       <div className={s.summaryRow}>
                         <span className={s.summaryLabel}>Các bước</span>
-                        <span className={s.summaryValue}>{steps.filter(s=>s.instruction.trim()).length} bước</span>
+                        <span className={s.summaryValue}>{steps.filter(s => s.instruction.trim()).length} bước</span>
                       </div>
                       <div className={s.summaryRow}>
                         <span className={s.summaryLabel}>Thời gian</span>
-                        <span className={s.summaryValue}>{(parseInt(form.prepTime||0) + parseInt(form.cookTime||0)) || '--'} phút</span>
+                        <span className={s.summaryValue}>{(parseInt(form.prepTime || 0) + parseInt(form.cookTime || 0)) || '--'} phút</span>
                       </div>
                       <div className={s.summaryRow}>
                         <span className={s.summaryLabel}>Độ khó</span>
                         <span className={s.badgeDifficulty}>
-                          {DIFFICULTIES.find(d=>d.value===form.difficulty)?.label || 'Dễ'}
+                          {DIFFICULTIES.find(d => d.value === form.difficulty)?.label || 'Dễ'}
                         </span>
                       </div>
                     </div>
@@ -877,15 +931,15 @@ export default function RecipeFormPage() {
             </button>
           )}
         </div>
-        
+
         {currentStep < 4 ? (
           <button type="button" onClick={handleNext} className={s.btnNext}>
             Tiếp tục
           </button>
         ) : (
-          <button 
-            type="button" 
-            onClick={() => handleSave()} 
+          <button
+            type="button"
+            onClick={() => handleSave()}
             disabled={loading}
             className={s.btnNext}
           >

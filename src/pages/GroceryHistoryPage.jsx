@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, CalendarDays, ChevronDown, CheckCircle2, RefreshCw, Package, Trash2 } from 'lucide-react';
+import { Search, CalendarDays, ChevronDown, CheckCircle2, RefreshCw, Package, Trash2, ArrowLeft } from 'lucide-react';
 import { groceryService } from '../services/groceryService';
 import HistoryDetailModal from '../components/grocery/HistoryDetailModal';
 import ConfirmModal from '../components/ui/ConfirmModal';
@@ -99,6 +99,15 @@ const GroceryHistoryPage = () => {
           <p className="text-[15px] text-on-surface-variant">Xem lại các danh sách mua sắm và chi tiêu của bạn.</p>
         </div>
         <div className="flex items-center gap-3 relative">
+          {/* Back Button */}
+          <button 
+            onClick={() => navigate('/grocery')}
+            className="group flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-white shadow-md shadow-primary/20 hover:bg-[#B3412B] hover:shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 active:translate-y-0"
+          >
+            <ArrowLeft size={20} className="transition-transform duration-300 group-hover:-translate-x-1" />
+            <span className="text-sm font-bold">Trở về</span>
+          </button>
+          
           {/* Filter Dropdown */}
           <button 
             onClick={() => setShowFilterMenu(!showFilterMenu)}

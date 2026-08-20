@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, Edit2, Save, Share2, ShoppingCart, Plus, Trash2, CheckCircle2, ChevronRight, Wand2, ArrowUpDown, Filter, Clock, Calendar, Package } from 'lucide-react';
 import { groceryService } from '../services/groceryService';
 import ConfirmModal from '../components/ui/ConfirmModal';
@@ -8,13 +9,14 @@ import GroceryItemRow from '../components/grocery/GroceryItemRow';
 import AddGroceryItemModal from '../components/grocery/AddGroceryItemModal';
 import GenerateListModal from '../components/grocery/GenerateListModal';
 import HistoryDetailModal from '../components/grocery/HistoryDetailModal';
-import CompleteConfetti from '../components/grocery/CompleteConfetti';
+import CompleteSuccessModal from '../components/grocery/CompleteSuccessModal';
 import ShoppingModeView from '../components/grocery/ShoppingModeView';
 import styles from '../styles/pages/GroceryPage.module.css';
 
 const GroceryPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [groceryList, setGroceryList] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ const GroceryPage = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [completedLists, setCompletedLists] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [shoppingMode, setShoppingMode] = useState(false);
@@ -198,8 +200,13 @@ const GroceryPage = () => {
 
   const handleComplete = async () => {
     try {
-      const updatedList = await groceryService.completeList(groceryList.id);
-      setShowConfetti(true);
+      const updatedList = await groceryService.completeList(groceryList.id, true);
+      
+      // Cập nhật lại cache của tủ nguyên liệu để dữ liệu mới hiển thị ngay lập tức
+      queryClient.invalidateQueries({ queryKey: ['pantry'] });
+      queryClient.invalidateQueries({ queryKey: ['pantry-summary'] });
+
+      setShowSuccessModal(true);
       setShoppingMode(false);
       // Giữ nguyên list hiện tại làm bản tóm tắt thay vì tải list mới trống
       setGroceryList({ ...groceryList, status: 'COMPLETED', completedAt: new Date().toISOString() });
@@ -284,7 +291,7 @@ const GroceryPage = () => {
   if (shoppingMode && items.length > 0) {
     return (
       <>
-        <CompleteConfetti isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
+        <CompleteSuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
         <ShoppingModeView
           groceryList={groceryList}
           items={items}
@@ -311,7 +318,7 @@ const GroceryPage = () => {
 
   return (
     <div className="md:px-12 max-w-[1280px] mx-auto pb-32 pt-8">
-      <CompleteConfetti isActive={showConfetti} onComplete={() => setShowConfetti(false)} />
+      <CompleteSuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
 
       {error && (
         <div className={styles.errorBar}>
@@ -489,7 +496,7 @@ const GroceryPage = () => {
                   <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-primary/15 rounded-full"></div>
 
                   <div className="space-y-5">
-                    {completedLists.map((list, idx) => (
+                    {completedLists.slice(0, 3).map((list, idx) => (
                       <div
                         key={list.id}
                         onClick={() => handleViewHistory(list)}

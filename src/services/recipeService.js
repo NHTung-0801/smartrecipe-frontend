@@ -88,4 +88,13 @@ export const recipeService = {
     });
     return response.data;
   },
+
+  uploadStepImage: async (recipeId, stepNumber, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post(`/recipes/${recipeId}/steps/${stepNumber}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
 };
