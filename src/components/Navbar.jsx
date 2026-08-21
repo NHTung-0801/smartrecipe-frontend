@@ -1,4 +1,4 @@
-﻿import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 
 export default function Navbar() {
@@ -79,6 +79,16 @@ export default function Navbar() {
             🛒 <span className="hidden sm:inline">Đi chợ</span>
           </Link>
           <Link
+            to="/journal"
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isActive('/journal')
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            📔 <span className="hidden sm:inline">Nhật ký</span>
+          </Link>
+          <Link
             to={`/users/${user?.id}`}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               isActive('/users/')
@@ -86,7 +96,7 @@ export default function Navbar() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            ðŸ‘¤ <span className="hidden sm:inline">Trang cÃ¡ nhÃ¢n</span>
+            👤 <span className="hidden sm:inline">Trang cá nhân</span>
           </Link>
           <Link
             to="/profile"
