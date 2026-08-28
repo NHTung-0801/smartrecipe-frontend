@@ -58,17 +58,17 @@ export default function AddPantryItemModal({ isOpen, item, onClose, onSubmit, ai
       let finalUnit = form.unit || form.ingredient?.baseUnit || 'g';
 
       if (!finalIngredientId && ingredientName?.trim()) {
-         const newIng = {
+         // Nguyên liệu chưa có trong hệ thống: chỉ gửi tên + kệ hàng.
+         // Backend đặt baseUnit = 'g' và dinh dưỡng = 0, nên phải dùng lại đơn vị
+         // do backend trả về — giữ đơn vị user chọn (vd "quả") sẽ làm bước quy đổi
+         // sang đơn vị cơ bản thất bại vì chưa có tỉ lệ chuyển đổi.
+         const response = await ingredientService.createQuick({
            name: ingredientName.trim(),
-           baseUnit: finalUnit,
-           caloriesPer100g: 0,
-           protein: 0,
-           fat: 0,
-           carbs: 0,
            aisleId: form.aisleId ? Number(form.aisleId) : null
-         };
-         const response = await ingredientService.create(newIng);
-         finalIngredientId = response.data?.id || response.id; 
+         });
+         const created = response.data || response;
+         finalIngredientId = created.id;
+         finalUnit = created.baseUnit || 'g';
       }
 
       await onSubmit({ 

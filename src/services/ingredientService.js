@@ -21,6 +21,13 @@ export const ingredientService = {
     const response = await api.post('/ingredients', ingredientData);
     return response.data;
   },
+  // Thêm nhanh cho user thường: chỉ gửi tên + kệ hàng.
+  // Backend tự đặt baseUnit = 'g' và dinh dưỡng = 0 (chờ admin kiểm duyệt).
+  // POST /ingredients (đầy đủ dinh dưỡng) giờ chỉ ADMIN gọi được.
+  createQuick: async ({ name, aisleId }) => {
+    const response = await api.post('/ingredients/quick', { name, aisleId });
+    return response.data;
+  },
   updateAisle: async (id, aisleId) => {
     const response = await api.patch(`/ingredients/${id}/aisle`, { aisleId });
     return response.data;

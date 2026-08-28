@@ -64,18 +64,15 @@ const AddGroceryItemModal = ({ isOpen, onClose, onSubmit, listId, editingItem = 
       
       // Auto-create ingredient if not exists
       if (!finalIngredientId && ingredientName?.trim()) {
-         const newIng = {
+         // Chỉ gửi tên + kệ hàng; backend đặt baseUnit = 'g' và dinh dưỡng = 0.
+         // Dùng lại baseUnit backend trả về để tránh đơn vị không quy đổi được.
+         const response = await ingredientService.createQuick({
            name: ingredientName.trim(),
-           baseUnit: finalUnit,
-           caloriesPer100g: 0,
-           protein: 0,
-           fat: 0,
-           carbs: 0,
            aisleId: form.aisleId ? Number(form.aisleId) : null
-         };
-         const response = await ingredientService.create(newIng);
-         // extract ID from ApiResponse wrapper if needed
-         finalIngredientId = response.data?.id || response.id; 
+         });
+         const created = response.data || response;
+         finalIngredientId = created.id;
+         finalUnit = created.baseUnit || 'g';
       }
       
       const data = {
