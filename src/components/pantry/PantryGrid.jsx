@@ -1,95 +1,82 @@
-import { LayoutGrid } from 'lucide-react';
 import PantryItemCard from './PantryItemCard';
 import s from '../../styles/pages/PantryPage.module.css';
 
-const aisleIcons = {
-  'thịt': '🍖', 'hải sản': '🦐', 'thịt & hải sản': '🥩',
-  'rau': '🥬', 'trái cây': '🍎', 'rau củ': '🥕', 'rau củ & trái cây': '🥬',
-  'gia vị': '🫙', 'đồ khô': '🌾', 'gia vị & đồ khô': '🫙',
-  'sữa': '🥛', 'trứng': '🥚', 'sữa & trứng': '🥛',
-  'đồ uống': '🥤', 'bánh': '🍞', 'ngũ cốc': '🌾',
-  'dầu': '🫒', 'nước chấm': '🫙', 'đông lạnh': '🧊',
+/**
+ * Tách tên kệ thành các từ rời để so khớp theo TỪ, không theo chuỗi con.
+ * Cùng cách làm với components/grocery/AisleGroupHeader.jsx: \b của JS chỉ hiểu
+ * ASCII nên không dùng được với tiếng Việt có dấu, phải dựa vào \p{L} + cờ u.
+ *
+ * Không tra cứu bằng key nguyên chuỗi (kiểu icons['Dầu mỡ & Chất béo']) vì tên
+ * kệ trong DB có thể đổi qua API, chỉ cần thêm một chữ là mất icon.
+ */
+const words = (text) => text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+const hasWord = (list, ...targets) => targets.some((t) => list.includes(t));
+
+const hasPhrase = (text, ...phrases) => phrases.some((p) => text.toLowerCase().includes(p));
+
+/**
+ * Thứ tự luật có ý nghĩa: luật hẹp phải đứng trước luật rộng.
+ * 'Các loại Hạt' phải xét trước luật hải sản, vì chuỗi con 'cá' nằm trong 'Các'.
+ */
+const getAisleIcon = (name) => {
+  if (!name) return '📦';
+  const w = words(name);
+
+  if (hasPhrase(name, 'các loại hạt') || hasWord(w, 'hạt')) return '🥜';
+  if (hasWord(w, 'dầu', 'mỡ') || hasPhrase(name, 'chất béo')) return '🫒';
+  if (hasPhrase(name, 'trái cây') || hasWord(w, 'quả')) return '🍎';
+  if (hasPhrase(name, 'hải sản') || hasWord(w, 'cá', 'tôm', 'cua')) return '🦐';
+  if (hasWord(w, 'thịt', 'bò', 'gà', 'heo') || hasPhrase(name, 'gia cầm')) return '🥩';
+  if (hasWord(w, 'rau', 'củ')) return '🥬';
+  // 'gia vị' xét trước 'khô' vì luật gia vị hẹp hơn: tên gộp kiểu
+  // 'Gia vị & Đồ khô' nên ra hũ gia vị, không phải bó lúa.
+  if (hasPhrase(name, 'gia vị', 'nước chấm')) return '🫙';
+  if (hasWord(w, 'khô', 'gạo', 'mì') || hasPhrase(name, 'ngũ cốc')) return '🌾';
+  if (hasWord(w, 'sữa', 'trứng', 'bơ')) return '🥛';
+  if (hasPhrase(name, 'đông lạnh')) return '🧊';
+  if (hasWord(w, 'uống')) return '🥤';
+  if (hasWord(w, 'bánh', 'kẹo')) return '🍞';
+
+  return '📦';
 };
 
-const FIXED_CATEGORIES = [
-  { name: 'Thịt & Hải sản', icon: '🥩' },
-  { name: 'Rau củ & Trái cây', icon: '🥬' },
-  { name: 'Gia vị & Đồ khô', icon: '🫙' },
-  { name: 'Sữa & Trứng', icon: '🥚' }
+/**
+ * Thứ tự hiển thị theo lối đi siêu thị (đồ tươi -> đồ khô -> gia vị).
+ * Kệ không có trong danh sách (admin tự thêm, hoặc 'Chưa phân loại' mà
+ * PantryServiceImpl gán cho nguyên liệu thiếu aisle) bị đẩy xuống cuối.
+ */
+const AISLE_ORDER = [
+  'Rau củ',
+  'Trái cây',
+  'Thịt & Gia cầm',
+  'Hải sản',
+  'Sữa & Trứng',
+  'Đồ khô & Gạo',
+  'Các loại Hạt',
+  'Dầu mỡ & Chất béo',
+  'Gia vị & Nước chấm',
 ];
 
+const orderOf = (name) => {
+  const i = AISLE_ORDER.indexOf(name);
+  return i === -1 ? AISLE_ORDER.length : i;
+};
+
 export default function PantryGrid({ groups = {}, onViewDetail }) {
+  // Backend chỉ trả về kệ đang có nguyên liệu; vẫn lọc phòng mảng rỗng.
+  const sections = Object.entries(groups)
+    .filter(([, items]) => items?.length > 0)
+    .sort(([a], [b]) => orderOf(a) - orderOf(b) || a.localeCompare(b, 'vi'));
+
   return (
     <div className={s.pantryGroups}>
-      {/* Hai danh mục đầu tiên: Hiển thị 100% width */}
-      {FIXED_CATEGORIES.slice(0, 2).map((category) => {
-        const items = groups[category.name] || [];
-        return (
-          <section className={s.aisleSection} key={category.name}>
-            <header className={s.aisleHeader}>
-              <div>
-                <span><span className={s.aisleIcon}>{category.icon}</span></span>
-                <h2>{category.name}</h2>
-              </div>
-              <span className={s.itemCount}>{items.length} nguyên liệu</span>
-            </header>
-            
-            {items.length > 0 ? (
-              <div className={s.itemGrid}>
-                {items.map((item, index) => (
-                  <PantryItemCard key={item.id} item={item} index={index} onViewDetail={onViewDetail} />
-                ))}
-              </div>
-            ) : (
-              <div className={s.emptyCategoryState}>
-                <p>Chưa có nguyên liệu</p>
-              </div>
-            )}
-          </section>
-        );
-      })}
-
-      {/* Hai danh mục cuối: Hiển thị 50% width, side-by-side */}
-      <div className={s.bottomRow}>
-        {FIXED_CATEGORIES.slice(2, 4).map((category) => {
-          const items = groups[category.name] || [];
-          // Phân biệt class cho lưới nhỏ và danh sách
-          const gridClass = category.name === 'Gia vị & Đồ khô' ? s.spiceGrid : s.dairyGrid;
-          
-          return (
-            <section className={s.aisleSection} key={category.name}>
-              <header className={s.aisleHeader}>
-                <div>
-                  <span><span className={s.aisleIcon}>{category.icon}</span></span>
-                  <h2>{category.name}</h2>
-                </div>
-                <span className={s.itemCount}>{items.length} nguyên liệu</span>
-              </header>
-              {items.length > 0 ? (
-                <div className={gridClass}>
-                  {items.map((item, index) => (
-                    <PantryItemCard key={item.id} item={item} index={index} onViewDetail={onViewDetail} variant={category.name === 'Sữa & Trứng' ? 'tile' : 'list'} />
-                  ))}
-                </div>
-              ) : (
-                <div className={s.emptyCategoryState}>
-                  <p>Chưa có nguyên liệu</p>
-                </div>
-              )}
-            </section>
-          );
-        })}
-      </div>
-
-      {/* Render any unknown/uncategorized items just in case */}
-      {Object.entries(groups)
-        .filter(([aisle, items]) => items?.length > 0 && !FIXED_CATEGORIES.find(c => c.name === aisle))
-        .map(([aisle, items]) => (
+      {sections.map(([aisle, items]) => (
         <section className={s.aisleSection} key={aisle}>
           <header className={s.aisleHeader}>
             <div>
-              <span><span className={s.aisleIcon}>📦</span></span>
-              <h2>{aisle || 'Khác'}</h2>
+              <span><span className={s.aisleIcon}>{getAisleIcon(aisle)}</span></span>
+              <h2>{aisle}</h2>
             </div>
             <span className={s.itemCount}>{items.length} nguyên liệu</span>
           </header>
