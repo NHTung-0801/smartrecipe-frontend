@@ -51,5 +51,10 @@ export const userService = {
   getFollowing: async (id, page = 0, size = 10) => {
     const response = await api.get(`/users/${id}/following`, { params: { page, size } });
     return response.data;
-  }
+  },
+
+  deleteAccount: async (password) => {
+    const response = await api.delete('/users/me', { params: { password } });
+    return response.data;
+  },
 };
