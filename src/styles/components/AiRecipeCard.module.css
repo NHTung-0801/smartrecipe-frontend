@@ -1,0 +1,230 @@
+﻿.card {
+  background-color: var(--sr-surface);
+  border: 1px solid var(--sr-border);
+  border-radius: var(--sr-radius-lg);
+  padding: 1.5rem;
+  margin-top: 0.5rem;
+  margin-left: 3.5rem; /* Indent to align with chat text, accounting for 40px avatar + 16px gap */
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--sr-radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badgeZeroWaste {
+  background-color: var(--sr-primary);
+  color: white;
+}
+
+.badgeAi {
+  background-color: var(--sr-surface-hover);
+  color: var(--sr-text-light);
+  border: 1px solid var(--sr-border);
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  color: var(--sr-text);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  color: var(--sr-text-light);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.meta {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--sr-text-light);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  color: var(--sr-text);
+  margin-bottom: 1rem;
+}
+
+.ingredientList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ingredientItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--sr-border);
+  color: var(--sr-text);
+  font-size: 0.95rem;
+}
+
+.ingredientItem:last-child {
+  border-bottom: none;
+}
+
+.checkIcon {
+  color: var(--sr-primary);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.stepList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stepItem {
+  display: flex;
+  gap: 1rem;
+}
+
+.stepNumber {
+  background-color: var(--sr-surface-hover);
+  color: var(--sr-primary);
+  font-weight: 700;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.stepInstruction {
+  color: var(--sr-text);
+  line-height: 1.6;
+}
+
+.footer {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--sr-border);
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.saveBtn {
+  background-color: var(--sr-primary);
+  color: white;
+  border: none;
+  border-radius: 100px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background-color: var(--sr-primary-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background-color: transparent;
+  color: var(--sr-text-light);
+  border: 1px solid var(--sr-border);
+  border-radius: 100px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background-color: var(--sr-surface-hover);
+  color: var(--sr-text);
+}
+
+.cancelBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.errorMsg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--sr-danger, #ef4444);
+  font-size: 0.9rem;
+  background-color: #fef2f2;
+  padding: 0.5rem 1rem;
+  border-radius: var(--sr-radius-sm);
+  margin-bottom: 0.5rem;
+  width: 100%;
+  justify-content: center;
+}
