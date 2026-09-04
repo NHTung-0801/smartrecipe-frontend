@@ -5,12 +5,14 @@ import useAuthStore from '../../store/useAuthStore';
 import s from '../../styles/layout/TopHeader.module.css';
 
 const getPageTitle = (pathname) => {
-  if (pathname === '/') return 'Dashboard';
+  if (pathname === '/') return 'Khám phá';
   if (pathname.startsWith('/recipes')) return 'Công thức của tôi';
   if (pathname.startsWith('/pantry') || pathname.startsWith('/inventory')) return 'Tủ nguyên liệu';
-  if (pathname.startsWith('/list')) return 'Danh sách mua sắm';
+  if (pathname.startsWith('/grocery') || pathname.startsWith('/list')) return 'Đi chợ';
+  if (pathname.startsWith('/journal')) return 'Nhật ký';
   if (pathname.startsWith('/profile')) return 'Cài đặt tài khoản';
   if (pathname.startsWith('/users')) return 'Hồ sơ người dùng';
+  if (pathname.startsWith('/ai-suggestion')) return 'Trợ lý AI';
   return 'Smart Recipe';
 };
 

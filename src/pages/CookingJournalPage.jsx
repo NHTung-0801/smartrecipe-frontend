@@ -105,8 +105,8 @@ export default function CookingJournalPage() {
       {/* Header */}
       <FadeIn>
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-[#a13923] mb-3">Hành Trình Ẩm Thực</h1>
-          <p className="text-gray-600">Hành trình lưu giữ những hương vị và kỷ niệm ẩm thực của riêng bạn.</p>
+          <h1 className="text-4xl font-extrabold mb-3 bg-gradient-to-r from-[#a13923] to-[#f59e0b] bg-clip-text text-transparent tracking-tight">Hành Trình Ẩm Thực</h1>
+          <p className="text-gray-700 font-semibold text-lg">Hành trình lưu giữ những hương vị và kỷ niệm ẩm thực của riêng bạn.</p>
         </div>
       </FadeIn>
 

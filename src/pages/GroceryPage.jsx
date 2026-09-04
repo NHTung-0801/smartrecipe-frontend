@@ -340,11 +340,11 @@ const GroceryPage = () => {
           </div>
           <div className="relative z-10 w-full flex justify-between items-end">
             <div className="flex-1 max-w-xl">
-              <h3 className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                Trang chủ đi chợ
+              <h3 className="text-4xl md:text-5xl font-extrabold mb-3 bg-gradient-to-r from-[#a13923] to-[#f59e0b] bg-clip-text text-transparent tracking-tight">
+                Tận hưởng khoảnh khắc mua sắm
               </h3>
               
-              <p className="text-on-surface-variant text-sm md:text-base max-w-md mt-2">
+              <p className="text-gray-700 font-semibold text-lg max-w-md mt-2">
                 Kiểm tra nguyên liệu và mua sắm chuẩn bị cho các bữa ăn ngon miệng.
               </p>
             </div>
