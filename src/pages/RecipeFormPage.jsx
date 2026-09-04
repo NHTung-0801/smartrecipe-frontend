@@ -252,6 +252,9 @@ export default function RecipeFormPage() {
         toast.error('Vui lòng nhập tên công thức');
         return false;
       }
+      if (!form.baseServings || parseInt(form.baseServings) < 1) {
+        handleFormChange('baseServings', 4);
+      }
     }
     if (step === 2) {
       if (currentIngredient.ingredientId || (currentIngredient.ingredientName && currentIngredient.ingredientName.trim())) {
@@ -297,7 +300,7 @@ export default function RecipeFormPage() {
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
-        baseServings: parseInt(form.baseServings) || 1,
+        baseServings: Math.max(1, parseInt(form.baseServings) || 4),
         status: finalStatus,
         imageUrl: form.imageUrl.trim(),
         prepTime: form.prepTime ? parseInt(form.prepTime) : 0,
@@ -325,7 +328,14 @@ export default function RecipeFormPage() {
       } else {
         const created = await recipeService.create(payload);
         recipeId = created.id;
-        toast.success(finalStatus === 'DRAFT' ? 'Đã lưu bản nháp' : 'Đăng công thức thành công! 🎉');
+        const isPending = finalStatus === 'PENDING_REVIEW';
+        toast.success(
+          finalStatus === 'DRAFT'
+            ? 'Đã lưu bản nháp'
+            : isPending
+              ? '📤 Bài đăng đã được gửi! Admin sẽ xem xét và phê duyệt trong thời gian sớm nhất.'
+              : 'Đăng công thức thành công! 🎉'
+        );
       }
 
       // Upload recipe cover image
@@ -471,8 +481,13 @@ export default function RecipeFormPage() {
                 <div className="relative">
                   <input
                     type="number"
+                    min={1}
                     value={form.baseServings}
                     onChange={(e) => handleFormChange('baseServings', e.target.value)}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (!val || val < 1) handleFormChange('baseServings', 4);
+                    }}
                     placeholder="4"
                     className={s.formInput}
                   />
