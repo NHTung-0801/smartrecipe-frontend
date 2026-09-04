@@ -124,8 +124,8 @@ export default function PantryPage() {
     <div className={s.page}>
       <header className={s.pageHeader}>
         <div>
-          <h1>Sẵn sàng nấu nướng chưa, Chef?</h1>
-          <p>Theo dõi độ tươi, số lượng và tận dụng mọi nguyên liệu tốt hơn.</p>
+          <h1 className={s.gradientTitle}>Sẵn sàng nấu nướng chưa, Chef?</h1>
+          <p className={s.boldSubtitle}>Theo dõi độ tươi, số lượng và tận dụng mọi nguyên liệu tốt hơn.</p>
         </div>
         <div className={s.headerActions}>
           <button type="button" className={s.refreshButton} onClick={refresh} aria-label="Làm mới" title="Làm mới dữ liệu">
