@@ -17,6 +17,14 @@ import GroceryPage from './pages/GroceryPage';
 import GroceryHistoryPage from './pages/GroceryHistoryPage';
 import CookingJournalPage from './pages/CookingJournalPage';
 import JournalDetailPage from './pages/JournalDetailPage';
+import AiSuggestionPage from './pages/AiSuggestionPage';
+import AdminGuard from './components/admin/AdminGuard';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminIngredients from './pages/admin/AdminIngredients';
+import AdminRecipes from './pages/admin/AdminRecipes';
+import AdminPlaceholder from './pages/admin/AdminPlaceholder';
 import useAuthStore from './store/useAuthStore';
 
 const queryClient = new QueryClient({
@@ -157,6 +165,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/ai-suggestion"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <AiSuggestionPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
           <Route path="/inventory" element={<Navigate to="/pantry" replace />} />
           <Route
             path="/recipes/:id/edit"
@@ -168,6 +186,58 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* ── Admin routes ── */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminGuard>
+                <AdminLayout><AdminDashboard /></AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/ingredients"
+            element={
+              <AdminGuard>
+                <AdminLayout><AdminIngredients /></AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/recipes"
+            element={
+              <AdminGuard>
+                <AdminLayout><AdminRecipes /></AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminGuard>
+                <AdminLayout><AdminPlaceholder title="Quản lý Người dùng" /></AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/masterdata"
+            element={
+              <AdminGuard>
+                <AdminLayout><AdminPlaceholder title="Master Data" /></AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <AdminGuard>
+                <AdminLayout><AdminPlaceholder title="Cài đặt Hệ thống" /></AdminLayout>
+              </AdminGuard>
+            }
+          />
+          <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />
       </Router>
