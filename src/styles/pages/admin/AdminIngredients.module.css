@@ -1,0 +1,503 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.header { }
+
+.title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #a13923 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ─── Tabs ───────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #f0e6e0;
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 10px 10px 0 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+}
+
+.tab:hover { color: #a13923; background: #fff8f4; }
+
+.tabActive {
+  color: #a13923;
+  border-bottom-color: #a13923;
+  background: #fff8f4;
+}
+
+/* ─── Content wrapper ────────────────────────── */
+.content {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #f0e6e0;
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+  min-height: 300px;
+}
+
+/* ─── States ─────────────────────────────────── */
+.stateBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.stateBox button {
+  background: none;
+  border: none;
+  color: #a13923;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.emptyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: #10b981;
+}
+
+.emptyBox h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.emptyBox p {
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ─── Table ──────────────────────────────────── */
+.tableInfo {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid #f0e6e0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.table thead tr {
+  background: linear-gradient(135deg, #fff8f4 0%, #fff 100%);
+  border-bottom: 2px solid #f0e6e0;
+}
+
+.table th {
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  font-weight: 700;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.85rem 1.1rem;
+  color: #374151;
+  border-bottom: 1px solid #f9f3f0;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: #fffbf9;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rowPending {
+  background: #fffbeb !important;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.rowIcon {
+  color: #a13923;
+  flex-shrink: 0;
+}
+
+.idCell {
+  color: #9ca3af;
+  font-size: 0.8rem;
+}
+
+.numCol {
+  text-align: right;
+}
+
+.na {
+  color: #d1d5db;
+}
+
+/* ─── Actions ────────────────────────────────── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reviewBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reviewBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16,185,129,0.3);
+}
+
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1.5px solid #fecaca;
+  border-radius: 8px;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deleteBtn:hover {
+  background: #fef2f2;
+}
+
+/* ─── Pagination ─────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.pageBtn {
+  padding: 0.55rem 1.25rem;
+  border: 1.5px solid #e5c8be;
+  border-radius: 10px;
+  background: white;
+  color: #a13923;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageBtn:not(:disabled):hover {
+  background: #fff8f4;
+  border-color: #a13923;
+}
+
+.pageInfo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ─── Search ─────────────────────────────────── */
+.searchBar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.searchWrap {
+  position: relative;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a13923;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.8rem;
+  border: 1.5px solid #e5c8be;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  outline: none;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: #a13923;
+  box-shadow: 0 0 0 3px rgba(161, 57, 35, 0.1);
+}
+
+.searchBtn {
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #a13923, #c2410c);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.searchBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(161, 57, 35, 0.3);
+}
+
+/* ─── Modal ──────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.75rem 1rem;
+  border-bottom: 1px solid #f0e6e0;
+}
+
+.modalHeader h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+}
+
+.modalClose:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modalBody {
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ingredientTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff8f4;
+  border: 1.5px solid #e5c8be;
+  border-radius: 100px;
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #a13923;
+}
+
+.tagUnit {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.formLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.formInput {
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e5c8be;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.formInput:focus {
+  border-color: #a13923;
+  box-shadow: 0 0 0 3px rgba(161, 57, 35, 0.08);
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.75rem 1.5rem;
+  border-top: 1px solid #f0e6e0;
+}
+
+.cancelBtn {
+  padding: 0.7rem 1.5rem;
+  border: 1.5px solid #e5c8be;
+  border-radius: 10px;
+  background: white;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background: #f9fafb;
+}
+
+.saveBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+}
+
+.saveBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ─── Spin ───────────────────────────────────── */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

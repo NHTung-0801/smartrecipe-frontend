@@ -1,0 +1,213 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #a13923 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border: 1.5px solid #e5c8be;
+  border-radius: 10px;
+  background: white;
+  color: #a13923;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.refreshBtn:hover {
+  background: #fff0eb;
+  border-color: #a13923;
+}
+
+/* ─── Section ───────────────────────────────── */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 1.25rem;
+}
+
+/* ─── Stat Cards ────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  border: 1px solid #f0e6e0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+  transition: all 0.25s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+}
+
+.statAlert {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);
+}
+
+.statIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.statIcon.primary { background: linear-gradient(135deg, #a13923, #c2410c); }
+.statIcon.blue    { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.statIcon.green   { background: linear-gradient(135deg, #10b981, #059669); }
+.statIcon.orange  { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+.statContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.statValue {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.statLabel {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.statSub {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-top: 0.2rem;
+}
+
+/* ─── Quick Links ───────────────────────────── */
+.quickLinks {}
+
+.quickGrid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.quickCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.1rem 1.75rem;
+  background: white;
+  border: 1.5px solid #f0e6e0;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #3d1208;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.quickCard:hover {
+  border-color: #a13923;
+  color: #a13923;
+  background: #fff8f4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(161, 57, 35, 0.08);
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+/* ─── State ─────────────────────────────────── */
+.loading, .error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.error button {
+  background: none;
+  border: none;
+  color: #a13923;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
