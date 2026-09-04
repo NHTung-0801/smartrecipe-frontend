@@ -212,9 +212,9 @@ export default function MyRecipesPage() {
       </div>
 
       {/* Floating AI Button */}
-      <button className={s.aiFloatBtn} onClick={() => toast.info('Tính năng Gợi ý thực đơn AI đang được phát triển!')}>
+      <Link to="/ai-suggestion" className={s.aiFloatBtn}>
         <Sparkles size={20} /> Gợi ý thực đơn AI
-      </button>
+      </Link>
 
       {/* Delete Confirmation Modal */}
       {recipeToDelete && (
