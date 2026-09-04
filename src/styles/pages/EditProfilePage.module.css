@@ -424,6 +424,7 @@
 
 .optionIcon1 { background-color: rgba(204, 198, 179, 0.3); color: var(--sr-tertiary); }
 .optionIcon2 { background-color: rgba(255, 218, 214, 0.4); color: var(--sr-error); }
+.optionIconLogout { background-color: rgba(251, 191, 36, 0.15); color: #d97706; }
 
 .optionTitle {
   font-family: var(--sr-font-body);
@@ -433,6 +434,7 @@
 }
 .optionTitle1 { color: var(--sr-on-surface); }
 .optionTitle2 { color: var(--sr-error); }
+.optionTitleLogout { color: #d97706; }
 
 .optionDesc {
   font-size: 12px;

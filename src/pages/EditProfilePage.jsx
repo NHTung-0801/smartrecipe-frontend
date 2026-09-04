@@ -2,11 +2,12 @@ import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Camera, User, Lock, Save, Loader2, ArrowLeft, Share2, Utensils, Heart, Mail, BookText, Globe, MapPin, Shield, Trash2, ChevronRight, BookOpen, Eye, EyeOff } from 'lucide-react';
+import { Camera, User, Lock, Save, Loader2, ArrowLeft, Share2, Utensils, Heart, Mail, BookText, Globe, MapPin, Shield, Trash2, ChevronRight, BookOpen, Eye, EyeOff, LogOut } from 'lucide-react';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
 import { userService } from '../services/userService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 import s from '../styles/pages/EditProfilePage.module.css';
 import fx from '../styles/effects.module.css';
@@ -33,11 +34,50 @@ const EditProfilePage = () => {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
 
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
+  const logout = useAuthStore((state) => state.logout);
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    queryClient.clear();
+    navigate('/login', { replace: true });
+  };
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: () => userService.deleteAccount(deletePassword),
+    onSuccess: () => {
+      toast.success('Tài khoản đã được xóa thành công.');
+      logout();
+      queryClient.clear();
+      navigate('/login', { replace: true });
+    },
+    onError: (error) => {
+      const msg = error?.response?.data?.message || 'Xóa tài khoản thất bại.';
+      toast.error(msg);
+    },
+  });
+
+  const handleOpenDeleteModal = () => {
+    setDeletePassword('');
+    setShowDeletePassword(false);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteAccount = () => {
+    if (!deletePassword.trim()) {
+      toast.error('Vui lòng nhập mật khẩu để xác nhận.');
+      return;
+    }
+    deleteAccountMutation.mutate();
+  };
 
   // Password Form
   const { register: registerPassword, handleSubmit: handleSubmitPassword, reset: resetPassword, formState: { errors: passwordErrors } } = useForm({
@@ -311,7 +351,7 @@ const EditProfilePage = () => {
             <ChevronRight className={s.chevron} size={20} />
           </div>
 
-          <div className={s.optionItem}>
+          <div className={s.optionItem} onClick={handleOpenDeleteModal} style={{ cursor: 'pointer' }}>
             <div className={s.optionContent}>
               <div className={`${s.optionIcon} ${s.optionIcon2}`}>
                 <Trash2 size={24} />
@@ -319,6 +359,19 @@ const EditProfilePage = () => {
               <div>
                 <p className={`${s.optionTitle} ${s.optionTitle2}`}>Xóa tài khoản</p>
                 <p className={s.optionDesc}>Hành động này không thể hoàn tác</p>
+              </div>
+            </div>
+            <ChevronRight className={s.chevron} size={20} />
+          </div>
+
+          <div className={s.optionItem} onClick={handleLogout} style={{ cursor: 'pointer' }}>
+            <div className={s.optionContent}>
+              <div className={`${s.optionIcon} ${s.optionIconLogout}`}>
+                <LogOut size={24} />
+              </div>
+              <div>
+                <p className={`${s.optionTitle} ${s.optionTitleLogout}`}>Đăng xuất</p>
+                <p className={s.optionDesc}>Thoát khỏi tài khoản này</p>
               </div>
             </div>
             <ChevronRight className={s.chevron} size={20} />
@@ -372,6 +425,70 @@ const EditProfilePage = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-[sr-fadeIn_0.3s_ease-out_forwards]">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-[420px] shadow-2xl relative animate-[sr-slideUpFade_0.4s_ease-out_forwards]">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <Trash2 size={22} className="text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Xóa tài khoản</h3>
+            </div>
+
+            {/* Warning */}
+            <p className="text-sm text-gray-500 mb-1 leading-relaxed">
+              Hành động này <strong className="text-red-600">không thể hoàn tác</strong>. Toàn bộ dữ liệu bao gồm công thức, nhật ký và tủ nguyên liệu sẽ bị xóa vĩnh viễn.
+            </p>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              Nhập mật khẩu của bạn để xác nhận:
+            </p>
+
+            {/* Password input */}
+            <div className={s.fieldGroup}>
+              <div className={s.inputWrapper}>
+                <Lock className={s.inputIcon} size={18} />
+                <input
+                  type={showDeletePassword ? 'text' : 'password'}
+                  placeholder="Mật khẩu xác nhận"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleDeleteAccount()}
+                  className={s.inputField}
+                  autoFocus
+                />
+                <button type="button" className={s.eyeButton} onClick={() => setShowDeletePassword(!showDeletePassword)}>
+                  {showDeletePassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={deleteAccountMutation.isPending}
+                className="flex-1 py-3 bg-gray-100 rounded-xl font-semibold text-gray-700 hover:bg-gray-200 transition-all"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleteAccountMutation.isPending}
+                className="flex-1 py-3 bg-red-600 rounded-xl font-semibold text-white hover:bg-red-700 active:scale-95 transition-all disabled:opacity-60"
+              >
+                {deleteAccountMutation.isPending
+                  ? <Loader2 size={20} className={`${fx.spinner} mx-auto`} />
+                  : 'Xóa tài khoản'}
+              </button>
+            </div>
           </div>
         </div>
       )}
