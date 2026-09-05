@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle, ArrowRight, PackageOpen, Recycle,
-  RefreshCw, Sparkles, WandSparkles, X, Bot, Camera,
-  Send, Aperture
+  RefreshCw, Sparkles, WandSparkles, X, Bot,
+  Send, Aperture, History, Leaf, PenLine, BookOpen,
+  CheckCircle2, Clock
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { aiService } from '../services/aiService';
 import { pantryService } from '../services/pantryService';
 import AiRecipeCard from '../components/ai/AiRecipeCard';
@@ -12,6 +14,102 @@ import s from '../styles/pages/AiSuggestionPage.module.css';
 
 const TAB_PANTRY = 'PANTRY';
 const TAB_CUSTOM = 'CUSTOM';
+const TAB_HISTORY = 'HISTORY';
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function HistoryPanel({ onSaveSuccess }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const historyQuery = useQuery({
+    queryKey: ['ai-history'],
+    queryFn: aiService.getHistory,
+    staleTime: 30_000,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (logId) => aiService.saveAiRecipe(logId),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['ai-history'] });
+      const recipeId = res?.data?.id;
+      if (recipeId) navigate(`/recipes/${recipeId}`);
+    },
+  });
+
+  const items = historyQuery.data?.data || [];
+
+  if (historyQuery.isLoading) {
+    return (
+      <div className={s.historyEmpty}>
+        <RefreshCw size={28} className={s.spin} />
+        <p>Đang tải lịch sử...</p>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className={s.historyEmpty}>
+        <History size={40} style={{ opacity: 0.25 }} />
+        <p>Bạn chưa có lịch sử gợi ý nào.</p>
+        <small>Hãy thử tab "Giải cứu tủ lạnh" hoặc "Tôi có..." để bắt đầu!</small>
+      </div>
+    );
+  }
+
+  return (
+    <div className={s.historyList}>
+      {items.map((item, index) => (
+        <div key={item.logId} className={s.historyCard} style={{ animationDelay: `${index * 60}ms` }}>
+          <div className={s.historyCardLeft}>
+            <div className={`${s.historyTypeBadge} ${item.type === 'ZERO_WASTE' ? s.badgeGreen : s.badgeBlue}`}>
+              {item.type === 'ZERO_WASTE'
+                ? <><Leaf size={13} /> Giải cứu tủ lạnh</>
+                : <><PenLine size={13} /> Tôi có...</>}
+            </div>
+            <h4 className={s.historyTitle}>{item.title || 'Không có tên'}</h4>
+            {item.inputIngredients && (
+              <p className={s.historyIngredients}>
+                <PackageOpen size={13} /> {item.inputIngredients}
+              </p>
+            )}
+            <span className={s.historyTime}>
+              <Clock size={12} /> {formatDate(item.createdAt)}
+            </span>
+          </div>
+          <div className={s.historyCardRight}>
+            {item.savedRecipeId ? (
+              <button
+                className={s.historyBtnSaved}
+                onClick={() => navigate(`/recipes/${item.savedRecipeId}`)}
+              >
+                <BookOpen size={15} /> Xem công thức
+              </button>
+            ) : item.canSave ? (
+              <button
+                className={s.historyBtnSave}
+                onClick={() => saveMutation.mutate(item.logId)}
+                disabled={saveMutation.isPending}
+              >
+                {saveMutation.isPending && saveMutation.variables === item.logId
+                  ? <RefreshCw size={15} className={s.spin} />
+                  : <CheckCircle2 size={15} />}
+                Lưu công thức
+              </button>
+            ) : (
+              <span className={s.historyBtnExpired}>Đã hết hạn lưu</span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function describeError(error) {
   const status = error?.response?.status;
@@ -218,24 +316,35 @@ export default function AiSuggestionPage() {
       </div>
 
       <div className={s.tabs}>
-        <button 
+        <button
           className={`${s.tab} ${tab === TAB_PANTRY ? s.activeTab : ''}`}
           onClick={() => switchTab(TAB_PANTRY)}
         >
           <Recycle size={18} />
           Giải cứu tủ lạnh
         </button>
-        <button 
+        <button
           className={`${s.tab} ${tab === TAB_CUSTOM ? s.activeTab : ''}`}
           onClick={() => switchTab(TAB_CUSTOM)}
         >
           <WandSparkles size={18} />
           Tôi có...
         </button>
+        <button
+          className={`${s.tab} ${tab === TAB_HISTORY ? s.activeTab : ''}`}
+          onClick={() => switchTab(TAB_HISTORY)}
+        >
+          <History size={18} />
+          Lịch sử
+        </button>
       </div>
 
       <div className={s.content}>
-        {tab === TAB_PANTRY ? (
+        {tab === TAB_HISTORY ? (
+          <div className={s.historyPanel}>
+            <HistoryPanel />
+          </div>
+        ) : tab === TAB_PANTRY ? (
           <div className={s.expiringCard}>
             <h3 className={s.expiringTitle}>Nguyên liệu sắp hết hạn</h3>
             <div className={s.expiringContent}>
@@ -330,7 +439,7 @@ export default function AiSuggestionPage() {
           </div>
         )}
 
-        {validationError && (
+        {tab !== TAB_HISTORY && validationError && (
           <div className={s.inlineError}>
             <AlertCircle size={16} /> {validationError}
           </div>

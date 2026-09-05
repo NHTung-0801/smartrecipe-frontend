@@ -137,41 +137,77 @@
 
 .tabs {
   display: flex;
-  gap: 1rem;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 2rem;
+  gap: 1rem;
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 2.5rem;
 }
 
 .tab {
-  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.75rem;
-  background-color: var(--sr-surface);
-  border: 1px solid var(--sr-border);
-  border-radius: 100px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--sr-text-light);
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  background-color: #ffffff;
+  border: 1.5px solid var(--sr-outline-variant, #dec0b9);
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sr-on-surface-variant, #57423d);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(161, 57, 35, 0.04);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  user-select: none;
+}
+
+.tab svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
 .tab:hover {
-  background-color: var(--sr-surface-hover);
-  transform: translateY(-1px);
+  background-color: #fcf4f0;
+  border-color: var(--sr-primary, #a13923);
+  color: var(--sr-primary, #a13923);
+  box-shadow: 0 4px 14px rgba(161, 57, 35, 0.12);
+  transform: translateY(-2px);
+}
+
+.tab:hover svg {
+  transform: scale(1.1);
 }
 
 .activeTab {
-  background-color: var(--sr-primary);
-  color: white;
-  border-color: var(--sr-primary);
-  box-shadow: 0 4px 12px rgba(161, 57, 35, 0.2);
+  background: linear-gradient(135deg, var(--sr-primary, #a13923) 0%, #be462d 100%) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 16px rgba(161, 57, 35, 0.28) !important;
 }
 
 .activeTab:hover {
-  background-color: var(--sr-primary-hover);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #8f2f1b 0%, #a13923 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(161, 57, 35, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .tabs {
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+
+  .tab {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.82rem;
+    gap: 0.35rem;
+  }
 }
 
 .content {
@@ -668,4 +704,220 @@
   background: #d1d5db;
   box-shadow: none;
 }
+
+/* ==============================
+   HISTORY TAB
+   ============================== */
+
+.historyPanel {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.historyCard {
+  background: white;
+  border: 1px solid var(--sr-border);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  animation: slideUp 0.35s ease-out both;
+  position: relative;
+  overflow: hidden;
+}
+
+.historyCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--sr-primary), #f59e0b);
+  border-radius: 4px 0 0 4px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.historyCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  border-color: rgba(161, 57, 35, 0.2);
+}
+
+.historyCard:hover::before {
+  opacity: 1;
+}
+
+.historyCardLeft {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.historyCardRight {
+  flex-shrink: 0;
+}
+
+.historyTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  width: fit-content;
+}
+
+.badgeGreen {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badgeBlue {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.historyTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sr-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historyIngredients {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--sr-text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historyTime {
+  font-size: 0.8rem;
+  color: var(--sr-text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  opacity: 0.75;
+}
+
+.historyBtnSave {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: linear-gradient(135deg, var(--sr-primary) 0%, #c2410c 100%);
+  color: white;
+  border: none;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(161, 57, 35, 0.25);
+  white-space: nowrap;
+}
+
+.historyBtnSave:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(161, 57, 35, 0.35);
+}
+
+.historyBtnSave:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.historyBtnSaved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.historyBtnSaved:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-2px);
+}
+
+.historyBtnExpired {
+  font-size: 0.82rem;
+  color: var(--sr-text-light);
+  opacity: 0.6;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.historyEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  color: var(--sr-text-light);
+  text-align: center;
+}
+
+.historyEmpty p {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.historyEmpty small {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+  .historyCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .historyCardRight {
+    width: 100%;
+  }
+  .historyBtnSave,
+  .historyBtnSaved {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 
