@@ -194,7 +194,11 @@ export default function MyRecipesPage() {
                 </div>
                 <div className={s.metaItem}>
                   <Flame size={16} className={s.metaIcon} />
-                  <span>{recipe.likeCount ? recipe.likeCount * 50 : 350} kcal</span>
+                  <span>
+                    {recipe.nutrition?.caloriesPerServing != null
+                      ? `${Math.round(recipe.nutrition.caloriesPerServing)} kcal`
+                      : '-- kcal'}
+                  </span>
                 </div>
               </div>
             </div>

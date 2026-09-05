@@ -176,13 +176,8 @@ export default function RecipeDetailPage() {
 
   if (!recipe) return null;
 
-  // Mock nutrition data if missing to match design
-  const nutrition = recipe.nutrition || {
-    caloriesPerServing: 540,
-    proteinPerServing: 32,
-    carbsPerServing: 65,
-    fatPerServing: 18
-  };
+  // Nutrition data from backend (null if not available)
+  const nutrition = recipe.nutrition || null;
 
   return (
     <div className={s.pageContainer}>
@@ -298,6 +293,99 @@ export default function RecipeDetailPage() {
         </div>
       </section>
 
+      {/* NUTRITION BANNER */}
+      <section className="max-w-[1200px] mx-auto px-5 mt-8 mb-2">
+        <div style={{
+          background: 'linear-gradient(135deg, #3d271d 0%, #5c3e33 60%, #a13923 100%)',
+          borderRadius: '24px',
+          padding: '28px 36px',
+          boxShadow: '0 8px 32px rgba(161,57,35,0.18)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          flexWrap: 'wrap',
+        }}>
+          {/* Label */}
+          <div style={{ marginRight: '8px', minWidth: '120px' }}>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>
+              Dinh dưỡng
+            </div>
+            <div style={{ color: 'white', fontSize: '13px', fontWeight: 600 }}>
+              mỗi khẩu phần
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div style={{ width: '1px', height: '48px', background: 'rgba(255,255,255,0.15)', marginRight: '8px' }} />
+
+          {/* Calories */}
+          <div style={{ flex: 1, minWidth: '100px', textAlign: 'center', padding: '0 12px' }}>
+            <div style={{ color: '#ffb347', fontSize: '28px', fontWeight: 800, lineHeight: 1 }}>
+              {nutrition?.caloriesPerServing != null ? Math.round(nutrition.caloriesPerServing) : '--'}
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', fontWeight: 600, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              kcal
+            </div>
+          </div>
+
+          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.1)' }} />
+
+          {/* Protein */}
+          <div style={{ flex: 1, minWidth: '100px', textAlign: 'center', padding: '0 12px' }}>
+            <div style={{ color: '#7ecfff', fontSize: '28px', fontWeight: 800, lineHeight: 1 }}>
+              {nutrition?.proteinPerServing != null ? (
+                <>
+                  {Math.round(nutrition.proteinPerServing)}
+                  <span style={{ fontSize: '14px', fontWeight: 600 }}>g</span>
+                </>
+              ) : '--'}
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', fontWeight: 600, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Protein
+            </div>
+          </div>
+
+          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.1)' }} />
+
+          {/* Carbs */}
+          <div style={{ flex: 1, minWidth: '100px', textAlign: 'center', padding: '0 12px' }}>
+            <div style={{ color: '#a8e6a3', fontSize: '28px', fontWeight: 800, lineHeight: 1 }}>
+              {nutrition?.carbsPerServing != null ? (
+                <>
+                  {Math.round(nutrition.carbsPerServing)}
+                  <span style={{ fontSize: '14px', fontWeight: 600 }}>g</span>
+                </>
+              ) : '--'}
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', fontWeight: 600, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Carbs
+            </div>
+          </div>
+
+          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.1)' }} />
+
+          {/* Fat */}
+          <div style={{ flex: 1, minWidth: '100px', textAlign: 'center', padding: '0 12px' }}>
+            <div style={{ color: '#f9a8d4', fontSize: '28px', fontWeight: 800, lineHeight: 1 }}>
+              {nutrition?.fatPerServing != null ? (
+                <>
+                  {Math.round(nutrition.fatPerServing)}
+                  <span style={{ fontSize: '14px', fontWeight: 600 }}>g</span>
+                </>
+              ) : '--'}
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', fontWeight: 600, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Chất béo
+            </div>
+          </div>
+
+          {/* Note */}
+          <div style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.35)', fontSize: '11px', textAlign: 'right', minWidth: '110px' }}>
+            * Ước tính từ<br />nguyên liệu AI
+          </div>
+        </div>
+      </section>
+
       {/* MAIN SPLIT CONTENT */}
       <section className={s.mainContent}>
         
@@ -355,17 +443,60 @@ export default function RecipeDetailPage() {
           </div>
 
           {/* CHEF TIPS */}
-          <div className="bg-[#fcf9f5] rounded-[24px] p-7 border border-[#f0e8df] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group cursor-default">
-            <h3 className="font-heading text-[19px] font-bold text-[#3d271d] mb-5 flex items-center gap-2 group-hover:text-[#a13923] transition-colors">
-              <Lightbulb size={20} className="text-[#a13923] group-hover:scale-110 transition-transform" /> Mẹo từ đầu bếp
+          <div style={{
+            background: 'linear-gradient(135deg, #fffbf8 0%, #fff8f4 100%)',
+            borderRadius: '24px',
+            padding: '28px',
+            border: '1.5px solid #f0e4da',
+            boxShadow: '0 4px 20px rgba(161,57,35,0.05)',
+          }}>
+            <h3 className="font-heading text-[19px] font-bold text-[#3d271d] mb-5 flex items-center gap-2">
+              <Lightbulb size={20} className="text-[#a13923]" /> Mẹo từ đầu bếp
             </h3>
-            <ul className="space-y-4">
-              {randomTips.map((tip, idx) => (
-                <li key={idx} className="flex gap-3 text-[15px] text-[#5c3e33] hover:text-[#3d271d] transition-colors">
-                  <span className="text-[#a13923] text-[20px] leading-[22px] font-bold">•</span>
-                  <span className="leading-relaxed">{tip}</span>
-                </li>
-              ))}
+            <ul className="space-y-3">
+              {randomTips.map((tip, idx) => {
+                const colors = [
+                  { bg: 'rgba(161,57,35,0.12)', text: '#a13923' },
+                  { bg: 'rgba(230,150,80,0.15)', text: '#b8611a' },
+                  { bg: 'rgba(100,160,100,0.12)', text: '#3d7a3d' },
+                  { bg: 'rgba(80,130,200,0.12)', text: '#2a6aad' },
+                ];
+                const c = colors[idx % colors.length];
+                return (
+                  <li
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      alignItems: 'flex-start',
+                      padding: '10px 12px',
+                      borderRadius: '12px',
+                      transition: 'background 0.2s',
+                      cursor: 'default',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(161,57,35,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <span style={{
+                      minWidth: '24px',
+                      height: '24px',
+                      borderRadius: '8px',
+                      background: c.bg,
+                      color: c.text,
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: '1px',
+                    }}>
+                      {idx + 1}
+                    </span>
+                    <span className="text-[15px] text-[#5c3e33] leading-relaxed">{tip}</span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
