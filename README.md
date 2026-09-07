@@ -440,4 +440,60 @@ role, text và label thay vì class.
 
 ---
 
+## 🐳 Docker
+
+Dùng cho local dev hoặc self-host (Vercel dùng CI/CD riêng, không cần Docker):
+
+```bash
+# Build image
+docker build -t smartrecipe-frontend .
+
+# Chạy container
+docker run -p 80:80 smartrecipe-frontend
+# → http://localhost:80
+```
+
+| Stage | Base Image | Mục đích |
+|---|---|---|
+| builder | `node:22-alpine` | Build React → `dist/` |
+| runtime | `nginx:alpine` | Serve static files + SPA routing |
+
+`nginx.conf` cấu hình `try_files $uri /index.html` để React Router hoạt động đúng khi F5.
+
+---
+
+## 🔄 CI/CD (GitHub Actions)
+
+Pipeline tự động gồm 2 workflow trong `.github/workflows/`:
+
+### `ci-frontend.yml` — Chạy khi push bất kỳ branch
+1. Setup Node.js 20
+2. Cache `node_modules`
+3. `npm ci` — cài packages sạch
+4. `npm run lint` — ESLint (OxLint)
+5. `npm test -- --run` — **17 Vitest tests**
+6. `npm run build` — build production bundle
+7. Upload `dist/` artifact
+
+### `cd-frontend.yml` — Chạy khi push `main` (sau CI pass)
+1. Vercel CLI pull environment info
+2. Build production với Vercel
+3. Deploy `--prod` → production URL
+4. Verify URL trả về HTTP 200
+
+**GitHub Secrets cần cấu hình:**
+
+| Secret | Lấy từ đâu |
+|---|---|
+| `VERCEL_TOKEN` | Vercel Dashboard → Settings → Tokens |
+| `VERCEL_ORG_ID` | `.vercel/project.json` sau khi `npx vercel link` |
+| `VERCEL_PROJECT_ID` | `.vercel/project.json` sau khi `npx vercel link` |
+
+```bash
+# Chạy tests thủ công (giống CI)
+npm test -- --run
+```
+
+---
+
 *Xây dựng với ❤️ — SmartRecipe Frontend v0.0.0*

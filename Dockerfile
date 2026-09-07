@@ -15,7 +15,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy the custom Nginx configuration for SPA routing
-COPY .docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the build output from the builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html

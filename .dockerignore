@@ -1,0 +1,26 @@
+# Build output
+node_modules/
+dist/
+
+# Local env files
+.env
+.env.*
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+README.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
