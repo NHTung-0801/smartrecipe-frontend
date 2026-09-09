@@ -465,24 +465,27 @@
   gap: 12px;
 }
 
-/* Register link */
+/* Register link (inside glassCard) */
 .registerLink {
   text-align: center;
-  padding: 8px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(220, 195, 180, 0.45);
+  margin-top: 2px;
   flex-shrink: 0;
 }
 
 .registerText {
-  font-size: 15px;
+  font-size: 14.5px;
   color: var(--sr-on-surface-variant);
+  margin: 0;
 }
 
 .registerAnchor {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14.5px;
+  font-weight: 750;
   color: var(--sr-primary);
   text-decoration: none;
-  margin-left: 4px;
+  margin-left: 6px;
   transition: color 0.3s;
 }
 
