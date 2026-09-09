@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Compass, TrendingUp, Sparkles, Plus } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
+import useAuthPromptStore from '../store/useAuthPromptStore';
 import { recipeService } from '../services/recipeService';
 import RecipeCard from '../components/RecipeCard';
 import SearchBar from '../components/recipe/SearchBar';
@@ -10,6 +11,8 @@ import QuickFilterChips from '../components/recipe/QuickFilterChips';
 
 export default function HomePage() {
   const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const openAuthModal = useAuthPromptStore((state) => state.openModal);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
 
@@ -105,6 +108,12 @@ export default function HomePage() {
           </div>
           <Link
             to="/recipes"
+            onClick={(e) => {
+              if (!isAuthenticated) {
+                e.preventDefault();
+                openAuthModal('Xem toàn bộ công thức');
+              }
+            }}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/70 backdrop-blur-md 
                        border border-[var(--sr-outline-variant)] text-[var(--sr-on-surface-variant)] 
                        text-sm font-semibold hover:text-[var(--sr-primary)] hover:border-[var(--sr-primary)]
@@ -156,6 +165,12 @@ export default function HomePage() {
             {!searchKeyword && (
               <Link
                 to="/recipes/new"
+                onClick={(e) => {
+                  if (!isAuthenticated) {
+                    e.preventDefault();
+                    openAuthModal('Tạo công thức');
+                  }
+                }}
                 className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-[var(--sr-primary)] text-white 
                            rounded-xl font-semibold hover:bg-[var(--sr-primary-light)] active:scale-95
                            transition-all duration-200 shadow-lg shadow-orange-900/20 hover:shadow-xl hover:shadow-orange-900/30"
@@ -186,6 +201,12 @@ export default function HomePage() {
               </p>
               <Link
                 to="/recipes/new"
+                onClick={(e) => {
+                  if (!isAuthenticated) {
+                    e.preventDefault();
+                    openAuthModal('Tạo công thức');
+                  }
+                }}
                 className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-[var(--sr-primary)] text-white 
                            rounded-xl font-semibold hover:bg-[var(--sr-primary-light)] active:scale-95
                            transition-all duration-200 shadow-lg shadow-orange-900/20 hover:shadow-xl hover:shadow-orange-900/30"

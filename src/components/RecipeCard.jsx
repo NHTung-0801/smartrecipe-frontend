@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Clock } from 'lucide-react';
+import useAuthStore from '../store/useAuthStore';
+import useAuthPromptStore from '../store/useAuthPromptStore';
 
 const DIFFICULTY_LABELS = {
   EASY: 'Dễ',
@@ -20,6 +22,8 @@ const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?background=a13923&color=fff&
 
 const RecipeCard = ({ recipe }) => {
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const openAuthModal = useAuthPromptStore((state) => state.openModal);
   const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
   const timeText = formatTime(totalTime);
   const diffText = DIFFICULTY_LABELS[recipe.difficulty] || null;
@@ -66,7 +70,15 @@ const RecipeCard = ({ recipe }) => {
         </div>
 
         {/* Top-right: like button */}
-        <div className="absolute top-3 right-3">
+        <div 
+          className="absolute top-3 right-3"
+          onClick={(e) => {
+            if (!isAuthenticated) {
+              e.stopPropagation();
+              openAuthModal('Lưu công thức yêu thích');
+            }
+          }}
+        >
           <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all
             ${recipe.likeCount > 0 
               ? 'bg-white text-rose-500' 

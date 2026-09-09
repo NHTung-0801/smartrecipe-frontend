@@ -3,14 +3,19 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { recipeService } from '../services/recipeService';
 import { groceryService } from '../services/groceryService';
 import { pantryService } from '../services/pantryService';
+import { userService } from '../services/userService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
+import useAuthPromptStore from '../store/useAuthPromptStore';
 import { 
   Heart, Share2, Copy, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer
 } from 'lucide-react';
 import s from '../styles/pages/RecipeDetailPage.module.css';
 import CookingMode from '../components/recipe/CookingMode';
 import ShareRecipeModal from '../components/recipe/ShareRecipeModal';
+import FollowButton from '../components/FollowButton';
+import CommentSection from '../components/comment/CommentSection';
+import UserAvatar from '../components/ui/UserAvatar';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200';
 
@@ -48,6 +53,7 @@ export default function RecipeDetailPage() {
   const [isCookingMode, setIsCookingMode] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [addingToGrocery, setAddingToGrocery] = useState(false);
+  const [isAuthorFollowing, setIsAuthorFollowing] = useState(false);
   
   // Trạng thái các checkbox nguyên liệu
   const [checkedIngredients, setCheckedIngredients] = useState({});
@@ -92,6 +98,17 @@ export default function RecipeDetailPage() {
           });
         }
         setCheckedIngredients(initialChecked);
+
+        // Kiểm tra trạng thái theo dõi tác giả
+        if (r.author?.id && currentUser && Number(currentUser.id) !== Number(r.author.id)) {
+          try {
+            const authorRes = await userService.getPublicProfile(r.author.id);
+            const profileData = authorRes?.data || authorRes;
+            setIsAuthorFollowing(profileData?.isFollowing || false);
+          } catch (e) {
+            console.error('Failed to load author profile:', e);
+          }
+        }
       } catch (err) {
         toast.error('Lỗi: ' + (err.response?.data?.message || err.message || err));
         console.error(err);
@@ -112,9 +129,15 @@ export default function RecipeDetailPage() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [id, navigate]);
+  }, [id, navigate, currentUser]);
+
+  const openAuthModal = useAuthPromptStore((state) => state.openModal);
 
   const handleLike = async () => {
+    if (!currentUser) {
+      openAuthModal('Lưu công thức yêu thích');
+      return;
+    }
     try {
       if (isLiked) {
         await recipeService.unlike(id);
@@ -131,6 +154,10 @@ export default function RecipeDetailPage() {
   };
 
   const handleClone = async () => {
+    if (!currentUser) {
+      openAuthModal('Sao chép công thức');
+      return;
+    }
     if (!window.confirm('Bạn có muốn sao chép công thức này về bộ sưu tập của mình?')) return;
     setCloning(true);
     try {
@@ -145,6 +172,10 @@ export default function RecipeDetailPage() {
   };
 
   const handleAddToGroceryList = async () => {
+    if (!currentUser) {
+      openAuthModal('Tự động tạo danh sách đi chợ');
+      return;
+    }
     try {
       setAddingToGrocery(true);
       const res = await groceryService.generateFromRecipe(id);
@@ -292,6 +323,40 @@ export default function RecipeDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* AUTHOR CARD & FOLLOW BAR */}
+      {recipe.author && (
+        <section className="max-w-[1200px] mx-auto px-5 mt-6 mb-2">
+          <div className="flex items-center justify-between p-4 px-6 bg-white/90 backdrop-blur-md rounded-2xl border border-[#f0e3d9] shadow-sm hover:shadow-md transition-shadow">
+            <Link to={`/users/${recipe.author.id}`} className="flex items-center gap-3.5 group">
+              <UserAvatar 
+                src={recipe.author.avatarUrl} 
+                name={recipe.author.displayName || recipe.author.username} 
+                className="w-12 h-12 text-sm border-2 border-[#f0e3d9] group-hover:border-[#a13923] transition-colors shadow-xs"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-heading font-bold text-base text-[#3d271d] group-hover:text-[#a13923] transition-colors">
+                    {recipe.author.displayName || recipe.author.username}
+                  </span>
+                  <span className="text-[11px] text-[#a13923] bg-[#fff5f2] px-2.5 py-0.5 rounded-full font-semibold border border-[#fbdcd5]">
+                    Đầu bếp
+                  </span>
+                </div>
+                <p className="text-xs text-[#796255] mt-0.5">
+                  @{recipe.author.username} {recipe.createdAt && `• Đã đăng ${new Date(recipe.createdAt).toLocaleDateString('vi-VN')}`}
+                </p>
+              </div>
+            </Link>
+            {(!currentUser || Number(currentUser.id) !== Number(recipe.author.id)) && (
+              <FollowButton 
+                userId={recipe.author.id}
+                initialIsFollowing={isAuthorFollowing}
+              />
+            )}
+          </div>
+        </section>
+      )}
 
       {/* NUTRITION BANNER */}
       <section className="max-w-[1200px] mx-auto px-5 mt-8 mb-2">
@@ -580,7 +645,11 @@ export default function RecipeDetailPage() {
           ))}
         </div>
       </section>
-      
+
+      {/* 5. BÌNH LUẬN CỘNG ĐỒNG */}
+      <section className="max-w-[1200px] mx-auto mt-16 px-5 mb-16">
+        <CommentSection recipeId={id} />
+      </section>
 
       {isCookingMode && (
         <CookingMode recipe={recipe} onClose={() => setIsCookingMode(false)} />

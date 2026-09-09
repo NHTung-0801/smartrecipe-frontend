@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { commentService } from '../../services/commentService';
 import CommentItem from './CommentItem';
+import useAuthStore from '../../store/useAuthStore';
+import useAuthPromptStore from '../../store/useAuthPromptStore';
 import styles from './CommentSection.module.css';
 
 export default function CommentSection({ recipeId }) {
@@ -10,7 +12,8 @@ export default function CommentSection({ recipeId }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  const isLoggedIn = !!localStorage.getItem('accessToken');
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const openAuthModal = useAuthPromptStore((s) => s.openModal);
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -32,6 +35,10 @@ export default function CommentSection({ recipeId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      openAuthModal('Vui lòng đăng nhập để gửi bình luận!');
+      return;
+    }
     if (!newComment.trim()) return;
 
     setSubmitting(true);
@@ -91,11 +98,11 @@ export default function CommentSection({ recipeId }) {
         </div>
       )}
 
-      {isLoggedIn ? (
+      {isAuthenticated ? (
         <form className={styles.commentForm} onSubmit={handleSubmit}>
           <textarea
             className={styles.textarea}
-            placeholder="Viết bình luận của bạn..."
+            placeholder="Viết bình luận hoặc chia sẻ cảm nghĩ của bạn về món ăn..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             rows={3}
@@ -116,9 +123,16 @@ export default function CommentSection({ recipeId }) {
           </div>
         </form>
       ) : (
-        <p className={styles.loginPrompt}>
-          <a href="/login">Đăng nhập</a> để viết bình luận.
-        </p>
+        <div className={styles.loginPrompt}>
+          <span>Bạn muốn tham gia thảo luận và đánh giá món ăn này?</span>
+          <button
+            type="button"
+            onClick={() => openAuthModal('Vui lòng đăng nhập để gửi bình luận và đánh giá công thức này!')}
+            className={styles.loginPromptBtn}
+          >
+            Đăng nhập để viết bình luận
+          </button>
+        </div>
       )}
 
       {loading ? (

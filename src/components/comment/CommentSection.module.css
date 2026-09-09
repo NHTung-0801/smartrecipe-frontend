@@ -43,8 +43,8 @@
 
 .textarea:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+  border-color: #a13923;
+  box-shadow: 0 0 0 3px rgba(161, 57, 35, 0.15);
 }
 
 .textarea:disabled {
@@ -65,46 +65,61 @@
 }
 
 .submitBtn {
-  background-color: #22c55e;
+  background-color: #a13923;
   color: #fff;
   border: none;
-  padding: 8px 20px;
-  border-radius: 6px;
+  padding: 9px 22px;
+  border-radius: 9999px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(161, 57, 35, 0.2);
 }
 
 .submitBtn:hover:not(:disabled) {
-  background-color: #16a34a;
+  background-color: #8b311e;
+  transform: translateY(-1px);
 }
 
 .submitBtn:disabled {
-  background-color: #a7f3d0;
+  background-color: #f0c3ba;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* Login prompt */
 .loginPrompt {
-  text-align: center;
-  padding: 20px;
-  background-color: #f9fafb;
-  border-radius: 8px;
-  border: 1px dashed #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #fff8f5;
+  border-radius: 14px;
+  border: 1.5px dashed #f6cbb7;
   font-size: 0.938rem;
-  color: #6b7280;
-  margin-bottom: 20px;
+  color: #614a3e;
+  margin-bottom: 24px;
 }
 
-.loginPrompt a {
-  color: #22c55e;
-  text-decoration: none;
-  font-weight: 500;
+.loginPromptBtn {
+  background-color: #a13923;
+  color: #ffffff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(161, 57, 35, 0.2);
 }
 
-.loginPrompt a:hover {
-  text-decoration: underline;
+.loginPromptBtn:hover {
+  background-color: #8b311e;
+  transform: translateY(-1px);
 }
 
 /* Loading & empty */
@@ -192,7 +207,8 @@
   margin-bottom: 6px;
 }
 
-.commentContent {
+.commentContent,
+.commentText {
   font-size: 0.938rem;
   line-height: 1.6;
   color: #374151;
@@ -214,15 +230,16 @@
   border: none;
   color: #6b7280;
   font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 2px 6px;
   border-radius: 4px;
-  transition: color 0.1s ease, background-color 0.1s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .actionBtn:hover {
-  color: #22c55e;
-  background-color: #f0fdf4;
+  color: #a13923;
+  background-color: #fff5f2;
 }
 
 /* Reply form */
@@ -234,21 +251,21 @@
 
 .replyTextarea {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid #e7d7cd;
+  border-radius: 10px;
   font-size: 0.875rem;
-  line-height: 1.4;
+  line-height: 1.45;
   resize: vertical;
-  min-height: 48px;
+  min-height: 52px;
   font-family: inherit;
   box-sizing: border-box;
 }
 
 .replyTextarea:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15);
+  border-color: #a13923;
+  box-shadow: 0 0 0 2px rgba(161, 57, 35, 0.15);
 }
 
 .replyTextarea:disabled {
@@ -257,23 +274,23 @@
 
 .replyBtn {
   margin-top: 6px;
-  background-color: #22c55e;
+  background-color: #a13923;
   color: #fff;
   border: none;
-  padding: 6px 16px;
-  border-radius: 5px;
+  padding: 6px 18px;
+  border-radius: 9999px;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .replyBtn:hover:not(:disabled) {
-  background-color: #16a34a;
+  background-color: #8b311e;
 }
 
 .replyBtn:disabled {
-  background-color: #a7f3d0;
+  background-color: #f0c3ba;
   cursor: not-allowed;
 }
 

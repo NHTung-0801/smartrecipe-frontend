@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import useAuthStore from '../../store/useAuthStore';
+import useAuthPromptStore from '../../store/useAuthPromptStore';
+import UserAvatar from '../ui/UserAvatar';
 import styles from './CommentSection.module.css';
 
 export default function CommentItem({ comment, onReply, onUpdate, onDelete, depth }) {
@@ -10,7 +13,8 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
   const [error, setError] = useState(null);
   const [showReplies, setShowReplies] = useState(true);
 
-  const currentUserId = getCurrentUserId();
+  const currentUser = useAuthStore((s) => s.user);
+  const openAuthModal = useAuthPromptStore((s) => s.openModal);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -30,6 +34,10 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
 
   const handleReplySubmit = async (e) => {
     e.preventDefault();
+    if (!currentUser) {
+      openAuthModal('Vui lòng đăng nhập để trả lời bình luận này!');
+      return;
+    }
     if (!replyContent.trim()) return;
     setSubmitting(true);
     setError(null);
@@ -59,7 +67,7 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
     }
   };
 
-  const isOwner = currentUserId && Number(currentUserId) === Number(comment.author?.id);
+  const isOwner = !!currentUser?.id && Number(currentUser.id) === Number(comment.author?.id);
   const hasReplies = comment.replies && comment.replies.length > 0;
 
   return (
@@ -68,9 +76,9 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
       style={{ marginLeft: depth > 0 ? `${Math.min(depth * 20, 80)}px` : 0 }}
     >
       <div className={styles.commentHeader}>
-        <img
-          src={comment.author?.avatarUrl || '/default-avatar.png'}
-          alt={comment.author?.displayName || comment.author?.username}
+        <UserAvatar
+          src={comment.author?.avatarUrl}
+          name={comment.author?.displayName || comment.author?.username}
           className={styles.avatar}
         />
         <div className={styles.authorInfo}>
@@ -110,7 +118,6 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
                 onClick={() => {
                   setIsEditing(false);
                   setEditContent(comment.content);
-                  setError(null);
                 }}
               >
                 Hủy
@@ -118,12 +125,12 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
             </div>
           </form>
         ) : (
-          <p className={styles.commentContent}>{comment.content}</p>
+          <p className={styles.commentText}>{comment.content}</p>
         )}
       </div>
 
       <div className={styles.commentActions}>
-        {isOwner && !isEditing && (
+        {isOwner && (
           <>
             <button
               className={styles.actionBtn}
@@ -141,7 +148,13 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
         )}
         <button
           className={styles.actionBtn}
-          onClick={() => setIsReplying(!isReplying)}
+          onClick={() => {
+            if (!currentUser) {
+              openAuthModal('Vui lòng đăng nhập để trả lời bình luận này!');
+              return;
+            }
+            setIsReplying(!isReplying);
+          }}
         >
           {isReplying ? 'Hủy trả lời' : 'Trả lời'}
         </button>
@@ -193,16 +206,4 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
       )}
     </div>
   );
-}
-
-/** Lấy userId từ JWT token trong localStorage */
-function getCurrentUserId() {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.userId || payload.sub || null;
-  } catch {
-    return null;
-  }
 }

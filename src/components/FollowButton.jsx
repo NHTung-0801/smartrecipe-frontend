@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, UserMinus, Loader2 } from 'lucide-react';
+import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { userService } from '../services/userService';
 import useAuthStore from '../store/useAuthStore';
-import { useNavigate } from 'react-router-dom';
+import useAuthPromptStore from '../store/useAuthPromptStore';
 
-const FollowButton = ({ userId, initialIsFollowing, className = '' }) => {
+const FollowButton = ({ userId, initialIsFollowing = false, className = '' }) => {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
-  const navigate = useNavigate();
+  const openAuthModal = useAuthPromptStore((s) => s.openModal);
+
+  useEffect(() => {
+    setIsFollowing(initialIsFollowing);
+  }, [initialIsFollowing]);
 
   const toggleFollowMutation = useMutation({
     mutationFn: async () => {
@@ -21,26 +25,24 @@ const FollowButton = ({ userId, initialIsFollowing, className = '' }) => {
       }
     },
     onMutate: async () => {
-      // Optimistic update
       setIsFollowing(!isFollowing);
     },
     onSuccess: (data) => {
       toast.success(data?.message || (isFollowing ? 'Đã hủy theo dõi' : 'Đã theo dõi thành công'));
-      // Invalidate relevant queries to refresh counts
       queryClient.invalidateQueries({ queryKey: ['publicProfile', userId] });
       queryClient.invalidateQueries({ queryKey: ['followers', userId] });
     },
     onError: (error) => {
-      // Revert on error
       setIsFollowing(isFollowing);
       toast.error(error?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
     }
   });
 
-  const handleToggleFollow = () => {
+  const handleToggleFollow = (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     if (!isAuthenticated) {
-      toast.info('Vui lòng đăng nhập để theo dõi tác giả này');
-      navigate('/login');
+      openAuthModal('Vui lòng đăng nhập để theo dõi đầu bếp này và nhận thông báo công thức mới!');
       return;
     }
     toggleFollowMutation.mutate();
@@ -49,14 +51,15 @@ const FollowButton = ({ userId, initialIsFollowing, className = '' }) => {
   if (isFollowing) {
     return (
       <button
+        type="button"
         onClick={handleToggleFollow}
         disabled={toggleFollowMutation.isPending}
-        className={`flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors ${className}`}
+        className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#f0e3d9] text-[#553e32] font-semibold text-xs rounded-full hover:bg-[#e4d2c5] transition-all shadow-sm ${className}`}
       >
         {toggleFollowMutation.isPending ? (
-          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
         ) : (
-          <UserMinus className="w-5 h-5 mr-2" />
+          <UserCheck className="w-3.5 h-3.5 text-[#a13923]" />
         )}
         Đang theo dõi
       </button>
@@ -65,14 +68,15 @@ const FollowButton = ({ userId, initialIsFollowing, className = '' }) => {
 
   return (
     <button
+      type="button"
       onClick={handleToggleFollow}
       disabled={toggleFollowMutation.isPending}
-      className={`flex items-center justify-center px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#a13923] text-white font-semibold text-xs rounded-full hover:bg-[#8b311e] transition-all shadow-sm shadow-[#a13923]/25 hover:-translate-y-0.5 ${className}`}
     >
       {toggleFollowMutation.isPending ? (
-        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
       ) : (
-        <UserPlus className="w-5 h-5 mr-2" />
+        <UserPlus className="w-3.5 h-3.5" />
       )}
       Theo dõi
     </button>
