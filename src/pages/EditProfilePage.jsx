@@ -2,19 +2,21 @@ import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Camera, User, Lock, Save, Loader2, ArrowLeft, Share2, Utensils, Heart, Mail, BookText, Globe, MapPin, Shield, Trash2, ChevronRight, BookOpen, Eye, EyeOff, LogOut } from 'lucide-react';
+import { Camera, User, Lock, Save, Loader2, ArrowLeft, Share2, Utensils, Heart, Mail, BookText, Globe, MapPin, Shield, Trash2, ChevronRight, BookOpen, Eye, EyeOff, LogOut, Users, Calendar, CheckCircle2, Trophy } from 'lucide-react';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
 import { userService } from '../services/userService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import UserAvatar from '../components/ui/UserAvatar';
+import BadgesModal, { BADGE_DEFINITIONS } from '../components/profile/BadgesModal';
 
 import s from '../styles/pages/EditProfilePage.module.css';
 import fx from '../styles/effects.module.css';
 
 const profileSchema = z.object({
   displayName: z.string().min(2, 'Tên hiển thị phải có ít nhất 2 ký tự').max(50, 'Tên quá dài'),
-  bio: z.string().max(500, 'Tiểu sử quá dài').optional(),
+  bio: z.string().max(500, 'Tiểu sử không được vượt quá 500 ký tự').optional().or(z.literal('')),
 });
 
 const passwordSchema = z.object({
@@ -37,6 +39,7 @@ const EditProfilePage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [showDeletePassword, setShowDeletePassword] = useState(false);
+  const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
 
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
@@ -115,7 +118,7 @@ const EditProfilePage = () => {
   const currentProfile = profileData?.data || user;
 
   // Profile Form
-  const { register: registerProfile, handleSubmit: handleSubmitProfile, reset: resetProfile, formState: { errors: profileErrors, isDirty } } = useForm({
+  const { register: registerProfile, handleSubmit: handleSubmitProfile, reset: resetProfile, watch, formState: { errors: profileErrors, isDirty } } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       displayName: '',
@@ -123,10 +126,12 @@ const EditProfilePage = () => {
     }
   });
 
+  const watchedBio = watch('bio') || '';
+
   React.useEffect(() => {
     if (currentProfile) {
       resetProfile({
-        displayName: currentProfile.displayName || '',
+        displayName: currentProfile.displayName || currentProfile.username || '',
         bio: currentProfile.bio || '',
       });
     }
@@ -204,22 +209,23 @@ const EditProfilePage = () => {
   return (
     <div className={s.pageContainer}>
       
-      {/* Hero Section / Statistics */}
-      <section className={`${s.heroGrid} ${fx.stagger1}`}>
-        {/* User Profile Intro */}
-        <div className={s.profileIntro}>
-          <div className={s.avatarGroup} onClick={() => fileInputRef.current?.click()}>
-            <div className={s.avatarCircle}>
-              {currentProfile?.avatarUrl ? (
-                <img src={currentProfile.avatarUrl} alt="Avatar" className={s.avatarImg} />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
-                  <User size={48} />
-                </div>
-              )}
-            </div>
-            <button className={s.btnCamera} disabled={updateAvatarMutation.isPending}>
-              {updateAvatarMutation.isPending ? <Loader2 size={20} className={fx.spinner} /> : <Camera size={20} />}
+      {/* 1. Profile Header Banner (Horizontal, Non-overlapping, Cohesive) */}
+      <section className={`${s.profileBanner} ${fx.stagger1}`}>
+        {/* Left: Identity info */}
+        <div className={s.bannerIdentity}>
+          <div className={s.avatarWrapper} onClick={() => fileInputRef.current?.click()} title="Bấm để đổi ảnh đại diện">
+            <UserAvatar
+              src={currentProfile?.avatarUrl}
+              name={currentProfile?.displayName || currentProfile?.username}
+              className="w-20 h-20 sm:w-24 sm:h-24 text-2xl sm:text-3xl font-bold border-4 border-white shadow-md"
+            />
+            <button 
+              type="button" 
+              className={s.btnCamera} 
+              disabled={updateAvatarMutation.isPending}
+              title="Tải ảnh mới"
+            >
+              {updateAvatarMutation.isPending ? <Loader2 size={15} className={fx.spinner} /> : <Camera size={15} />}
             </button>
             <input 
               type="file" 
@@ -229,155 +235,248 @@ const EditProfilePage = () => {
               accept="image/*"
             />
           </div>
-          
-          <h2 className={s.userName}>{currentProfile?.displayName || currentProfile?.username}</h2>
-          <p className={s.userBio}>{currentProfile?.bio || 'Đam mê ẩm thực & Sống khỏe'}</p>
-          
-          <div className={s.actionButtons}>
-            <button className={s.btnChangePhoto} onClick={() => fileInputRef.current?.click()}>
-              Đổi ảnh
-            </button>
-            <button className={s.btnShare}>
-              <Share2 size={18} />
-            </button>
+
+          <div className={s.bannerDetails}>
+            <div className={s.bannerNameRow}>
+              <h2 className={s.bannerName}>
+                {currentProfile?.displayName || currentProfile?.username}
+              </h2>
+              <span className={s.bannerRoleBadge}>
+                {currentProfile?.recipeCount > 0 ? 'Đầu bếp' : 'Thành viên'}
+              </span>
+            </div>
+            
+            <div className={s.bannerMeta}>
+              <span className="font-semibold text-[#553e32]">@{currentProfile?.username}</span>
+              <span>•</span>
+              <span>Mã đầu bếp: #{currentProfile?.id || '--'}</span>
+              {currentProfile?.createdAt && (
+                <>
+                  <span>•</span>
+                  <span>Tham gia: {new Date(currentProfile.createdAt).toLocaleDateString('vi-VN')}</span>
+                </>
+              )}
+            </div>
+
+            <p className={s.bannerBioSnippet}>
+              "{currentProfile?.bio || 'Yêu thích nấu ăn và sẻ chia hương vị bữa cơm gia đình'}"
+            </p>
           </div>
         </div>
 
-        {/* Bento Stats Cards */}
-        <div className={s.statsGrid}>
-          <div className={s.statCard}>
-            <div className={s.statCardGlow1} />
-            <div className={s.statHeader}>
-              <div className={`${s.statIcon} ${s.statIcon1}`}>
-                <BookOpen size={20} />
-              </div>
-              <span className={s.statChange}>+12% tháng này</span>
+        {/* Right: Real live Stats & Quick Action buttons */}
+        <div className={s.bannerRight}>
+          <div className={s.miniStatsGroup}>
+            <div className={s.miniStatItem} title="Tổng số công thức bạn đã chia sẻ">
+              <BookOpen size={14} className="text-[#a13923]" />
+              <span className={s.miniStatVal}>{currentProfile?.recipeCount || 0}</span>
+              <span>Công thức</span>
             </div>
-            <div className={s.statBody}>
-              <span className={`${s.statNumber} ${s.statNumber1}`}>{currentProfile?.recipeCount || 0}</span>
-              <p className={s.statLabel}>Công thức đã tạo</p>
+            <div className={s.miniStatItem} title="Số người đang theo dõi bạn">
+              <Users size={14} className="text-[#a13923]" />
+              <span className={s.miniStatVal}>{currentProfile?.followerCount || 0}</span>
+              <span>Người theo dõi</span>
+            </div>
+            <div className={s.miniStatItem} title="Số người bạn đang theo dõi">
+              <Heart size={14} className="text-[#a13923]" />
+              <span className={s.miniStatVal}>{currentProfile?.followingCount || 0}</span>
+              <span>Đang theo dõi</span>
             </div>
           </div>
 
-          <div className={s.statCard}>
-            <div className={s.statCardGlow2} />
-            <div className={s.statHeader}>
-              <div className={`${s.statIcon} ${s.statIcon2}`}>
-                <Heart size={20} />
-              </div>
-              <span className={s.statChange}>Lượt yêu thích</span>
-            </div>
-            <div className={s.statBody}>
-              <span className={`${s.statNumber} ${s.statNumber2}`}>1.2k</span>
-              <p className={s.statLabel}>Lượt thích nhận được</p>
-            </div>
+          <div className={s.bannerActions}>
+            <button 
+              type="button"
+              className={s.btnChangeAvatar}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={updateAvatarMutation.isPending}
+            >
+              <Camera size={14} />
+              <span>{updateAvatarMutation.isPending ? 'Đang tải...' : 'Đổi ảnh đại diện'}</span>
+            </button>
+            <button 
+              type="button"
+              onClick={() => setIsBadgesModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-amber-900 border border-amber-200/90 rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+              title="Xem danh sách huy hiệu và thành tích ẩm thực"
+            >
+              <span>🏆</span>
+              <span>Bộ sưu tập ({BADGE_DEFINITIONS.filter(b => b.checkUnlocked(currentProfile)).length}/{BADGE_DEFINITIONS.length})</span>
+            </button>
+            <Link 
+              to={`/users/${currentProfile?.id}`}
+              className={s.btnViewPublic}
+              title="Xem trang cá nhân công khai dưới góc nhìn người khác"
+            >
+              <Eye size={14} />
+              <span>Xem trang công khai</span>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Profile Settings Form */}
-      <section className={`${s.formSection} ${fx.stagger2}`}>
-        <div className={s.formHeader}>
+      {/* 2. Main Settings Grid (2 Columns: Left Form, Right Security) */}
+      <div className={`${s.settingsGrid} ${fx.stagger2}`}>
+        
+        {/* Left Column: Form thông tin cá nhân */}
+        <div className={s.formCard}>
+          <div className={s.formHeader}>
+            <div>
+              <h3 className={s.formTitle}>Thông tin cá nhân</h3>
+              <p className={s.formSubtitle}>Cập nhật tên hiển thị và lời giới thiệu của bạn trên Smart Recipe</p>
+            </div>
+            <button 
+              onClick={handleSubmitProfile(onProfileSubmit)}
+              disabled={!isDirty || updateProfileMutation.isPending}
+              className={s.btnSave}
+            >
+              {updateProfileMutation.isPending ? (
+                <Loader2 size={16} className={fx.spinner} />
+              ) : (
+                <Save size={16} />
+              )}
+              <span>Lưu thay đổi</span>
+            </button>
+          </div>
+
+          <form className={s.formFields} onSubmit={handleSubmitProfile(onProfileSubmit)}>
+            <div className={s.fieldRow2}>
+              {/* Name Input */}
+              <div className={s.fieldGroup}>
+                <label className={s.fieldLabel}>Tên hiển thị</label>
+                <div className={s.inputWrapper}>
+                  <User className={s.inputIcon} size={18} />
+                  <input 
+                    type="text" 
+                    {...registerProfile('displayName')}
+                    placeholder="Ví dụ: Hoàng Tùng"
+                    className={s.inputField} 
+                  />
+                </div>
+                {profileErrors.displayName ? (
+                  <p className={s.errorMessage}>{profileErrors.displayName.message}</p>
+                ) : (
+                  <p className="text-[11px] text-[#8c786c] mt-0.5 ml-1">Tên xuất hiện trên các công thức công khai.</p>
+                )}
+              </div>
+
+              {/* Email Input (Read-only) */}
+              <div className={s.fieldGroup}>
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className={s.fieldLabel}>Email tài khoản</label>
+                  <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1 border border-emerald-200">
+                    <CheckCircle2 size={11} /> Đã liên kết
+                  </span>
+                </div>
+                <div className={s.inputWrapper}>
+                  <Mail className={s.inputIcon} size={18} />
+                  <input 
+                    type="email" 
+                    value={currentProfile?.email || ''} 
+                    disabled
+                    className={`${s.inputField} opacity-75 cursor-not-allowed bg-black/[0.02]`} 
+                  />
+                </div>
+                <p className="text-[11px] text-[#8c786c] mt-0.5 ml-1">Dùng để đăng nhập và bảo mật.</p>
+              </div>
+            </div>
+
+            {/* Bio Input */}
+            <div className={s.fieldGroup}>
+              <div className="flex items-center justify-between mb-0.5">
+                <label className={s.fieldLabel}>Tiểu sử bản thân</label>
+                <span className="text-xs text-[#8c786c] font-medium">{watchedBio.length}/500</span>
+              </div>
+              <div className={s.inputWrapper}>
+                <BookText className={s.inputIconTop} size={18} />
+                <textarea 
+                  {...registerProfile('bio')}
+                  className={s.textareaField} 
+                  rows="3"
+                  placeholder="Chia sẻ niềm đam mê nấu ăn của bạn... (Nếu để trống, hệ thống sẽ hiển thị câu mặc định ấm áp)"
+                />
+              </div>
+              {profileErrors.bio && <p className={s.errorMessage}>{profileErrors.bio.message}</p>}
+            </div>
+
+            {/* Account strip */}
+            <div className="p-3 px-4 bg-[#fff9f6] rounded-xl border border-[#f0e3d9] flex items-center justify-between text-xs text-[#796255] mt-1">
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-[#a13923]" />
+                <span>
+                  Ngày tham gia: <strong>{currentProfile?.createdAt ? new Date(currentProfile.createdAt).toLocaleDateString('vi-VN') : 'Mới tham gia'}</strong>
+                </span>
+              </div>
+              <div>
+                <span>Trạng thái: <strong className="text-emerald-700 font-semibold">Đang hoạt động</strong></span>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {/* Right Column: Bảo mật & Quản trị tài khoản */}
+        <div className={s.securityCard}>
           <div>
-            <h3 className={s.formTitle}>Thông tin cá nhân</h3>
-            <p className={s.formSubtitle}>Cập nhật chi tiết tài khoản của bạn tại đây.</p>
+            <h3 className={s.formTitle}>Bảo mật & Quản lý</h3>
+            <p className={s.formSubtitle}>Thiết lập mật khẩu và quyền riêng tư tài khoản</p>
           </div>
-          <button 
-            onClick={handleSubmitProfile(onProfileSubmit)}
-            disabled={!isDirty || updateProfileMutation.isPending}
-            className={s.btnSave}
-          >
-            {updateProfileMutation.isPending ? <Loader2 size={18} className={fx.spinner} /> : 'Lưu thay đổi'}
-          </button>
+
+          <div className={s.securityList}>
+            <div className={s.securityItem} onClick={() => setIsBadgesModalOpen(true)}>
+              <div className={s.securityLeft}>
+                <div className={`${s.securityIcon} bg-amber-100 text-amber-800`}>
+                  <Trophy size={20} />
+                </div>
+                <div>
+                  <p className={s.securityTitle}>Huy hiệu hiển thị</p>
+                  <p className={s.securityDesc}>Chọn tối đa 3 huy hiệu xuất hiện ở hồ sơ</p>
+                </div>
+              </div>
+              <ChevronRight className={s.chevron} size={18} />
+            </div>
+
+            <div className={s.securityItem} onClick={handleOpenPasswordModal}>
+              <div className={s.securityLeft}>
+                <div className={`${s.securityIcon} ${s.iconShield}`}>
+                  <Shield size={20} />
+                </div>
+                <div>
+                  <p className={s.securityTitle}>Đổi mật khẩu</p>
+                  <p className={s.securityDesc}>Cập nhật mật khẩu định kỳ để an toàn</p>
+                </div>
+              </div>
+              <ChevronRight className={s.chevron} size={18} />
+            </div>
+
+            <div className={s.securityItem} onClick={handleLogout}>
+              <div className={s.securityLeft}>
+                <div className={`${s.securityIcon} ${s.iconLogout}`}>
+                  <LogOut size={20} />
+                </div>
+                <div>
+                  <p className={s.securityTitle}>Đăng xuất</p>
+                  <p className={s.securityDesc}>Thoát tài khoản trên thiết bị này</p>
+                </div>
+              </div>
+              <ChevronRight className={s.chevron} size={18} />
+            </div>
+
+            <div className={s.securityItem} onClick={handleOpenDeleteModal}>
+              <div className={s.securityLeft}>
+                <div className={`${s.securityIcon} ${s.iconTrash}`}>
+                  <Trash2 size={20} />
+                </div>
+                <div>
+                  <p className={`${s.securityTitle} text-red-600`}>Xóa tài khoản</p>
+                  <p className={s.securityDesc}>Hành động vĩnh viễn không thể khôi phục</p>
+                </div>
+              </div>
+              <ChevronRight className={s.chevron} size={18} />
+            </div>
+          </div>
         </div>
 
-        <form className={s.formGrid}>
-          {/* Name Input */}
-          <div className={s.fieldGroup}>
-            <label className={s.fieldLabel}>Họ và tên</label>
-            <div className={s.inputWrapper}>
-              <User className={s.inputIcon} size={18} />
-              <input 
-                type="text" 
-                {...registerProfile('displayName')}
-                className={s.inputField} 
-              />
-            </div>
-            {profileErrors.displayName && <p className={s.errorMessage}>{profileErrors.displayName.message}</p>}
-          </div>
-
-          {/* Email Input (Disabled/Read-only since API might not support changing email easily here) */}
-          <div className={s.fieldGroup}>
-            <label className={s.fieldLabel}>Email liên kết</label>
-            <div className={s.inputWrapper}>
-              <Mail className={s.inputIcon} size={18} />
-              <input 
-                type="email" 
-                value={currentProfile?.email || ''} 
-                disabled
-                className={`${s.inputField} opacity-60 cursor-not-allowed`} 
-              />
-            </div>
-          </div>
-
-          {/* Bio Input */}
-          <div className={s.fieldGroupFull}>
-            <label className={s.fieldLabel}>Tiểu sử</label>
-            <div className={s.inputWrapper}>
-              <BookText className={s.inputIconTop} size={18} />
-              <textarea 
-                {...registerProfile('bio')}
-                className={s.textareaField} 
-                rows="2"
-                placeholder="Chia sẻ đôi điều về bạn..."
-              />
-            </div>
-            {profileErrors.bio && <p className={s.errorMessage}>{profileErrors.bio.message}</p>}
-          </div>
-        </form>
-
-        {/* Additional Options */}
-        <div className={s.dangerZone}>
-          <div className={s.optionItem} onClick={handleOpenPasswordModal}>
-            <div className={s.optionContent}>
-              <div className={`${s.optionIcon} ${s.optionIcon1}`}>
-                <Shield size={24} />
-              </div>
-              <div>
-                <p className={`${s.optionTitle} ${s.optionTitle1}`}>Đổi mật khẩu</p>
-                <p className={s.optionDesc}>Bảo mật tài khoản của bạn</p>
-              </div>
-            </div>
-            <ChevronRight className={s.chevron} size={20} />
-          </div>
-
-          <div className={s.optionItem} onClick={handleOpenDeleteModal} style={{ cursor: 'pointer' }}>
-            <div className={s.optionContent}>
-              <div className={`${s.optionIcon} ${s.optionIcon2}`}>
-                <Trash2 size={24} />
-              </div>
-              <div>
-                <p className={`${s.optionTitle} ${s.optionTitle2}`}>Xóa tài khoản</p>
-                <p className={s.optionDesc}>Hành động này không thể hoàn tác</p>
-              </div>
-            </div>
-            <ChevronRight className={s.chevron} size={20} />
-          </div>
-
-          <div className={s.optionItem} onClick={handleLogout} style={{ cursor: 'pointer' }}>
-            <div className={s.optionContent}>
-              <div className={`${s.optionIcon} ${s.optionIconLogout}`}>
-                <LogOut size={24} />
-              </div>
-              <div>
-                <p className={`${s.optionTitle} ${s.optionTitleLogout}`}>Đăng xuất</p>
-                <p className={s.optionDesc}>Thoát khỏi tài khoản này</p>
-              </div>
-            </div>
-            <ChevronRight className={s.chevron} size={20} />
-          </div>
-        </div>
-      </section>
+      </div>
 
       {/* Password Modal */}
       {isPasswordModalOpen && (
@@ -492,6 +591,14 @@ const EditProfilePage = () => {
           </div>
         </div>
       )}
+
+      {/* Badges Collection Modal */}
+      <BadgesModal 
+        isOpen={isBadgesModalOpen} 
+        onClose={() => setIsBadgesModalOpen(false)} 
+        profile={currentProfile} 
+        isOwner={true}
+      />
     </div>
   );
 };

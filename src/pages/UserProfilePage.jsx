@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Camera, MoreVertical, Loader2, Plus, Clock, ChefHat, Bookmark } from 'lucide-react';
+import { Camera, MoreVertical, Loader2, Plus, Clock, ChefHat, Bookmark, Sparkles, Trophy } from 'lucide-react';
 import { userService } from '../services/userService';
 import { recipeService } from '../services/recipeService';
 import useAuthStore from '../store/useAuthStore';
 import FollowButton from '../components/FollowButton';
+import UserAvatar from '../components/ui/UserAvatar';
+import BadgesModal, { BADGE_DEFINITIONS, getPinnedBadgeIds } from '../components/profile/BadgesModal';
+import { Star } from 'lucide-react';
 
 import s from '../styles/pages/UserProfilePage.module.css';
 import fx from '../styles/effects.module.css';
@@ -26,9 +29,12 @@ function formatTime(minutes) {
 
 const UserProfilePage = () => {
   const { id } = useParams();
-  const currentUserId = useAuthStore((state) => state.user?.id);
+  const currentUser = useAuthStore((state) => state.user);
+  const currentUserId = currentUser?.id;
   const isOwnProfile = currentUserId === parseInt(id, 10);
   const [activeTab, setActiveTab] = useState('recipes');
+  const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
+  const [pinnedBadgeIds, setPinnedBadgeIds] = useState([]);
 
   // Fetch public profile
   const { data: profileData, isLoading: isLoadingProfile } = useQuery({
@@ -36,11 +42,20 @@ const UserProfilePage = () => {
     queryFn: () => userService.getPublicProfile(id),
   });
 
+
   // Fetch user's recipes (all for self, public for others)
   const { data: recipesData, isLoading: isLoadingRecipes } = useQuery({
     queryKey: ['userRecipes', id, isOwnProfile],
     queryFn: () => isOwnProfile ? recipeService.getMyRecipes(0, 20) : recipeService.getUserPublicRecipes(id, 0, 20),
   });
+
+  const profile = profileData?.data;
+
+  React.useEffect(() => {
+    if (profile?.id) {
+      setPinnedBadgeIds(getPinnedBadgeIds(profile.id, profile));
+    }
+  }, [profile?.id, profile?.recipeCount, profile?.followerCount]);
 
   if (isLoadingProfile) {
     return (
@@ -49,8 +64,6 @@ const UserProfilePage = () => {
       </div>
     );
   }
-
-  const profile = profileData?.data;
 
   if (!profile) {
     return (
@@ -69,14 +82,12 @@ const UserProfilePage = () => {
           
           {/* Avatar */}
           <div className="relative group cursor-pointer">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden ring-4 ring-primary/20 group-hover:ring-primary/60 border-4 border-white bg-surface-container transition-all duration-500 group-hover:scale-105 shadow-xl">
-              {profile.avatarUrl ? (
-                <img src={profile.avatarUrl} alt={profile.displayName} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-4xl text-primary font-bold">
-                  {(profile.displayName || profile.username).charAt(0).toUpperCase()}
-                </div>
-              )}
+            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden ring-4 ring-[#a13923]/20 group-hover:ring-[#a13923]/60 border-4 border-white transition-all duration-500 group-hover:scale-105 shadow-xl">
+              <UserAvatar
+                src={profile.avatarUrl}
+                name={profile.displayName || profile.username}
+                className="w-full h-full text-4xl md:text-5xl font-bold"
+              />
             </div>
             
             {isOwnProfile && (
@@ -88,47 +99,117 @@ const UserProfilePage = () => {
 
           {/* Identity & Stats */}
           <div className="flex-1 text-center md:text-left w-full">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-5">
               <div>
-                <h2 className="font-headline-lg text-3xl font-bold text-on-surface mb-1">
-                  {profile.displayName || profile.username}
-                </h2>
-                {profile.bio && (
-                  <p className="text-on-surface-variant font-body-md max-w-lg">{profile.bio}</p>
+                <div className="flex items-center justify-center md:justify-start gap-2.5 flex-wrap mb-1.5">
+                  <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[#3d271d]">
+                    {profile.displayName || profile.username}
+                  </h2>
+                  <span className="text-xs text-[#a13923] bg-[#fff5f2] px-2.5 py-0.5 rounded-full font-semibold border border-[#fbdcd5]">
+                    {profile.recipeCount > 0 ? 'Đầu bếp' : 'Thành viên'}
+                  </span>
+                </div>
+                <p className="text-xs text-[#796255] mb-2.5 flex items-center justify-center md:justify-start gap-2 flex-wrap">
+                  <span className="font-medium">@{profile.username}</span>
+                  {profile.createdAt && (
+                    <>
+                      <span>•</span>
+                      <span>Tham gia từ {new Date(profile.createdAt).toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' })}</span>
+                    </>
+                  )}
+                </p>
+                {profile.bio ? (
+                  <p className="text-[#553e32] text-sm max-w-lg leading-relaxed">{profile.bio}</p>
+                ) : (
+                  <p className="text-[#8c786c] text-sm italic max-w-lg">Yêu thích nấu ăn và sẻ chia hương vị bữa cơm gia đình cùng Smart Recipe.</p>
                 )}
+
+                {/* Huy hiệu danh hiệu ẩm thực */}
+                <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap mt-3 pt-2.5 border-t border-[#f0e3d9]/70">
+                  <span className="text-[11px] font-bold text-[#8c786c] uppercase tracking-wider mr-0.5 flex items-center gap-1">
+                    <Trophy size={13} className="text-amber-600" />
+                    Huy hiệu:
+                  </span>
+
+                  {/* Danh sách huy hiệu được ghim / chọn hiển thị (tối đa 3) */}
+                  {pinnedBadgeIds.map((badgeId) => {
+                    const badge = BADGE_DEFINITIONS.find((b) => b.id === badgeId);
+                    if (!badge) return null;
+                    return (
+                      <button 
+                        key={badge.id}
+                        type="button"
+                        onClick={() => setIsBadgesModalOpen(true)}
+                        className={`inline-flex items-center gap-1.5 bg-gradient-to-r ${badge.colorClasses} px-2.5 py-0.5 rounded-full text-xs font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer border`} 
+                        title={`Bấm để xem chi tiết danh hiệu: ${badge.title}`}
+                      >
+                        <span>{badge.icon}</span>
+                        <span>{badge.title}</span>
+                      </button>
+                    );
+                  })}
+
+                  {/* Nút Chọn huy hiệu hiển thị cho chính chủ */}
+                  {isOwnProfile && (
+                    <button
+                      type="button"
+                      onClick={() => setIsBadgesModalOpen(true)}
+                      className="inline-flex items-center gap-1 bg-[#fff5f2] hover:bg-[#ffece6] text-[#a13923] border border-[#fbdcd5] px-2 py-0.5 rounded-full text-[11px] font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Chọn tối đa 3 huy hiệu để hiển thị ở hồ sơ"
+                    >
+                      <Star size={11} className="text-amber-500 fill-amber-500" />
+                      <span>Chọn hiển thị ({pinnedBadgeIds.length}/3)</span>
+                    </button>
+                  )}
+
+                  {/* Nút Xem tất cả bộ sưu tập */}
+                  <button
+                    type="button"
+                    onClick={() => setIsBadgesModalOpen(true)}
+                    className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/70 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs transition-all cursor-pointer ml-1"
+                    title="Mở toàn bộ bộ sưu tập huy hiệu"
+                  >
+                    <Sparkles size={11} className="text-amber-600" />
+                    <span>Bộ sưu tập ({BADGE_DEFINITIONS.filter(b => b.checkUnlocked(profile)).length}/{BADGE_DEFINITIONS.length})</span>
+                  </button>
+                </div>
               </div>
               
               {isOwnProfile ? (
-                <Link to="/profile" className="bg-primary text-white px-6 py-2.5 rounded-full font-label-md hover:brightness-110 active:scale-95 transition-all shadow-md inline-block">
+                <Link to="/profile" className="bg-[#a13923] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#8b311e] active:scale-95 transition-all shadow-md inline-flex items-center gap-2 self-center md:self-start">
                   Chỉnh sửa hồ sơ
                 </Link>
               ) : (
-                <FollowButton 
-                  userId={profile.id} 
-                  initialIsFollowing={profile.isFollowing} 
-                  className="rounded-full shadow-md font-label-md px-8 py-2.5"
-                />
+                <div className="self-center md:self-start">
+                  <FollowButton 
+                    userId={profile.id} 
+                    initialIsFollowing={profile.isFollowing} 
+                    className="rounded-full shadow-md text-sm px-7 py-2.5 font-bold"
+                  />
+                </div>
               )}
             </div>
 
-            {/* Statistics Bento-ish Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+            {/* Statistics Bento Grid: 3 ô căn đều khi xem người khác, 4 ô khi là chính chủ */}
+            <div className={`grid ${isOwnProfile ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3'} gap-3 sm:gap-4 mt-4`}>
               <div className={s.statBox}>
-                <span className="block text-2xl text-primary font-bold mb-1">{profile.recipeCount || 0}</span>
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Công thức</span>
+                <span className="block text-2xl font-heading text-[#a13923] font-bold mb-0.5">{profile.recipeCount || 0}</span>
+                <span className="text-[11px] font-bold text-[#796255] uppercase tracking-wider">Công thức</span>
               </div>
               <div className={s.statBox}>
-                <span className="block text-2xl text-primary font-bold mb-1">{profile.followerCount || 0}</span>
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Người theo dõi</span>
+                <span className="block text-2xl font-heading text-[#a13923] font-bold mb-0.5">{profile.followerCount || 0}</span>
+                <span className="text-[11px] font-bold text-[#796255] uppercase tracking-wider">Người theo dõi</span>
               </div>
               <div className={s.statBox}>
-                <span className="block text-2xl text-primary font-bold mb-1">{profile.followingCount || 0}</span>
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Đang theo dõi</span>
+                <span className="block text-2xl font-heading text-[#a13923] font-bold mb-0.5">{profile.followingCount || 0}</span>
+                <span className="text-[11px] font-bold text-[#796255] uppercase tracking-wider">Đang theo dõi</span>
               </div>
-              <div className={s.statBox}>
-                <span className="block text-2xl text-primary font-bold mb-1">0</span>
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Đã lưu</span>
-              </div>
+              {isOwnProfile && (
+                <div className={s.statBox}>
+                  <span className="block text-2xl font-heading text-[#a13923] font-bold mb-0.5">0</span>
+                  <span className="text-[11px] font-bold text-[#796255] uppercase tracking-wider">Đã lưu</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -136,32 +217,39 @@ const UserProfilePage = () => {
       </section>
 
         {/* Tabbed Interface */}
-      <section className={`mb-10 ${fx.stagger2}`}>
-        <div className={`flex items-center gap-8 mb-8 border-b border-outline-variant/20 overflow-x-auto ${s.hideScrollbar}`}>
-          <button 
-            onClick={() => setActiveTab('recipes')}
-            className={`pb-4 px-2 font-label-md whitespace-nowrap transition-all relative flex items-center ${activeTab === 'recipes' ? 'text-primary font-bold' : 'text-on-surface-variant font-medium hover:text-primary'}`}
-          >
-            <span>Công thức của tôi</span>
-            <div className={`absolute bottom-[-1px] left-0 h-[3px] bg-primary transition-all duration-300 ${activeTab === 'recipes' ? 'w-full' : 'w-0'}`}></div>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('saved')}
-            className={`pb-4 px-2 font-label-md whitespace-nowrap transition-all relative flex items-center ${activeTab === 'saved' ? 'text-primary font-bold' : 'text-on-surface-variant font-medium hover:text-primary'}`}
-          >
-            <span>Đã lưu</span>
-            <div className={`absolute bottom-[-1px] left-0 h-[3px] bg-primary transition-all duration-300 ${activeTab === 'saved' ? 'w-full' : 'w-0'}`}></div>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('activity')}
-            className={`pb-4 px-2 font-label-md whitespace-nowrap transition-all relative flex items-center ${activeTab === 'activity' ? 'text-primary font-bold' : 'text-on-surface-variant font-medium hover:text-primary'}`}
-          >
-            <span>Hoạt động</span>
-            <div className={`absolute bottom-[-1px] left-0 h-[3px] bg-primary transition-all duration-300 ${activeTab === 'activity' ? 'w-full' : 'w-0'}`}></div>
-          </button>
-        </div>
+        <section className={`mb-10 ${fx.stagger2}`}>
+          <div className={`flex items-center gap-8 mb-8 border-b border-[#f0e3d9] overflow-x-auto ${s.hideScrollbar}`}>
+            <button 
+              onClick={() => setActiveTab('recipes')}
+              className={`pb-3.5 px-2 font-heading text-base sm:text-lg whitespace-nowrap transition-all relative flex items-center gap-2 ${activeTab === 'recipes' ? 'text-[#a13923] font-bold' : 'text-[#796255] font-medium hover:text-[#a13923]'}`}
+            >
+              <span>{isOwnProfile ? 'Công thức của tôi' : 'Công thức đã đăng'}</span>
+              <span className="text-xs bg-[#fff5f2] text-[#a13923] font-bold px-2.5 py-0.5 rounded-full border border-[#fbdcd5]">
+                {profile.recipeCount || 0}
+              </span>
+              <div className={`absolute bottom-[-1px] left-0 h-[3px] bg-[#a13923] rounded-full transition-all duration-300 ${activeTab === 'recipes' ? 'w-full' : 'w-0'}`}></div>
+            </button>
+            
+            {isOwnProfile && (
+              <>
+                <button 
+                  onClick={() => setActiveTab('saved')}
+                  className={`pb-3.5 px-2 font-heading text-base sm:text-lg whitespace-nowrap transition-all relative flex items-center ${activeTab === 'saved' ? 'text-[#a13923] font-bold' : 'text-[#796255] font-medium hover:text-[#a13923]'}`}
+                >
+                  <span>Đã lưu</span>
+                  <div className={`absolute bottom-[-1px] left-0 h-[3px] bg-[#a13923] rounded-full transition-all duration-300 ${activeTab === 'saved' ? 'w-full' : 'w-0'}`}></div>
+                </button>
+                
+                <button 
+                  onClick={() => setActiveTab('activity')}
+                  className={`pb-3.5 px-2 font-heading text-base sm:text-lg whitespace-nowrap transition-all relative flex items-center ${activeTab === 'activity' ? 'text-[#a13923] font-bold' : 'text-[#796255] font-medium hover:text-[#a13923]'}`}
+                >
+                  <span>Hoạt động</span>
+                  <div className={`absolute bottom-[-1px] left-0 h-[3px] bg-[#a13923] rounded-full transition-all duration-300 ${activeTab === 'activity' ? 'w-full' : 'w-0'}`}></div>
+                </button>
+              </>
+            )}
+          </div>
 
         {/* Tab Contents */}
         {activeTab === 'recipes' && (
@@ -233,6 +321,30 @@ const UserProfilePage = () => {
                 )}
               </div>
             )}
+
+            {/* Guest Conversion Hook */}
+            {!currentUser && (
+              <div className="mt-14 p-8 rounded-2xl bg-gradient-to-r from-[#3d271d] via-[#5c3e33] to-[#a13923] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles size={18} className="text-[#ffb347]" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#ffb347]">Khám phá cùng Smart Recipe</span>
+                  </div>
+                  <h3 className="font-heading text-xl sm:text-2xl font-bold mb-1.5">
+                    Yêu thích công thức của {profile.displayName || profile.username}?
+                  </h3>
+                  <p className="text-white/80 text-sm max-w-xl">
+                    Đăng ký tài khoản miễn phí để lưu món ngon vào thực đơn tuần, nhận thông báo công thức mới và quản lý nguyên liệu nấu ăn thông minh ngay hôm nay!
+                  </p>
+                </div>
+                <Link 
+                  to="/register" 
+                  className="px-6 py-3 rounded-full bg-white text-[#a13923] font-bold text-sm shadow-md hover:bg-[#fff5f2] hover:scale-105 active:scale-95 transition-all whitespace-nowrap"
+                >
+                  Đăng ký miễn phí
+                </Link>
+              </div>
+            )}
           </>
         )}
 
@@ -251,6 +363,15 @@ const UserProfilePage = () => {
           </div>
         )}
       </section>
+
+      {/* Badges Collection Modal */}
+      <BadgesModal 
+        isOpen={isBadgesModalOpen} 
+        onClose={() => setIsBadgesModalOpen(false)} 
+        profile={profile} 
+        isOwner={isOwnProfile}
+        onPinnedChange={(newPinned) => setPinnedBadgeIds(newPinned)}
+      />
 
     </div>
   );
