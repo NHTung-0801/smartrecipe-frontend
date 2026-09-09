@@ -25,6 +25,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminIngredients from './pages/admin/AdminIngredients';
 import AdminRecipes from './pages/admin/AdminRecipes';
 import AdminPlaceholder from './pages/admin/AdminPlaceholder';
+import BenefitsPage from './pages/BenefitsPage';
 import useAuthStore from './store/useAuthStore';
 
 const queryClient = new QueryClient({
@@ -54,15 +55,24 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected routes - có Navbar */}
+          {/* === Public routes - Có Navbar, không yêu cầu đăng nhập === */}
+          {/* Trang Khám phá: Khách vãng lai xem được công thức công khai */}
           <Route
             path="/"
             element={
-              <ProtectedRoute>
-                <AppLayout>
-                  <HomePage />
-                </AppLayout>
-              </ProtectedRoute>
+              <AppLayout>
+                <HomePage />
+              </AppLayout>
+            }
+          />
+
+          {/* Trang Đặc quyền thành viên: Giới thiệu hệ sinh thái Smart Recipe */}
+          <Route
+            path="/features"
+            element={
+              <AppLayout>
+                <BenefitsPage />
+              </AppLayout>
             }
           />
           <Route
@@ -95,24 +105,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Trang chi tiết công thức: Khách xem được nguyên liệu, bước nấu, bình luận.
+              Chỉ khi bấm Like / Clone / Thêm vào giỏ mới nhắc đăng nhập (xem RecipeDetailPage.jsx). */}
           <Route
             path="/recipes/:id"
             element={
-              <ProtectedRoute>
-                <AppLayout>
-                  <RecipeDetailPage />
-                </AppLayout>
-              </ProtectedRoute>
+              <AppLayout>
+                <RecipeDetailPage />
+              </AppLayout>
             }
           />
+          {/* Trang hồ sơ người dùng: Khách xem được profile công khai của tác giả */}
           <Route
             path="/users/:id"
             element={
-              <ProtectedRoute>
-                <AppLayout>
-                  <UserProfilePage />
-                </AppLayout>
-              </ProtectedRoute>
+              <AppLayout>
+                <UserProfilePage />
+              </AppLayout>
             }
           />
           <Route

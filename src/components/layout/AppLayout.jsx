@@ -3,6 +3,7 @@ import Sidebar from './Sidebar';
 import TopHeader from './TopHeader';
 import s from '../../styles/layout/AppLayout.module.css';
 import { AuroraBackground, FloatingParticles } from '../effects';
+import AuthRequiredModal from '../ui/AuthRequiredModal';
 
 const AppLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,6 +35,9 @@ const AppLayout = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* Modal yêu cầu đăng nhập khi khách bấm vào các tính năng bảo mật */}
+      <AuthRequiredModal />
     </div>
   );
 };
