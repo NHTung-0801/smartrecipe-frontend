@@ -2,9 +2,10 @@ import { useState } from 'react';
 import useAuthStore from '../../store/useAuthStore';
 import useAuthPromptStore from '../../store/useAuthPromptStore';
 import UserAvatar from '../ui/UserAvatar';
+import { MessageCircle, Edit3, Trash2, ChefHat, ChevronDown, ChevronUp, CornerDownRight, Check, X } from 'lucide-react';
 import styles from './CommentSection.module.css';
 
-export default function CommentItem({ comment, onReply, onUpdate, onDelete, depth }) {
+export default function CommentItem({ comment, onReply, onUpdate, onDelete, depth = 0, recipeAuthorId }) {
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [replyContent, setReplyContent] = useState('');
@@ -45,6 +46,7 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
       await onReply(comment.id, replyContent.trim());
       setReplyContent('');
       setIsReplying(false);
+      setShowReplies(true);
     } catch (err) {
       setError('Không thể gửi trả lời.');
     } finally {
@@ -68,23 +70,31 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
   };
 
   const isOwner = !!currentUser?.id && Number(currentUser.id) === Number(comment.author?.id);
+  const isRecipeAuthor = recipeAuthorId && Number(recipeAuthorId) === Number(comment.author?.id);
   const hasReplies = comment.replies && comment.replies.length > 0;
+  const authorName = comment.author?.displayName || comment.author?.fullName || comment.author?.username || 'Người dùng';
 
   return (
     <div
-      className={`${styles.commentItem} ${depth > 0 ? styles.nested : ''}`}
-      style={{ marginLeft: depth > 0 ? `${Math.min(depth * 20, 80)}px` : 0 }}
+      className={`${styles.commentItem} ${depth > 0 ? styles.nestedItem : styles.rootItem}`}
+      style={{ marginLeft: depth > 0 ? `${Math.min(depth * 24, 72)}px` : 0 }}
     >
       <div className={styles.commentHeader}>
         <UserAvatar
           src={comment.author?.avatarUrl}
-          name={comment.author?.displayName || comment.author?.username}
+          name={authorName}
           className={styles.avatar}
         />
         <div className={styles.authorInfo}>
           <span className={styles.authorName}>
-            {comment.author?.displayName || comment.author?.username || 'Người dùng'}
+            {authorName}
           </span>
+          {isRecipeAuthor && (
+            <span className={styles.recipeAuthorBadge} title="Tác giả công thức này">
+              <ChefHat size={12} /> Tác giả
+            </span>
+          )}
+          <span className={styles.commentDot}>•</span>
           <span className={styles.commentTime}>{formatDate(comment.createdAt)}</span>
           {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
             <span className={styles.editedLabel}>(đã sửa)</span>
@@ -110,7 +120,8 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
                 className={styles.saveBtn}
                 disabled={submitting || !editContent.trim()}
               >
-                {submitting ? 'Đang lưu...' : 'Lưu'}
+                <Check size={14} />
+                <span>{submitting ? 'Đang lưu...' : 'Lưu'}</span>
               </button>
               <button
                 type="button"
@@ -120,7 +131,8 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
                   setEditContent(comment.content);
                 }}
               >
-                Hủy
+                <X size={14} />
+                <span>Hủy</span>
               </button>
             </div>
           </form>
@@ -130,22 +142,6 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
       </div>
 
       <div className={styles.commentActions}>
-        {isOwner && (
-          <>
-            <button
-              className={styles.actionBtn}
-              onClick={() => setIsEditing(true)}
-            >
-              Sửa
-            </button>
-            <button
-              className={styles.actionBtn}
-              onClick={() => onDelete(comment.id)}
-            >
-              Xóa
-            </button>
-          </>
-        )}
         <button
           className={styles.actionBtn}
           onClick={() => {
@@ -156,37 +152,73 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
             setIsReplying(!isReplying);
           }}
         >
-          {isReplying ? 'Hủy trả lời' : 'Trả lời'}
+          <MessageCircle size={13} />
+          <span>{isReplying ? 'Hủy trả lời' : 'Trả lời'}</span>
         </button>
+
+        {isOwner && (
+          <>
+            <button
+              className={styles.actionBtn}
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit3 size={13} />
+              <span>Sửa</span>
+            </button>
+            <button
+              className={`${styles.actionBtn} ${styles.deleteActionBtn}`}
+              onClick={() => onDelete(comment.id)}
+            >
+              <Trash2 size={13} />
+              <span>Xóa</span>
+            </button>
+          </>
+        )}
+
         {hasReplies && (
           <button
-            className={styles.actionBtn}
+            className={`${styles.actionBtn} ${styles.toggleRepliesBtn}`}
             onClick={() => setShowReplies(!showReplies)}
           >
-            {showReplies ? `Ẩn ${comment.replies.length} trả lời` : `Xem ${comment.replies.length} trả lời`}
+            {showReplies ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            <span>{showReplies ? `Ẩn ${comment.replies.length} phản hồi` : `Xem ${comment.replies.length} phản hồi`}</span>
           </button>
         )}
       </div>
 
       {isReplying && (
         <form onSubmit={handleReplySubmit} className={styles.replyForm}>
+          <div className={styles.replyFormIndicator}>
+            <CornerDownRight size={16} className="text-[#a13923]" />
+            <span>Trả lời @{authorName}</span>
+          </div>
           <textarea
             className={styles.replyTextarea}
-            placeholder={`Trả lời @${comment.author?.displayName || comment.author?.username}...`}
+            placeholder={`Viết câu trả lời cho @${authorName}...`}
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
             rows={2}
             maxLength={2000}
             disabled={submitting}
+            autoFocus
           />
           {error && <span className={styles.error}>{error}</span>}
-          <button
-            type="submit"
-            className={styles.replyBtn}
-            disabled={submitting || !replyContent.trim()}
-          >
-            {submitting ? 'Đang gửi...' : 'Gửi'}
-          </button>
+          <div className={styles.replyActions}>
+            <button
+              type="button"
+              className={styles.cancelReplyBtn}
+              onClick={() => setIsReplying(false)}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              className={styles.replyBtn}
+              disabled={submitting || !replyContent.trim()}
+            >
+              {submitting ? 'Đang gửi...' : 'Gửi trả lời'}
+            </button>
+          </div>
         </form>
       )}
 
@@ -200,6 +232,7 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, dept
               onUpdate={onUpdate}
               onDelete={onDelete}
               depth={depth + 1}
+              recipeAuthorId={recipeAuthorId}
             />
           ))}
         </div>
