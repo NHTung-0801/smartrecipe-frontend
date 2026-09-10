@@ -7,8 +7,9 @@ import { userService } from '../services/userService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
 import useAuthPromptStore from '../store/useAuthPromptStore';
+import useLikedRecipes from '../hooks/useLikedRecipes';
 import { 
-  Heart, Share2, Copy, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer
+  Heart, Share2, Copy, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer, Sparkles
 } from 'lucide-react';
 import s from '../styles/pages/RecipeDetailPage.module.css';
 import CookingMode from '../components/recipe/CookingMode';
@@ -43,11 +44,12 @@ export default function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const currentUser = useAuthStore((s) => s.user);
+  const { isLiked: checkIsLiked, toggleLike } = useLikedRecipes();
 
   const [recipe, setRecipe] = useState(null);
   const [similarRecipes, setSimilarRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
+  const isLiked = checkIsLiked(id);
   const [likeCount, setLikeCount] = useState(0);
   const [cloning, setCloning] = useState(false);
   const [isCookingMode, setIsCookingMode] = useState(false);
@@ -66,14 +68,19 @@ export default function RecipeDetailPage() {
       try {
         const [r, similarRes, pantryRes] = await Promise.all([
           recipeService.getById(id),
-          recipeService.getPublicRecipes(0, 3),
+          recipeService.getPublicRecipes(0, 4),
           currentUser ? pantryService.getPantry() : Promise.resolve(null)
         ]);
         
         setRecipe(r);
-        setIsLiked(r.isLiked || false);
         setLikeCount(r.likeCount || 0);
-        setSimilarRecipes(similarRes.content || []);
+        let filteredSimilar = (similarRes.content || [])
+          .filter(item => Number(item.id) !== Number(id));
+        // Nếu trong DB chưa có món công khai nào khác, fallback giữ lại danh sách công khai để người dùng luôn thấy giao diện món tương tự
+        if (filteredSimilar.length === 0 && (similarRes.content || []).length > 0) {
+          filteredSimilar = (similarRes.content || []).slice(0, 3);
+        }
+        setSimilarRecipes(filteredSimilar);
 
         // Xử lý thông tin tủ nguyên liệu
         const pMap = {};
@@ -133,24 +140,13 @@ export default function RecipeDetailPage() {
 
   const openAuthModal = useAuthPromptStore((state) => state.openModal);
 
-  const handleLike = async () => {
+  const handleLike = () => {
     if (!currentUser) {
       openAuthModal('Lưu công thức yêu thích');
       return;
     }
-    try {
-      if (isLiked) {
-        await recipeService.unlike(id);
-        setIsLiked(false);
-        setLikeCount((c) => c - 1);
-      } else {
-        await recipeService.like(id);
-        setIsLiked(true);
-        setLikeCount((c) => c + 1);
-      }
-    } catch (err) {
-      toast.error('Thao tác thất bại');
-    }
+    setLikeCount((c) => (isLiked ? Math.max(0, c - 1) : c + 1));
+    toggleLike(id);
   };
 
   const handleClone = async () => {
@@ -293,8 +289,17 @@ export default function RecipeDetailPage() {
             </div>
 
             <div className="flex gap-3 mb-2 shrink-0">
-              <button onClick={handleLike} className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isLiked ? 'bg-[#a13923] text-white' : 'bg-white/20 text-white hover:bg-white/40'}`}>
+              <button 
+                onClick={handleLike} 
+                title={isLiked ? "Bỏ thích công thức" : "Yêu thích công thức"}
+                className={`h-10 px-3.5 rounded-full flex items-center gap-1.5 transition-all active:scale-95 ${
+                  isLiked 
+                    ? 'bg-[#a13923] text-white shadow-lg shadow-[#a13923]/40' 
+                    : 'bg-white/20 text-white hover:bg-white/40'
+                }`}
+              >
                 <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+                {likeCount > 0 && <span className="text-xs font-bold">{likeCount}</span>}
               </button>
               <button 
                 onClick={() => setIsShareModalOpen(true)}
@@ -626,29 +631,85 @@ export default function RecipeDetailPage() {
         </div>
       </section>
 
-      {/* 4. SIMILAR RECIPES */}
-      <section className="max-w-[1200px] mx-auto mt-20 px-5">
-        <h2 className="font-heading text-2xl font-bold text-[#3d271d] mb-6">Món ngon tương tự</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {similarRecipes.map(r => (
-            <Link key={r.id} to={`/recipes/${r.id}`} className="block group">
-              <div className="rounded-2xl overflow-hidden mb-3 aspect-[4/3] bg-gray-100">
-                <img 
-                  src={r.imageUrl || DEFAULT_IMAGE} 
-                  alt={r.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <h3 className="font-heading text-lg font-bold text-[#3d271d] group-hover:text-[#a13923] transition-colors mb-1">{r.title}</h3>
-              <p className="text-sm text-gray-500">Người đăng: {r.authorName}</p>
-            </Link>
-          ))}
-        </div>
+      {/* 4. BÌNH LUẬN & THẢO LUẬN CỘNG ĐỒNG */}
+      <section className="max-w-[1200px] mx-auto mt-14 px-5">
+        <CommentSection recipeId={id} recipeAuthorId={recipe?.author?.id} />
       </section>
 
-      {/* 5. BÌNH LUẬN CỘNG ĐỒNG */}
-      <section className="max-w-[1200px] mx-auto mt-16 px-5 mb-16">
-        <CommentSection recipeId={id} />
+      {/* 5. MÓN NGON TƯƠNG TỰ (GỢI Ý Ở CUỐI TRANG) */}
+      <section className="max-w-[1200px] mx-auto mt-16 px-5 mb-20">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="font-heading text-2xl font-bold text-[#3d271d] flex items-center gap-2" style={{ marginBottom: 0 }}>
+              <Sparkles size={22} className="text-[#a13923]" /> Món ngon tương tự
+            </h2>
+            <p className="text-sm text-[#7a6458] mt-1">
+              Gợi ý các công thức cùng phong cách có thể bạn sẽ thích
+            </p>
+          </div>
+          <Link 
+            to="/" 
+            className="text-sm font-semibold text-[#a13923] hover:text-[#8b311e] flex items-center gap-1 hover:underline"
+          >
+            Xem tất cả <ArrowLeft size={16} className="rotate-180" />
+          </Link>
+        </div>
+
+        {similarRecipes.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {similarRecipes.map((r) => {
+              const totalTime = (r.prepTime || 0) + (r.cookTime || 0);
+              const authorDisplayName = r.author?.fullName || r.author?.username || 'Đầu bếp SmartRecipe';
+
+              return (
+                <Link 
+                  key={r.id} 
+                  to={`/recipes/${r.id}`} 
+                  className="block group bg-white rounded-2xl p-3 border border-[#f0e6e0] shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="rounded-xl overflow-hidden mb-3 aspect-[4/3] bg-gray-100 relative">
+                    <img 
+                      src={r.imageUrl || DEFAULT_IMAGE} 
+                      alt={r.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {totalTime > 0 && (
+                      <span className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Clock size={12} /> {totalTime} phút
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-heading text-base font-bold text-[#3d271d] group-hover:text-[#a13923] transition-colors mb-1 line-clamp-1">
+                    {r.title}
+                  </h3>
+                  <div className="flex items-center justify-between text-xs text-[#7a6458] mt-2 pt-2 border-t border-[#f5eee9]">
+                    <span className="truncate max-w-[170px]">
+                      Bởi <strong>{authorDisplayName}</strong>
+                    </span>
+                    {r.likeCount > 0 && (
+                      <span className="flex items-center gap-1 text-[#a13923] font-medium flex-shrink-0">
+                        <Heart size={12} fill="currentColor" /> {r.likeCount}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl p-8 border border-[#f0e6e0] text-center shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-[#feebe7] text-[#a13923] flex items-center justify-center mx-auto mb-3">
+              <Sparkles size={24} />
+            </div>
+            <h4 className="font-heading text-lg font-bold text-[#3d271d] mb-1">Đang cập nhật thêm món tương tự</h4>
+            <p className="text-sm text-[#7a6458] max-w-md mx-auto">
+              Cộng đồng Smart Recipe đang tiếp tục sáng tạo các công thức hấp dẫn. Hãy quay lại khám phá thêm nhé!
+            </p>
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-bold text-[#a13923] hover:underline mt-4">
+              Khám phá kho công thức <ArrowLeft size={16} className="rotate-180" />
+            </Link>
+          </div>
+        )}
       </section>
 
       {isCookingMode && (
