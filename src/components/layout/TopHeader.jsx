@@ -1,14 +1,17 @@
 import React from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, Heart, Menu, LogIn, UserPlus } from 'lucide-react';
+import { Search, Heart, Menu, LogIn, UserPlus } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import useAuthPromptStore from '../../store/useAuthPromptStore';
 import UserAvatar from '../ui/UserAvatar';
+import NotificationDropdown from './NotificationDropdown';
 import s from '../../styles/layout/TopHeader.module.css';
 
 const getPageTitle = (pathname) => {
   if (pathname === '/') return 'Khám phá';
   if (pathname === '/features') return 'Đặc quyền thành viên';
+  if (pathname.startsWith('/recipes/new')) return 'Tạo công thức mới';
+  if (pathname.match(/^\/recipes\/\d+/)) return 'Chi tiết công thức';
   if (pathname.startsWith('/recipes')) return 'Công thức của tôi';
   if (pathname.startsWith('/pantry') || pathname.startsWith('/inventory')) return 'Tủ nguyên liệu';
   if (pathname.startsWith('/grocery') || pathname.startsWith('/list')) return 'Đi chợ';
@@ -59,12 +62,7 @@ const TopHeader = ({ toggleSidebar }) => {
         {/* Action Area: Khách thấy [Đăng nhập] & [Đăng ký], Thành viên thấy Bell, Heart, Avatar */}
         {isAuthenticated ? (
           <div className={s.actionGroup}>
-            <button 
-              className={s.iconBtn}
-              title="Thông báo"
-            >
-              <Bell size={20} />
-            </button>
+            <NotificationDropdown />
             <button 
               className={s.iconBtn}
               title="Món ăn yêu thích"
