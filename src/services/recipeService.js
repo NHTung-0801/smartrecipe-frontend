@@ -42,8 +42,8 @@ export const recipeService = {
     return response.data;
   },
 
-  getPublicRecipes: async (page = 0, size = 10) => {
-    const response = await api.get(`/recipes/public?page=${page}&size=${size}`);
+  getPublicRecipes: async (page = 0, size = 10, sortBy = 'createdAt') => {
+    const response = await api.get(`/recipes/public?page=${page}&size=${size}&sortBy=${sortBy}`);
     return response.data;
   },
 
@@ -75,6 +75,11 @@ export const recipeService = {
 
   unlike: async (id) => {
     const response = await api.delete(`/recipes/${id}/like`);
+    return response.data;
+  },
+
+  getLikedRecipeIds: async () => {
+    const response = await api.get('/recipes/liked-ids');
     return response.data;
   },
 

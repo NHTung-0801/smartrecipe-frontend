@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Clock } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import useAuthPromptStore from '../store/useAuthPromptStore';
+import useLikedRecipes from '../hooks/useLikedRecipes';
 
 const DIFFICULTY_LABELS = {
   EASY: 'Dễ',
@@ -20,13 +21,30 @@ function formatTime(minutes) {
 
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?background=a13923&color=fff&size=80&font-size=0.4&bold=true';
 
-const RecipeCard = ({ recipe }) => {
+const RecipeCard = ({ recipe, rankingIndex = null }) => {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const openAuthModal = useAuthPromptStore((state) => state.openModal);
+  const { isLiked: checkIsLiked, toggleLike } = useLikedRecipes();
+
   const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
   const timeText = formatTime(totalTime);
   const diffText = DIFFICULTY_LABELS[recipe.difficulty] || null;
+
+  const isLiked = checkIsLiked(recipe.id);
+  const [likeDelta, setLikeDelta] = useState(0);
+
+  const handleLikeToggle = (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      openAuthModal('Lưu công thức yêu thích');
+      return;
+    }
+    setLikeDelta((prev) => (isLiked ? prev - 1 : prev + 1));
+    toggleLike(recipe.id);
+  };
+
+  const effectiveLikeCount = Math.max(0, (recipe.likeCount || 0) + likeDelta);
 
   // Author info
   const authorName = recipe.authorName || recipe.author?.displayName || recipe.author?.username || 'Ẩn danh';
@@ -52,47 +70,65 @@ const RecipeCard = ({ recipe }) => {
         )}
 
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
 
-        {/* Top-left badges: time & difficulty */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5">
-          {timeText && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/85 backdrop-blur-sm rounded-lg text-xs font-semibold text-gray-700 shadow-sm">
-              <Clock size={12} className="text-gray-500" />
-              {timeText}
+        {/* 1. Top-left: ONLY Ranking badge if applicable */}
+        {rankingIndex !== null && rankingIndex !== undefined && rankingIndex < 3 && (
+          <div className="absolute top-3 left-3 z-10">
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-md ${
+              rankingIndex === 0 
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 ring-1 ring-amber-400/60' 
+                : rankingIndex === 1 
+                  ? 'bg-gradient-to-r from-slate-500 to-gray-600 ring-1 ring-slate-400/60' 
+                  : 'bg-gradient-to-r from-amber-700 to-amber-800 ring-1 ring-amber-600/60'
+            }`}>
+              {rankingIndex === 0 ? '🏆 #1' : rankingIndex === 1 ? '🥈 #2' : '🥉 #3'} Thịnh hành
             </span>
-          )}
-          {diffText && (
-            <span className="px-2.5 py-1 bg-white/85 backdrop-blur-sm rounded-lg text-xs font-semibold text-gray-700 shadow-sm">
+          </div>
+        )}
+
+        {/* 2. Top-right: Like button with onClick toggle */}
+        <div 
+          className="absolute top-3 right-3 z-10"
+          onClick={handleLikeToggle}
+        >
+          <button
+            type="button"
+            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all active:scale-90 cursor-pointer ${
+              isLiked 
+                ? 'bg-white text-rose-500 ring-2 ring-rose-300 shadow-rose-200' 
+                : 'bg-white/85 backdrop-blur-sm text-stone-400 hover:bg-white hover:text-rose-500'
+            }`}
+            title={isLiked ? 'Bỏ thích công thức' : 'Yêu thích công thức'}
+            aria-label={isLiked ? 'Bỏ thích công thức' : 'Yêu thích công thức'}
+          >
+            <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} className={isLiked ? 'text-rose-500 scale-110 transition-transform' : ''} />
+          </button>
+        </div>
+
+        {/* 3. Bottom-left: Difficulty badge */}
+        {diffText && (
+          <div className="absolute bottom-3 left-3 z-10">
+            <span className="px-2.5 py-1 bg-white/90 backdrop-blur-md rounded-lg text-xs font-bold text-stone-800 shadow-md border border-white/70">
               {diffText}
             </span>
-          )}
-        </div>
-
-        {/* Top-right: like button */}
-        <div 
-          className="absolute top-3 right-3"
-          onClick={(e) => {
-            if (!isAuthenticated) {
-              e.stopPropagation();
-              openAuthModal('Lưu công thức yêu thích');
-            }
-          }}
-        >
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all
-            ${recipe.likeCount > 0 
-              ? 'bg-white text-rose-500' 
-              : 'bg-white/80 backdrop-blur-sm text-gray-400 group-hover:bg-white group-hover:text-rose-400'
-            }`}
-          >
-            <Heart size={16} fill={recipe.likeCount > 0 ? 'currentColor' : 'none'} />
           </div>
-        </div>
+        )}
 
-        {/* Status badge for non-public */}
+        {/* 4. Bottom-right: Cook time badge */}
+        {timeText && (
+          <div className="absolute bottom-3 right-3 z-10">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/90 backdrop-blur-md rounded-lg text-xs font-bold text-stone-800 shadow-md border border-white/70">
+              <Clock size={12} className="text-[var(--sr-primary)]" />
+              {timeText}
+            </span>
+          </div>
+        )}
+
+        {/* Status badge for non-public if needed */}
         {recipe.status && recipe.status !== 'PUBLIC' && (
-          <div className="absolute bottom-3 left-3">
-            <span className="px-2.5 py-1 bg-gray-900/60 backdrop-blur-sm rounded-lg text-xs font-semibold text-white shadow-sm">
+          <div className="absolute top-12 left-3 z-10">
+            <span className="px-2.5 py-1 bg-gray-900/80 backdrop-blur-sm rounded-lg text-xs font-semibold text-white shadow-sm">
               {recipe.status === 'PRIVATE' ? '🔒 Riêng tư' : recipe.status === 'DRAFT' ? '📝 Bản nháp' : recipe.status}
             </span>
           </div>
@@ -116,10 +152,10 @@ const RecipeCard = ({ recipe }) => {
             <span className="text-sm text-gray-500 truncate">{authorName}</span>
           </div>
 
-          {recipe.likeCount > 0 && (
-            <div className="flex items-center gap-1 text-sm text-amber-500 font-semibold flex-shrink-0 ml-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              <span>{(recipe.likeCount * 0.8 + 3.2).toFixed(1)}</span>
+          {effectiveLikeCount > 0 && (
+            <div className="flex items-center gap-1 text-xs font-semibold text-rose-500 flex-shrink-0 ml-2">
+              <Heart size={13} fill="currentColor" />
+              <span>{effectiveLikeCount}</span>
             </div>
           )}
         </div>
