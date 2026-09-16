@@ -38,6 +38,7 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VITE_API_BASE_URL: https://smartrecipe-backend.onrender.com/api/v1
 
       - name: Deploy prebuilt to Vercel
         id: deploy

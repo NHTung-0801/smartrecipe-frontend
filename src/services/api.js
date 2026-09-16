@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.PROD 
+const rawEnvUrl = import.meta.env.VITE_API_BASE_URL;
+const isValidUrl = rawEnvUrl && !rawEnvUrl.includes('[SENSITIVE]') && rawEnvUrl.startsWith('http');
+
+const API_BASE_URL = isValidUrl 
+  ? rawEnvUrl 
+  : (import.meta.env.PROD 
     ? 'https://smartrecipe-backend.onrender.com/api/v1' 
     : 'http://localhost:8080/api/v1');
 
