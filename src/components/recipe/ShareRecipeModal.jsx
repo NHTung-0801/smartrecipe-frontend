@@ -1,4 +1,4 @@
-import { X, Globe, Download, Link, Check, ExternalLink } from 'lucide-react';
+import { X, Globe, Download, Link, Check, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { recipeService } from '../../services/recipeService';
@@ -10,18 +10,22 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe, onStatusChan
 
   if (!isOpen || !recipe) return null;
 
-  const isPublic = recipe.status === 'PUBLIC';
+  const isPublic   = recipe.status === 'PUBLIC';
+  const isPending  = recipe.status === 'PENDING_REVIEW';
+  // Đã gửi rồi (public hoặc đang chờ duyệt) → không cần gửi lại
+  const isAlreadySubmitted = isPublic || isPending;
 
   const handlePublish = async () => {
-    if (isPublic) return; // Already public
+    if (isAlreadySubmitted) return;
     setLoadingStatus(true);
     try {
+      // Backend sẽ tự chuyển PUBLIC → PENDING_REVIEW
       const updated = await recipeService.changeStatus(recipe.id, 'PUBLIC');
-      toast.success('Đã đăng công thức lên cộng đồng thành công!');
+      toast.success('Đã gửi yêu cầu công khai! Đang chờ Admin kiểm duyệt 🔍');
       if (onStatusChanged) onStatusChanged(updated);
       onClose();
     } catch (err) {
-      toast.error('Có lỗi xảy ra khi đăng tải');
+      toast.error('Có lỗi xảy ra khi gửi yêu cầu');
     } finally {
       setLoadingStatus(false);
     }
@@ -31,7 +35,6 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe, onStatusChan
     setDownloading(true);
     try {
       const blob = await recipeService.exportToWord(recipe.id);
-      // Create a link element, use it to download the blob, and then remove it
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
       link.href = url;
@@ -62,9 +65,34 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe, onStatusChan
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
   };
 
+  // ─── Trạng thái nút "Đăng lên cộng đồng" ─────────────────────────────────
+  const publishBtnState = (() => {
+    if (isPublic) return {
+      bg: 'bg-green-50 border-green-100 cursor-default opacity-90',
+      iconBg: 'bg-green-100 text-green-600',
+      title: 'Đã công khai',
+      desc: 'Công thức đang hiển thị trên cộng đồng',
+      indicator: <Check className="text-green-600" size={22} />,
+    };
+    if (isPending) return {
+      bg: 'bg-amber-50 border-amber-100 cursor-default opacity-90',
+      iconBg: 'bg-amber-100 text-amber-600',
+      title: 'Đang chờ Admin kiểm duyệt',
+      desc: 'Yêu cầu đã được gửi, Admin sẽ duyệt sớm',
+      indicator: <Clock className="text-amber-500" size={22} />,
+    };
+    return {
+      bg: 'bg-white border-gray-100 hover:border-[#a13923] hover:shadow-md',
+      iconBg: 'bg-red-50 text-[#a13923]',
+      title: 'Đăng lên cộng đồng',
+      desc: 'Cho phép mọi người cùng xem và khám phá',
+      indicator: null,
+    };
+  })();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div 
+      <div
         className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -74,34 +102,29 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe, onStatusChan
             <X size={24} />
           </button>
         </div>
-        
+
         <div className="p-6 space-y-4">
-          
+
           {/* Đăng lên cộng đồng */}
-          <button 
+          <button
             onClick={handlePublish}
-            disabled={isPublic || loadingStatus}
-            className={`w-full flex items-center p-4 rounded-2xl transition-all border-2
-              ${isPublic 
-                ? 'bg-blue-50 border-blue-100 cursor-default opacity-80' 
-                : 'bg-white border-gray-100 hover:border-[#a13923] hover:shadow-md'
-              }`}
+            disabled={isAlreadySubmitted || loadingStatus}
+            className={`w-full flex items-center p-4 rounded-2xl transition-all border-2 ${publishBtnState.bg}`}
           >
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 
-              ${isPublic ? 'bg-blue-100 text-blue-600' : 'bg-red-50 text-[#a13923]'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 ${publishBtnState.iconBg}`}>
               <Globe size={24} />
             </div>
             <div className="flex-1 text-left">
-              <h4 className="font-bold text-gray-900">Đăng lên cộng đồng</h4>
-              <p className="text-sm text-gray-500">
-                {isPublic ? 'Công thức đã được công khai' : 'Cho phép mọi người cùng xem và khám phá'}
-              </p>
+              <h4 className="font-bold text-gray-900">
+                {loadingStatus ? 'Đang gửi...' : publishBtnState.title}
+              </h4>
+              <p className="text-sm text-gray-500">{publishBtnState.desc}</p>
             </div>
-            {isPublic && <Check className="text-blue-600" size={24} />}
+            {publishBtnState.indicator}
           </button>
 
           {/* Tải file Word */}
-          <button 
+          <button
             onClick={handleDownloadWord}
             disabled={downloading}
             className="w-full flex items-center p-4 rounded-2xl bg-white border-2 border-gray-100 hover:border-blue-500 hover:shadow-md transition-all"
@@ -117,7 +140,7 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe, onStatusChan
 
           {/* Mạng xã hội & Link */}
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <button 
+            <button
               onClick={handleCopyLink}
               className="flex flex-col items-center justify-center p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
             >
@@ -127,7 +150,7 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe, onStatusChan
               <span className="text-sm font-semibold text-gray-700">{copied ? 'Đã chép' : 'Copy Link'}</span>
             </button>
 
-            <button 
+            <button
               onClick={handleShareFacebook}
               className="flex flex-col items-center justify-center p-4 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors"
             >
@@ -137,7 +160,7 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe, onStatusChan
               <span className="text-sm font-semibold text-blue-800">Facebook</span>
             </button>
           </div>
-          
+
         </div>
       </div>
     </div>

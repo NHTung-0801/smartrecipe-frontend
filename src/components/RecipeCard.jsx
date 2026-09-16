@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Clock } from 'lucide-react';
+import { Heart, Clock, Lock, FileText } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import useAuthPromptStore from '../store/useAuthPromptStore';
 import useLikedRecipes from '../hooks/useLikedRecipes';
@@ -128,8 +128,22 @@ const RecipeCard = ({ recipe, rankingIndex = null }) => {
         {/* Status badge for non-public if needed */}
         {recipe.status && recipe.status !== 'PUBLIC' && (
           <div className="absolute top-12 left-3 z-10">
-            <span className="px-2.5 py-1 bg-gray-900/80 backdrop-blur-sm rounded-lg text-xs font-semibold text-white shadow-sm">
-              {recipe.status === 'PRIVATE' ? '🔒 Riêng tư' : recipe.status === 'DRAFT' ? '📝 Bản nháp' : recipe.status}
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-900/80 backdrop-blur-sm rounded-lg text-xs font-semibold text-white shadow-sm">
+              {recipe.status === 'PRIVATE' ? (
+                <>
+                  <Lock size={11} /> Riêng tư
+                </>
+              ) : recipe.status === 'DRAFT' ? (
+                <>
+                  <FileText size={11} /> Bản nháp
+                </>
+              ) : recipe.status === 'PENDING_REVIEW' ? (
+                <>
+                  <Clock size={11} /> Chờ duyệt
+                </>
+              ) : (
+                recipe.status
+              )}
             </span>
           </div>
         )}

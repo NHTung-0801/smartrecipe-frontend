@@ -37,8 +37,12 @@ export const recipeService = {
 
   // ==================== LISTING & SEARCH ====================
 
-  getMyRecipes: async (page = 0, size = 10) => {
-    const response = await api.get(`/recipes/my?page=${page}&size=${size}`);
+  getMyRecipes: async (page = 0, size = 10, status = '') => {
+    let url = `/recipes/my?page=${page}&size=${size}`;
+    if (status && status !== 'ALL') {
+      url += `&status=${status}`;
+    }
+    const response = await api.get(url);
     return response.data;
   },
 

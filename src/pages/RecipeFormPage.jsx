@@ -873,7 +873,7 @@ export default function RecipeFormPage() {
                       />
                       <div className={s.radioText}>
                         <span className={s.radioTitle}>Công khai</span>
-                        <span className={s.radioDesc}>Bất kỳ ai trên Smart Recipe đều có thể xem và lưu.</span>
+                        <span className={s.radioDesc}>Bài viết sẽ được gửi đến Quản trị viên phê duyệt trước khi hiển thị công khai trên hệ thống.</span>
                       </div>
                       <Globe size={24} className={form.status === 'PUBLIC' ? "text-[#a13923]" : "text-gray-400"} />
                     </label>
