@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Camera, MoreVertical, Loader2, Plus, Clock, ChefHat, Bookmark, Sparkles, Trophy } from 'lucide-react';
+import { Camera, MoreVertical, Loader2, Plus, Clock, ChefHat, Bookmark, Sparkles, Trophy, Pencil, Star } from 'lucide-react';
 import { userService } from '../services/userService';
 import { recipeService } from '../services/recipeService';
 import useAuthStore from '../store/useAuthStore';
 import FollowButton from '../components/FollowButton';
 import UserAvatar from '../components/ui/UserAvatar';
 import BadgesModal, { BADGE_DEFINITIONS, getPinnedBadgeIds } from '../components/profile/BadgesModal';
-import { Star } from 'lucide-react';
 
 import s from '../styles/pages/UserProfilePage.module.css';
 import fx from '../styles/effects.module.css';
@@ -98,15 +97,17 @@ const UserProfilePage = () => {
           </div>
 
           {/* Identity & Stats */}
-          <div className="flex-1 text-center md:text-left w-full">
+          <div className="flex-1 text-center md:text-left w-full min-w-0">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-5">
-              <div>
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-center md:justify-start gap-2.5 flex-wrap mb-1.5">
                   <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[#3d271d]">
                     {profile.displayName || profile.username}
                   </h2>
-                  <span className="text-xs text-[#a13923] bg-[#fff5f2] px-2.5 py-0.5 rounded-full font-semibold border border-[#fbdcd5]">
-                    {profile.recipeCount > 0 ? 'Đầu bếp' : 'Thành viên'}
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${(profile.role === 'ADMIN' || profile.username === 'admin123') ? 'bg-[#a13923] text-white border-[#a13923]' : 'text-[#a13923] bg-[#fff5f2] border-[#fbdcd5]'}`}>
+                    {(profile.role === 'ADMIN' || profile.username === 'admin123') 
+                      ? 'Quản trị viên' 
+                      : (profile.recipeCount > 0 ? 'Đầu bếp' : 'Thành viên')}
                   </span>
                 </div>
                 <p className="text-xs text-[#796255] mb-2.5 flex items-center justify-center md:justify-start gap-2 flex-wrap">
@@ -176,15 +177,20 @@ const UserProfilePage = () => {
               </div>
               
               {isOwnProfile ? (
-                <Link to="/profile" className="bg-[#a13923] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#8b311e] active:scale-95 transition-all shadow-md inline-flex items-center gap-2 self-center md:self-start">
-                  Chỉnh sửa hồ sơ
+                <Link 
+                  to="/profile" 
+                  className="bg-[#a13923] text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-[#8b311e] active:scale-95 transition-all shadow-md inline-flex items-center justify-center gap-2 self-center md:self-start whitespace-nowrap shrink-0 hover:shadow-lg"
+                  title="Chuyển đến trang Cài đặt & Chỉnh sửa hồ sơ"
+                >
+                  <Pencil size={15} />
+                  <span>Chỉnh sửa hồ sơ</span>
                 </Link>
               ) : (
-                <div className="self-center md:self-start">
+                <div className="self-center md:self-start shrink-0">
                   <FollowButton 
                     userId={profile.id} 
                     initialIsFollowing={profile.isFollowing} 
-                    className="rounded-full shadow-md text-sm px-7 py-2.5 font-bold"
+                    className="rounded-full shadow-md text-sm px-7 py-2.5 font-bold whitespace-nowrap"
                   />
                 </div>
               )}
