@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -8,32 +8,47 @@ import useAuthPromptStore from '../store/useAuthPromptStore';
 
 const FollowButton = ({ userId, initialIsFollowing = false, className = '' }) => {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+  // Ref luôn phản ánh giá trị mới nhất — tránh stale closure trong mutationFn
+  const isFollowingRef = useRef(initialIsFollowing);
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
   const openAuthModal = useAuthPromptStore((s) => s.openModal);
 
   useEffect(() => {
     setIsFollowing(initialIsFollowing);
+    isFollowingRef.current = initialIsFollowing;
   }, [initialIsFollowing]);
 
   const toggleFollowMutation = useMutation({
     mutationFn: async () => {
-      if (isFollowing) {
+      // Đọc từ ref (không phải closure) để luôn có giá trị mới nhất
+      if (isFollowingRef.current) {
         return await userService.unfollowUser(userId);
       } else {
         return await userService.followUser(userId);
       }
     },
     onMutate: async () => {
-      setIsFollowing(!isFollowing);
+      // Capture trạng thái TRƯỚC khi thay đổi (dùng cho message và rollback)
+      const wasFollowing = isFollowingRef.current;
+      // Cập nhật cả state (UI) và ref (logic) ngay lập tức (optimistic)
+      isFollowingRef.current = !wasFollowing;
+      setIsFollowing(!wasFollowing);
+      return { wasFollowing }; // context để dùng trong onSuccess/onError
     },
-    onSuccess: (data) => {
-      toast.success(data?.message || (isFollowing ? 'Đã hủy theo dõi' : 'Đã theo dõi thành công'));
+    onSuccess: (data, _variables, context) => {
+      // Dùng context.wasFollowing (trạng thái TRƯỚC khi click) để xác định action
+      const actionMsg = context?.wasFollowing ? 'Đã hủy theo dõi' : 'Đã theo dõi thành công! 🎉';
+      toast.success(data?.message || actionMsg);
       queryClient.invalidateQueries({ queryKey: ['publicProfile', userId] });
       queryClient.invalidateQueries({ queryKey: ['followers', userId] });
     },
-    onError: (error) => {
-      setIsFollowing(isFollowing);
+    onError: (error, _variables, context) => {
+      // Rollback về trạng thái TRƯỚC khi click dùng context
+      if (context?.wasFollowing !== undefined) {
+        isFollowingRef.current = context.wasFollowing;
+        setIsFollowing(context.wasFollowing);
+      }
       toast.error(error?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
     }
   });
