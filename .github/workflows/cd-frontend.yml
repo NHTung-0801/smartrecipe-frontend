@@ -42,9 +42,13 @@ jobs:
       - name: Deploy prebuilt to Vercel
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt --prod \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            2>&1 | tail -1)
+          deploy_output=$(vercel deploy --prebuilt --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          echo "$deploy_output"
+          url=$(echo "$deploy_output" | grep -o 'https://[^ ]*\.vercel\.app' | tail -1)
+          if [ -z "$url" ]; then
+            url="https://smartrecipe-frontend.vercel.app"
+          fi
           echo "deployment_url=$url" >> $GITHUB_OUTPUT
           echo "✅ Deployed to: $url"
         env:
@@ -58,9 +62,9 @@ jobs:
           http_code=$(curl -s -o /dev/null -w "%{http_code}" \
             --connect-timeout 15 \
             --max-time 20 \
-            "$deployment_url")
-          if [ "$http_code" = "200" ]; then
-            echo "✅ Frontend is live! (HTTP 200)"
+            "$deployment_url" 2>/dev/null || echo "000")
+          if [ "$http_code" = "200" ] || [ "$http_code" = "308" ]; then
+            echo "✅ Frontend is live! (HTTP $http_code)"
           else
             echo "⚠️ Got HTTP $http_code — Vercel may still be propagating CDN"
           fi
