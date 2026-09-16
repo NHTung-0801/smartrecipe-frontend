@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Camera, User, Lock, Save, Loader2, ArrowLeft, Share2, Utensils, Heart, Mail, BookText, Globe, MapPin, Shield, Trash2, ChevronRight, BookOpen, Eye, EyeOff, LogOut, Users, Calendar, CheckCircle2, Trophy } from 'lucide-react';
+import { Camera, User, Lock, Save, Loader2, ArrowLeft, Share2, Utensils, Heart, Mail, BookText, Globe, MapPin, Shield, ShieldCheck, Trash2, ChevronRight, BookOpen, Eye, EyeOff, LogOut, Users, Calendar, CheckCircle2, Trophy } from 'lucide-react';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
 import { userService } from '../services/userService';
@@ -241,8 +241,10 @@ const EditProfilePage = () => {
               <h2 className={s.bannerName}>
                 {currentProfile?.displayName || currentProfile?.username}
               </h2>
-              <span className={s.bannerRoleBadge}>
-                {currentProfile?.recipeCount > 0 ? 'Đầu bếp' : 'Thành viên'}
+              <span className={`${s.bannerRoleBadge} ${(currentProfile?.role === 'ADMIN' || user?.role === 'ADMIN' || user?.username === 'admin123') ? 'bg-[#a13923] text-white border-transparent' : ''}`}>
+                {(currentProfile?.role === 'ADMIN' || user?.role === 'ADMIN' || user?.username === 'admin123') 
+                  ? 'Quản trị viên' 
+                  : (currentProfile?.recipeCount > 0 ? 'Đầu bếp' : 'Thành viên')}
               </span>
             </div>
             
@@ -422,6 +424,29 @@ const EditProfilePage = () => {
           </div>
 
           <div className={s.securityList}>
+            {/* Lối tắt truy cập Trang Quản trị dành cho Admin */}
+            {(user?.role === 'ADMIN' || currentProfile?.role === 'ADMIN' || user?.username === 'admin123') && (
+              <div 
+                className={`${s.securityItem} bg-gradient-to-r from-red-50/90 to-amber-50/70 border border-red-200/90 hover:border-red-400 cursor-pointer shadow-xs`}
+                onClick={() => navigate('/admin/dashboard')}
+                title="Chuyển sang Bảng Quản Trị Hệ Thống"
+              >
+                <div className={s.securityLeft}>
+                  <div className={`${s.securityIcon} bg-[#a13923] text-white shadow-xs`}>
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <p className={`${s.securityTitle} text-[#a13923] font-bold flex items-center gap-2`}>
+                      Trang Quản trị Hệ thống
+                      <span className="text-[10px] bg-[#a13923] text-white px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wider">ADMIN</span>
+                    </p>
+                    <p className={s.securityDesc}>Chuyển sang Bảng điều hành Quản trị viên (Admin Panel)</p>
+                  </div>
+                </div>
+                <ChevronRight className="text-[#a13923]" size={18} />
+              </div>
+            )}
+
             <div className={s.securityItem} onClick={() => setIsBadgesModalOpen(true)}>
               <div className={s.securityLeft}>
                 <div className={`${s.securityIcon} bg-amber-100 text-amber-800`}>

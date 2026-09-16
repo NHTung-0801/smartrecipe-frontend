@@ -210,3 +210,37 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ─── Switch Back to Client Area ─── */
+.switchBackArea {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f0e6e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.backToClientLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #78716c;
+  text-decoration: none;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.backToClientLink:hover {
+  color: #a13923;
+  transform: translateX(-1px);
+}
+
+.dividerDot {
+  color: #d6d3d1;
+  font-size: 0.8rem;
+}

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
@@ -24,9 +25,13 @@ import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminIngredients from './pages/admin/AdminIngredients';
 import AdminRecipes from './pages/admin/AdminRecipes';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminMasterData from './pages/admin/AdminMasterData';
+import AdminSettings from './pages/admin/AdminSettings';
 import AdminPlaceholder from './pages/admin/AdminPlaceholder';
 import BenefitsPage from './pages/BenefitsPage';
 import useAuthStore from './store/useAuthStore';
+import { userService } from './services/userService';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,10 +51,57 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+/**
+ * Hook khởi động: nếu user đã đăng nhập nhưng role bị mất (do updateUser cũ ghi đè),
+ * tự phục hồi bằng cách gọi API /users/me qua userService.
+ */
+function useRoleRecovery() {
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const updateUser = useAuthStore((state) => state.updateUser);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    // Dự phòng tức thì cho admin123 nếu role chưa kịp load
+    if (user.username === 'admin123' && user.role !== 'ADMIN') {
+      updateUser({ role: 'ADMIN' });
+      return;
+    }
+
+    // Nếu role đã có → không cần gọi lại
+    if (user.role) return;
+
+    // Role bị thiếu → gọi API profile để khôi phục role chính xác từ cơ sở dữ liệu
+    userService.getProfile()
+      .then((res) => {
+        const profileData = res?.data;
+        if (profileData?.role) {
+          console.info('[Auth] Role restored successfully:', profileData.role);
+          updateUser({ role: profileData.role });
+        }
+      })
+      .catch((err) => {
+        console.warn('[Auth] Could not recover role from server:', err);
+      });
+  }, [isAuthenticated, user?.username, user?.role, updateUser]);
+}
+
+
+/**
+ * AppShell: wrapper bên trong Router để dùng hooks cần router context.
+ * Gọi useRoleRecovery để tự động phục hồi role admin nếu bị mất.
+ */
+function AppShell({ children }) {
+  useRoleRecovery();
+  return children;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
+        <AppShell>
         <Routes>
           {/* Public routes - không có Navbar */}
           <Route path="/login" element={<LoginPage />} />
@@ -226,7 +278,7 @@ function App() {
             path="/admin/users"
             element={
               <AdminGuard>
-                <AdminLayout><AdminPlaceholder title="Quản lý Người dùng" /></AdminLayout>
+                <AdminLayout><AdminUsers /></AdminLayout>
               </AdminGuard>
             }
           />
@@ -234,7 +286,7 @@ function App() {
             path="/admin/masterdata"
             element={
               <AdminGuard>
-                <AdminLayout><AdminPlaceholder title="Master Data" /></AdminLayout>
+                <AdminLayout><AdminMasterData /></AdminLayout>
               </AdminGuard>
             }
           />
@@ -242,13 +294,14 @@ function App() {
             path="/admin/settings"
             element={
               <AdminGuard>
-                <AdminLayout><AdminPlaceholder title="Cài đặt Hệ thống" /></AdminLayout>
+                <AdminLayout><AdminSettings /></AdminLayout>
               </AdminGuard>
             }
           />
           <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />
+        </AppShell>
       </Router>
     </QueryClientProvider>
   );

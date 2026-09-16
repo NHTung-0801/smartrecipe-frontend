@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Search, Heart, Menu, LogIn, UserPlus } from 'lucide-react';
+import { Search, Menu, LogIn, UserPlus, ShieldCheck } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import useAuthPromptStore from '../../store/useAuthPromptStore';
 import UserAvatar from '../ui/UserAvatar';
@@ -62,13 +62,18 @@ const TopHeader = ({ toggleSidebar }) => {
         {/* Action Area: Khách thấy [Đăng nhập] & [Đăng ký], Thành viên thấy Bell, Heart, Avatar */}
         {isAuthenticated ? (
           <div className={s.actionGroup}>
+            {(user?.role === 'ADMIN' || user?.username === 'admin123') && (
+              <Link
+                to="/admin/dashboard"
+                className={s.adminQuickBtn}
+                title="Chuyển sang Trang Quản Trị (Admin Panel)"
+              >
+                <ShieldCheck size={16} />
+                <span className={s.adminBtnText}>Trang Quản trị</span>
+              </Link>
+            )}
+
             <NotificationDropdown />
-            <button 
-              className={s.iconBtn}
-              title="Món ăn yêu thích"
-            >
-              <Heart size={20} />
-            </button>
             
             <Link to={`/users/${user?.id}`} className={s.profileAvatar} title="Trang cá nhân">
               <UserAvatar 

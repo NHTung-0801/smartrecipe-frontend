@@ -5,6 +5,14 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
+  },
   test: {
     // Test chạy trong jsdom vì phần lớn component đọc/ghi DOM
     // (document.body.style.overflow, addEventListener trong các modal).

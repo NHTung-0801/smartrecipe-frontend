@@ -489,6 +489,31 @@
   transition: color 0.3s;
 }
 
+/* Admin Gateway Link */
+.adminGateway {
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.adminGatewayLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #78716c;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.adminGatewayLink:hover {
+  color: #a13923;
+  background: rgba(161, 57, 35, 0.06);
+}
+
 /* Footer links */
 .footerLinks {
   display: flex;

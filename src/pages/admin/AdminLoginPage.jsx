@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Eye, EyeOff, Lock, User } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ShieldCheck, Eye, EyeOff, Lock, User, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import useAuthStore from '../../store/useAuthStore';
@@ -116,6 +116,17 @@ export default function AdminLoginPage() {
             )}
           </button>
         </form>
+
+        <div className={s.switchBackArea}>
+          <Link to="/" className={s.backToClientLink}>
+            <ArrowLeft size={14} />
+            <span>Quay lại trang chủ Website</span>
+          </Link>
+          <span className={s.dividerDot}>•</span>
+          <Link to="/login" className={s.backToClientLink}>
+            <span>Đăng nhập người dùng</span>
+          </Link>
+        </div>
       </div>
     </div>
   );

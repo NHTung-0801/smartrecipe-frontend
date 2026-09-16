@@ -1,6 +1,6 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, ChefHat, Users, Database, Settings, LogOut, ShieldCheck
+  LayoutDashboard, Package, ChefHat, Users, Database, Settings, LogOut, ShieldCheck, Globe, ArrowUpRight
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import useAuthStore from '../../store/useAuthStore';
@@ -55,6 +55,18 @@ export default function AdminLayout({ children }) {
 
         {/* User info + logout */}
         <div className={s.sidebarFooter}>
+          {/* Nút chuyển đổi nhanh sang Giao diện Website Người dùng */}
+          <Link to="/" className={s.switchModeBtn} title="Chuyển sang Giao diện Website (Người dùng)">
+            <div className={s.switchModeIcon}>
+              <Globe size={18} />
+            </div>
+            <div className={s.switchModeContent}>
+              <span className={s.switchModeTitle}>Giao diện Website</span>
+              <span className={s.switchModeSubtitle}>Chế độ Người dùng</span>
+            </div>
+            <ArrowUpRight size={16} className={s.switchModeArrow} />
+          </Link>
+
           <div className={s.userInfo}>
             <div className={s.userAvatar}>{user?.username?.[0]?.toUpperCase() ?? 'A'}</div>
             <div>

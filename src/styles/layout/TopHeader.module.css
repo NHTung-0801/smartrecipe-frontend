@@ -150,3 +150,39 @@
   display: flex;
   align-items: center;
 }
+
+/* Nút Chuyển nhanh sang Trang Quản trị (Admin) */
+.adminQuickBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #a13923 0%, #7c2d12 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-family: var(--sr-font-heading, 'Plus Jakarta Sans', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(161, 57, 35, 0.25);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.adminQuickBtn:hover {
+  background: linear-gradient(135deg, #8b311e 0%, #5c1e0b 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(161, 57, 35, 0.38);
+  color: #fff;
+}
+
+.adminBtnText {
+  display: inline;
+}
+
+@media (max-width: 640px) {
+  .adminBtnText {
+    display: none;
+  }
+}

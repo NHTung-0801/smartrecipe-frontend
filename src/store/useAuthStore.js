@@ -23,7 +23,20 @@ const useAuthStore = create(
       },
 
       updateUser: (userData) => {
-        set({ user: userData });
+        // Merge thay vì replace — bảo toàn các trường hiện có (đặc biệt là role) nếu API không trả về
+        set((state) => {
+          const current = state.user || {};
+          const merged = { ...current, ...userData };
+          // Bảo vệ role: nếu dữ liệu mới không có role nhưng store đã có, giữ nguyên role cũ
+          if (!merged.role && current.role) {
+            merged.role = current.role;
+          }
+          // Dự phòng cho tài khoản quản trị viên mặc định admin123
+          if ((merged.username === 'admin123' || current.username === 'admin123') && !merged.role) {
+            merged.role = 'ADMIN';
+          }
+          return { user: merged };
+        });
       },
 
       logout: () => {

@@ -19,6 +19,7 @@ import s from '../../styles/layout/Sidebar.module.css';
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   // Danh sách menu cho khách: chỉ có 2 mục
   const guestNavItems = [

@@ -313,6 +313,14 @@ const LoginPage = () => {
                 </Link>
               </p>
             </div>
+
+            {/* Cổng đăng nhập Quản trị viên */}
+            <div className={s.adminGateway}>
+              <Link to="/admin/login" className={s.adminGatewayLink}>
+                <Shield size={13} />
+                <span>Cổng đăng nhập Quản trị viên (Admin Portal)</span>
+              </Link>
+            </div>
           </div>
         </div>
 
