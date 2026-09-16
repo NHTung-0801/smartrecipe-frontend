@@ -548,71 +548,51 @@
 .actionGroup {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
 .btnAction {
-  height: 32px;
-  padding: 0 0.65rem;
-  border-radius: 8px;
-  font-size: 0.76rem;
-  font-weight: 600;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 9px;
+  font-size: 0.8rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  transition: all 0.18s;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  border: 1px solid transparent;
+  border: 1px solid #e7e5e4;
+  background: #ffffff;
+  flex-shrink: 0;
 }
 
 .btnAction.preview {
-  background: #fafaf9;
-  border-color: #e7e5e4;
   color: #44403c;
+  background: #fafaf9;
 }
 
 .btnAction.preview:hover {
   background: #fff1ed;
   border-color: #fbdad0;
   color: #a13923;
-}
-
-.btnAction.approve {
-  background: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #065f46;
-}
-
-.btnAction.approve:hover:not(:disabled) {
-  background: #059669;
-  color: white;
-}
-
-.btnAction.hide {
-  background: #fef3c7;
-  border-color: #fde68a;
-  color: #92400e;
-}
-
-.btnAction.hide:hover:not(:disabled) {
-  background: #d97706;
-  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(161, 57, 35, 0.12);
 }
 
 .btnAction.delete {
-  background: white;
-  border-color: #e7e5e4;
-  color: #a8a29e;
-  padding: 0;
-  width: 32px;
-  justify-content: center;
+  color: #78716c;
+  background: #ffffff;
 }
 
 .btnAction.delete:hover:not(:disabled) {
   background: #fef2f2;
   border-color: #fecaca;
-  color: #ef4444;
+  color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
 }
 
 /* ─── State Boxes ───────────────────────────────── */

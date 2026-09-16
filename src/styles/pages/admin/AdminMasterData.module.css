@@ -1,0 +1,912 @@
+/* AdminMasterData.module.css
+   Tuân thủ ADMIN_DESIGN_SYSTEM.md — đồng nhất với AdminUsers, AdminRecipes, AdminIngredients
+*/
+
+/* ─── Page Container ────────────────────────────────── */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  color: #2b130c;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ─── Header ────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0e6e0;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.titleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, #a13923 0%, #7c2d12 100%);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 8px rgba(161, 57, 35, 0.25);
+}
+
+.title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2b130c;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #78716c;
+  margin: 0;
+}
+
+/* ─── KPI Cards ─────────────────────────────────────── */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpiCard {
+  background: white;
+  border-radius: 16px;
+  padding: 0.95rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid #f0e6e0;
+  box-shadow: 0 2px 10px rgba(43, 19, 12, 0.03);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(43, 19, 12, 0.06);
+  border-color: #e4d5cc;
+}
+
+.kpiIconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.kpiIconWrap.terracotta {
+  background: linear-gradient(135deg, #a13923 0%, #7c2d12 100%);
+}
+
+.kpiIconWrap.amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.kpiIconWrap.emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.kpiIconWrap.blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.kpiBody {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.kpiLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #78716c;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kpiValue {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #2b130c;
+  line-height: 1.1;
+}
+
+.kpiSub {
+  font-size: 0.72rem;
+  color: #a8a29e;
+  margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Tabs Bar (Hàng 1 — đầy đủ chiều ngang) ──────────── */
+.tabsBar {
+  background: white;
+  border: 1px solid #f0e6e0;
+  border-radius: 14px 14px 0 0;
+  padding: 0 1rem;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-bottom: none;
+}
+
+/* ─── Toolbar (Hàng 2 — search + filter + add) ────────── */
+.toolbar {
+  background: white;
+  border: 1px solid #f0e6e0;
+  border-top: 1px solid #f5ede8;
+  border-radius: 0 0 14px 14px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: 0 2px 6px rgba(43, 19, 12, 0.03);
+  box-sizing: border-box;
+}
+
+/* ─── Tab Navigation (trải đều chiều ngang) ─────────── */
+.tabBtn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.95rem 1rem;
+  border-bottom: 2px solid transparent;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #78716c;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  position: relative;
+}
+
+.tabBtn:hover:not(.activeTab) {
+  color: #44403c;
+  background: #fffaf8;
+}
+
+.tabBtn + .tabBtn {
+  border-left: 1px solid #f0e6e0;
+}
+
+.activeTab {
+  color: #a13923 !important;
+  font-weight: 700;
+  border-bottom-color: #a13923 !important;
+  background: #fffbf9;
+}
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.4rem;
+  border-radius: 9999px;
+  background: #f5f5f4;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #78716c;
+  transition: all 0.2s;
+}
+
+.activeTab .tabCount {
+  background: #fff1ed;
+  color: #a13923;
+}
+
+/* ─── Search & Toolbar ──────────────────────────────── */
+.searchWrap {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a8a29e;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 38px;
+  padding: 0 2.2rem 0 2.4rem;
+  border-radius: 10px;
+  border: 1px solid #e7e5e4;
+  background: #fafaf9;
+  font-size: 0.85rem;
+  color: #292524;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: none;
+  background: white;
+  border-color: #a13923;
+  box-shadow: 0 0 0 3px rgba(161, 57, 35, 0.08);
+}
+
+.clearBtn {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #a8a29e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem;
+  border-radius: 4px;
+}
+
+.clearBtn:hover {
+  color: #dc2626;
+}
+
+/* ─── Sub-filter Pills (Conversions tab) ────────────── */
+.subFilters {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f5f5f4;
+  padding: 0.2rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.subFilterBtn {
+  border: none;
+  background: transparent;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #78716c;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.subFilterBtn:hover:not(.subFilterActive) {
+  color: #292524;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.subFilterActive {
+  background: white;
+  color: #a13923;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Add Button ────────────────────────────────────── */
+.btnAdd {
+  height: 38px;
+  padding: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #a13923 0%, #7c2d12 100%);
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(161, 57, 35, 0.2);
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btnAdd:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(161, 57, 35, 0.28);
+}
+
+/* ─── Table Container ───────────────────────────────── */
+.tableContainer {
+  background: white;
+  border: 1px solid #f0e6e0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(43, 19, 12, 0.03);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.88rem;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.table thead {
+  background: #fafaf9;
+  border-bottom: 1px solid #f0e6e0;
+}
+
+.table th {
+  padding: 0.75rem 0.85rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #57534e;
+  border-bottom: 1px solid #f0e6e0;
+}
+
+.table td {
+  padding: 0.85rem;
+  border-bottom: 1px solid #f5ede8;
+  vertical-align: middle;
+  color: #292524;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table tbody tr {
+  transition: background-color 0.15s;
+}
+
+.table tbody tr:hover {
+  background: #fff8f4;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ─── Table Cell Helpers ────────────────────────────── */
+.idCell {
+  font-size: 0.78rem;
+  color: #a8a29e;
+  font-weight: 600;
+}
+
+.nameText {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #2b130c;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dateText {
+  font-size: 0.82rem;
+  color: #78716c;
+  white-space: nowrap;
+}
+
+/* ─── Tag Badge ─────────────────────────────────────── */
+.tagBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 9999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* ─── Scope Badges (Unit Conversion) ────────────────── */
+.scopeBadgeGeneric {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 9999px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #059669;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.scopeBadgeIng {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 9999px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+/* ─── Formula Box (Unit Conversion) ─────────────────── */
+.formulaBox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #fafaf9;
+  border: 1px solid #f0e6e0;
+  padding: 0.28rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.formulaFrom {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  color: #292524;
+}
+
+.formulaEq {
+  color: #a13923;
+  font-weight: 700;
+}
+
+.formulaValue {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  color: #a13923;
+}
+
+.formulaTo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  color: #292524;
+}
+
+/* ─── Action Buttons ────────────────────────────────── */
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.btnAction {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e7e5e4;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.btnAction.edit {
+  color: #44403c;
+  background: #fafaf9;
+}
+
+.btnAction.edit:hover {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.12);
+}
+
+.btnAction.delete {
+  color: #78716c;
+  background: #ffffff;
+}
+
+.btnAction.delete:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
+}
+
+/* ─── Empty / Loading State ─────────────────────────── */
+.stateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 4rem 1.5rem;
+  color: #78716c;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.stateIcon {
+  color: #d6d3d1;
+}
+
+.stateTitle {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #57534e;
+  margin: 0;
+}
+
+.stateSub {
+  font-size: 0.82rem;
+  color: #a8a29e;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ─── Modal Overlay ─────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 1rem;
+}
+
+/* ─── Modal Panel ───────────────────────────────────── */
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: -8px 0 32px rgba(28, 25, 23, 0.18);
+  overflow: hidden;
+  border: 1px solid #f0e6e0;
+  animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modalHeader {
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid #f0ede8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fffbf9;
+}
+
+.modalTitle {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #292524;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modalCloseBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e7e5e4;
+  background: white;
+  color: #78716c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+}
+
+.modalCloseBtn:hover {
+  background: #f5f5f4;
+  color: #1c1917;
+}
+
+/* ─── Modal Body / Form ─────────────────────────────── */
+.modalBody {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 180px);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.formLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #44403c;
+}
+
+.required {
+  color: #dc2626;
+  margin-left: 0.15rem;
+}
+
+.formInput,
+.formSelect {
+  width: 100%;
+  height: 38px;
+  padding: 0 0.85rem;
+  border-radius: 9px;
+  border: 1px solid #e7e5e4;
+  background: #fafaf9;
+  font-size: 0.85rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  color: #292524;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  background: white;
+  border-color: #a13923;
+  box-shadow: 0 0 0 3px rgba(161, 57, 35, 0.08);
+}
+
+.formHint {
+  font-size: 0.75rem;
+  color: #a8a29e;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.radioLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #44403c;
+  cursor: pointer;
+}
+
+/* Live preview for conversion formula */
+.formulaPreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #fffbf9;
+  border: 1px solid #f0e6e0;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-size: 0.88rem;
+}
+
+/* ─── Modal Footer ──────────────────────────────────── */
+.modalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f0ede8;
+  background: #fafaf9;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.btnSecondary {
+  height: 38px;
+  padding: 0 1rem;
+  border-radius: 9px;
+  border: 1px solid #e7e5e4;
+  background: white;
+  color: #44403c;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.btnSecondary:hover {
+  background: #f5f5f4;
+  color: #1c1917;
+}
+
+.btnPrimary {
+  height: 38px;
+  padding: 0 1.1rem;
+  border-radius: 9px;
+  border: none;
+  background: linear-gradient(135deg, #a13923 0%, #7c2d12 100%);
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.18s;
+  box-shadow: 0 2px 6px rgba(161, 57, 35, 0.2);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(161, 57, 35, 0.28);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ─── Delete Modal Special ──────────────────────────── */
+.deleteModal {
+  max-width: 420px;
+}
+
+.deleteModalBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.deleteIconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff5f5;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteModalTitle {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #292524;
+  margin: 0;
+}
+
+.deleteWarning {
+  font-size: 0.85rem;
+  color: #78716c;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.deleteHighlight {
+  font-weight: 700;
+  color: #292524;
+}
+
+.btnDanger {
+  height: 38px;
+  padding: 0 1.1rem;
+  border-radius: 9px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.18s;
+}
+
+.btnDanger:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.btnDanger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

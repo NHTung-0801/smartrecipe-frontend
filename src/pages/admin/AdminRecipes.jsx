@@ -477,11 +477,11 @@ export default function AdminRecipes() {
               <table className={s.table}>
                 <thead>
                   <tr>
-                    <th style={{ width: '38%' }}>Công thức</th>
+                    <th style={{ width: '40%' }}>Công thức</th>
                     <th style={{ width: '20%' }}>Tác giả</th>
                     <th style={{ width: '16%' }}>Thông số</th>
                     <th style={{ width: '12%' }}>Ngày gửi</th>
-                    <th style={{ width: '14%', textAlign: 'right' }}>Thao tác</th>
+                    <th style={{ width: '12%', textAlign: 'right' }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -566,42 +566,12 @@ export default function AdminRecipes() {
                             className={`${s.btnAction} ${s.preview}`}
                             title="Xem xét chi tiết"
                             onClick={(e) => {
-                               e.stopPropagation();
-                               handleOpenRecipe(r.id);
-                             }}
+                              e.stopPropagation();
+                              handleOpenRecipe(r.id);
+                            }}
                           >
-                            <Eye size={14} />
+                            <Eye size={16} />
                           </button>
-
-                          {currentStatus !== 'PUBLIC' && (
-                            <button
-                              type="button"
-                              className={`${s.btnAction} ${s.approve}`}
-                              title="Duyệt công khai"
-                              disabled={mutation.isPending}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAction(r.id, 'APPROVE');
-                              }}
-                            >
-                              <CheckCircle size={14} />
-                            </button>
-                          )}
-
-                          {currentStatus !== 'PRIVATE' && (
-                            <button
-                              type="button"
-                              className={`${s.btnAction} ${s.hide}`}
-                              title="Đưa về riêng tư / Ẩn bài"
-                              disabled={mutation.isPending}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAction(r.id, 'HIDE');
-                              }}
-                            >
-                              <EyeOff size={14} />
-                            </button>
-                          )}
 
                           <button
                             type="button"
@@ -613,7 +583,7 @@ export default function AdminRecipes() {
                               handleAction(r.id, 'DELETE');
                             }}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
