@@ -339,17 +339,18 @@ const TOPIC_MATCHERS = {
   const totalLatestElements = latestData?.totalElements ?? latestRecipes.length;
 
   // 6. User Cooking Journal Query (Khi đã đăng nhập - đo lường tiến trình danh hiệu)
-  const { data: userJournalData } = useQuery({
-    queryKey: ['userJournalStats'],
+  const { data: userJournalData, isLoading: isJournalLoading } = useQuery({
+    queryKey: ['userJournalStats', user?.id],
     queryFn: () => journalService.getAll(0, 1),
     enabled: isAuthenticated,
     placeholderData: (prev) => prev,
   });
-  const totalCooked = userJournalData?.totalElements && userJournalData.totalElements > 0 
-    ? userJournalData.totalElements 
-    : 12; // Mặc định hiển thị 12/15 cho trực quan sinh động
+  // Dùng đúng dữ liệu thực của user đăng nhập — không fallback hardcode
+  const totalCooked = isAuthenticated
+    ? (userJournalData?.totalElements ?? 0)
+    : 0;
   const challengeTarget = 15;
-  const remainingCooks = Math.max(1, challengeTarget - totalCooked);
+  const remainingCooks = Math.max(0, challengeTarget - totalCooked);
   const progressPercent = Math.min(100, Math.round((totalCooked / challengeTarget) * 100));
 
   const handleSearch = useCallback((keyword) => {
@@ -662,30 +663,39 @@ const TOPIC_MATCHERS = {
                             <ChefHat size={20} className="drop-shadow-xs" />
                           </div>
 
-                          {/* Badge Tier Info */}
+                          {/* Badge Tier Info - hiển thị số liệu thực của user đăng nhập */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1">
-                              <h4 className="text-xs font-bold text-stone-900 truncate">
-                                Bếp Trưởng Tài Ba
-                              </h4>
-                              <span className="text-xs font-black text-[var(--sr-primary)] shrink-0">
-                                {totalCooked} <span className="text-stone-400 font-medium text-[11px]">/ 15 món</span>
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-stone-500 font-medium truncate mt-0.5">
-                              {remainingCooks > 0 
-                                ? `Nấu thêm ${remainingCooks} món để mở khóa huy hiệu` 
-                                : 'Đã xuất sắc hoàn thành danh hiệu!'}
-                            </p>
-                          </div>
+                             {isJournalLoading ? (
+                               <div className="space-y-1.5 animate-pulse">
+                                 <div className="h-3 bg-stone-200 rounded-full w-3/4" />
+                                 <div className="h-2.5 bg-stone-100 rounded-full w-1/2" />
+                               </div>
+                             ) : (
+                               <>
+                                 <div className="flex items-center justify-between gap-1">
+                                   <h4 className="text-xs font-bold text-stone-900 truncate">
+                                     Bếp Trưởng Tài Ba
+                                   </h4>
+                                   <span className="text-xs font-black text-[var(--sr-primary)] shrink-0">
+                                     {totalCooked} <span className="text-stone-400 font-medium text-[11px]">/ 15 món</span>
+                                   </span>
+                                 </div>
+                                 <p className="text-[11px] text-stone-500 font-medium truncate mt-0.5">
+                                   {remainingCooks > 0
+                                     ? `Nấu thêm ${remainingCooks} món để mở khóa huy hiệu`
+                                     : 'Đã xuất sắc hoàn thành danh hiệu! 🎉'}
+                                 </p>
+                               </>
+                             )}
+                           </div>
                         </div>
 
                         {/* Animated Progress Bar */}
                         <div className="w-full h-2 rounded-full bg-amber-100/90 overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-[var(--sr-primary)] transition-all duration-500"
-                            style={{ width: `${progressPercent}%` }}
-                          />
+                             className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-[var(--sr-primary)] transition-all duration-700"
+                             style={{ width: isJournalLoading ? '0%' : `${progressPercent}%` }}
+                           />
                         </div>
                       </div>
                     </div>
