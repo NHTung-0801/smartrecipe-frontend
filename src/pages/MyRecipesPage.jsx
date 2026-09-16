@@ -1,24 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { recipeService } from '../services/recipeService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
-import { Plus, Clock, Zap, Flame, Star, Sparkles, Edit3, Trash2, MoreVertical } from 'lucide-react';
+import { Plus, Clock, Zap, Flame, Star, Sparkles, Edit3, Trash2, MoreVertical, Utensils, CheckCircle2, Lock, FileText } from 'lucide-react';
 import s from '../styles/pages/MyRecipesPage.module.css';
 import fx from '../styles/effects.module.css';
 
 const DIFFICULTY_LABELS = {
   EASY: 'Dễ',
-  MEDIUM: 'Trung bình',
+  MEDIUM: 'Vừa',
   HARD: 'Khó',
 };
 
+const STATUS_TABS = [
+  { id: 'ALL', label: 'Tất cả', icon: Sparkles, countKey: 'total' },
+  { id: 'PENDING_REVIEW', label: 'Chờ duyệt', icon: Clock, countKey: 'pendingCount' },
+  { id: 'PUBLIC', label: 'Đã công khai', icon: CheckCircle2, countKey: 'publicCount' },
+  { id: 'PRIVATE', label: 'Riêng tư / Nháp', icon: Lock, countKey: 'privateCount' },
+];
+
 function formatTime(minutes) {
   if (!minutes) return '--';
-  if (minutes < 60) return `${minutes} ph`;
+  if (minutes < 60) return `${minutes}p`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}ph` : `${h}h`;
+  return m > 0 ? `${h}h${m}p` : `${h}h`;
 }
 
 export default function MyRecipesPage() {
@@ -26,9 +33,11 @@ export default function MyRecipesPage() {
   const user = useAuthStore((state) => state.user);
 
   const [recipes, setRecipes] = useState([]);
+  const [allUserRecipes, setAllUserRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [recipeToDelete, setRecipeToDelete] = useState(null);
@@ -40,10 +49,19 @@ export default function MyRecipesPage() {
     return () => window.removeEventListener('click', closeMenu);
   }, []);
 
-  const fetchRecipes = async (pageNum = 0) => {
+  const fetchAllForStats = async () => {
+    try {
+      const data = await recipeService.getMyRecipes(0, 100, '');
+      setAllUserRecipes(data.content || []);
+    } catch (err) {
+      console.error('Failed to fetch all recipes for stats', err);
+    }
+  };
+
+  const fetchRecipes = async (pageNum = 0, currentFilter = statusFilter) => {
     setLoading(true);
     try {
-      const data = await recipeService.getMyRecipes(pageNum, 10);
+      const data = await recipeService.getMyRecipes(pageNum, 12, currentFilter === 'ALL' ? '' : currentFilter);
       setRecipes(data.content || []);
       setTotalPages(data.totalPages || 0);
       setPage(pageNum);
@@ -56,17 +74,23 @@ export default function MyRecipesPage() {
   };
 
   useEffect(() => {
-    fetchRecipes(0);
+    fetchAllForStats();
+    fetchRecipes(0, 'ALL');
   }, []);
 
-  // Stats calculation
-  const totalRecipes = recipes.length; 
-  // Calculate total cooked times from all recipes
-  const totalCooked = recipes.reduce((sum, r) => sum + (r.cookCount || 0), 0);
-  
-  // Fake stats for UI completeness (others)
-  const totalViews = "24k"; 
-  const favorites = 8; 
+  // 100% Real Stats Calculation
+  const stats = useMemo(() => {
+    const list = allUserRecipes.length > 0 ? allUserRecipes : recipes;
+    const total = list.length;
+    const totalLikes = list.reduce((sum, r) => sum + (r.likeCount || 0), 0);
+    const totalCooked = list.reduce((sum, r) => sum + (r.cookCount || 0), 0);
+    const totalClones = list.reduce((sum, r) => sum + (r.cloneCount || 0), 0);
+    const publicCount = list.filter((r) => r.status === 'PUBLIC').length;
+    const pendingCount = list.filter((r) => r.status === 'PENDING_REVIEW').length;
+    const privateCount = list.filter((r) => r.status === 'PRIVATE' || r.status === 'DRAFT').length;
+    const totalIngredients = list.reduce((sum, r) => sum + (r.ingredientCount || 0), 0);
+    return { total, totalLikes, totalCooked, totalClones, publicCount, pendingCount, privateCount, totalIngredients };
+  }, [allUserRecipes, recipes]);
 
   const confirmDelete = async () => {
     if (!recipeToDelete) return;
@@ -74,13 +98,49 @@ export default function MyRecipesPage() {
     try {
       await recipeService.delete(recipeToDelete.id);
       toast.success('Đã xóa công thức');
-      fetchRecipes(0);
+      fetchRecipes(0, statusFilter);
+      fetchAllForStats();
     } catch (err) {
       toast.error('Lỗi khi xóa công thức');
       console.error(err);
     } finally {
       setDeleting(false);
       setRecipeToDelete(null);
+    }
+  };
+
+  const renderStatusBadge = (status) => {
+    switch (status) {
+      case 'PENDING_REVIEW':
+        return (
+          <div className={`${s.statusBadge} ${s.statusPending}`}>
+            <Clock size={11} />
+            <span>Chờ duyệt</span>
+          </div>
+        );
+      case 'PUBLIC':
+        return (
+          <div className={`${s.statusBadge} ${s.statusPublic}`}>
+            <CheckCircle2 size={11} />
+            <span>Công khai</span>
+          </div>
+        );
+      case 'PRIVATE':
+        return (
+          <div className={`${s.statusBadge} ${s.statusPrivate}`}>
+            <Lock size={11} />
+            <span>Riêng tư</span>
+          </div>
+        );
+      case 'DRAFT':
+        return (
+          <div className={`${s.statusBadge} ${s.statusDraft}`}>
+            <FileText size={11} />
+            <span>Bản nháp</span>
+          </div>
+        );
+      default:
+        return null;
     }
   };
 
@@ -100,24 +160,49 @@ export default function MyRecipesPage() {
         </div>
       </div>
 
-      {/* Bento Stats */}
+      {/* Bento Stats (100% Real User Stats) */}
       <div className={s.statsGrid}>
         <div className={s.statCard}>
-          <span className={s.statValue}>{totalRecipes}</span>
+          <span className={s.statValue}>{stats.total}</span>
           <span className={s.statLabel}>Tổng công thức</span>
         </div>
         <div className={s.statCard}>
-          <span className={s.statValue}>{totalCooked}</span>
+          <span className={s.statValue}>{stats.totalLikes}</span>
+          <span className={s.statLabel}>Số lượt thích</span>
+        </div>
+        <div className={s.statCard}>
+          <span className={s.statValue}>{stats.totalCooked}</span>
           <span className={s.statLabel}>Tổng đã nấu</span>
         </div>
         <div className={s.statCard}>
-          <span className={s.statValue}>{favorites}</span>
-          <span className={s.statLabel}>Yêu thích</span>
+          <span className={s.statValue}>{stats.totalClones}</span>
+          <span className={s.statLabel}>Lượt biến tấu</span>
         </div>
-        <div className={s.statCard}>
-          <span className={s.statValue}>{totalViews}</span>
-          <span className={s.statLabel}>Lượt xem</span>
-        </div>
+      </div>
+
+      {/* Status Filter Tabs (Full-Width Segmented Bar Spanning Recipe Grid) */}
+      <div className={s.filterSection}>
+        {STATUS_TABS.map((tab) => {
+          const TabIcon = tab.icon;
+          const count = stats[tab.countKey] ?? 0;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              className={`${s.statusTab} ${statusFilter === tab.id ? s.active : ''}`}
+              onClick={() => {
+                setStatusFilter(tab.id);
+                fetchRecipes(0, tab.id);
+              }}
+            >
+              {TabIcon && <TabIcon size={15} />}
+              <span>{tab.label}</span>
+              <span className={`${s.tabCountBadge} ${tab.id === 'PENDING_REVIEW' && count > 0 ? s.alert : ''}`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Recipes Grid */}
@@ -169,6 +254,9 @@ export default function MyRecipesPage() {
             </div>
             
             <div className={s.recipeImageWrapper}>
+              {/* Status Badge */}
+              {renderStatusBadge(recipe.status)}
+
               {recipe.imageUrl ? (
                 <img src={recipe.imageUrl} alt={recipe.title} className={s.recipeImage} />
               ) : (
@@ -183,21 +271,30 @@ export default function MyRecipesPage() {
             <div className={s.recipeContent}>
               <h3 className={s.recipeTitle}>{recipe.title}</h3>
               
+              {/* 4-item Meta: Time, Difficulty, Calo, Ingredients */}
               <div className={s.recipeMeta}>
-                <div className={s.metaItem}>
-                  <Clock size={16} className={s.metaIcon} />
-                  <span>{formatTime((recipe.prepTime || 0) + (recipe.cookTime || 0)) || '30 ph'}</span>
+                <div className={s.metaItem} title="Thời gian chuẩn bị & nấu">
+                  <Clock size={13} className={s.metaIcon} />
+                  <span>{formatTime((recipe.prepTime || 0) + (recipe.cookTime || 0))}</span>
                 </div>
-                <div className={s.metaItem}>
-                  <Zap size={16} className={s.metaIcon} />
-                  <span>{DIFFICULTY_LABELS[recipe.difficulty] || 'Trung bình'}</span>
+                <div className={s.metaItem} title="Độ khó">
+                  <Zap size={13} className={s.metaIcon} />
+                  <span>{DIFFICULTY_LABELS[recipe.difficulty] || 'Vừa'}</span>
                 </div>
-                <div className={s.metaItem}>
-                  <Flame size={16} className={s.metaIcon} />
+                <div className={s.metaItem} title="Calo mỗi khẩu phần">
+                  <Flame size={13} className={s.metaIcon} />
                   <span>
                     {recipe.nutrition?.caloriesPerServing != null
-                      ? `${Math.round(recipe.nutrition.caloriesPerServing)} kcal`
-                      : '-- kcal'}
+                      ? `${Math.round(recipe.nutrition.caloriesPerServing)}k`
+                      : '--'}
+                  </span>
+                </div>
+                <div className={s.metaItem} title="Số lượng nguyên liệu">
+                  <Utensils size={13} className={s.metaIcon} />
+                  <span>
+                    {recipe.ingredientCount != null
+                      ? `${recipe.ingredientCount} NL`
+                      : (recipe.ingredients?.length ? `${recipe.ingredients.length} NL` : '--')}
                   </span>
                 </div>
               </div>
