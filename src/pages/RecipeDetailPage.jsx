@@ -62,6 +62,37 @@ export default function RecipeDetailPage() {
   const [pantryMap, setPantryMap] = useState({});
   const [randomTips, setRandomTips] = useState([]);
 
+  // Hàm tải lại tủ nguyên liệu (dùng sau khi nấu xong để cập nhật checkbox)
+  const refreshPantry = async () => {
+    if (!currentUser) return;
+    try {
+      const pantryRes = await pantryService.getPantry();
+      const pMap = {};
+      if (pantryRes && pantryRes.data) {
+        Object.values(pantryRes.data).flat().forEach(pi => {
+          if (pi.ingredient && pi.ingredient.id) {
+            const current = pMap[pi.ingredient.id] || 0;
+            pMap[pi.ingredient.id] = current + (pi.quantityAvailable || 0);
+          }
+        });
+      }
+      setPantryMap(pMap);
+      // Cập nhật lại trạng thái checkbox nguyên liệu
+      if (recipe?.ingredients) {
+        const updatedChecked = {};
+        recipe.ingredients.forEach((ing, idx) => {
+          const available = pMap[ing.ingredientId] || 0;
+          if (available >= ing.amount) {
+            updatedChecked[idx] = true;
+          }
+        });
+        setCheckedIngredients(updatedChecked);
+      }
+    } catch (err) {
+      console.error('Failed to refresh pantry:', err);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -579,7 +610,13 @@ export default function RecipeDetailPage() {
             </h2>
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => setIsCookingMode(true)}
+                onClick={() => {
+                  if (!currentUser) {
+                    openAuthModal('nấu ăn và theo dõi nguyên liệu');
+                    return;
+                  }
+                  setIsCookingMode(true);
+                }}
                 className="px-4 py-2 bg-[#a13923] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 hover:bg-[#8b311e] transition-colors shadow-sm"
               >
                 <Play size={14} fill="currentColor" /> Bắt đầu nấu ăn
@@ -623,7 +660,13 @@ export default function RecipeDetailPage() {
 
           {recipe.steps?.length > 0 && (
             <div className="mt-12 flex justify-center">
-              <button onClick={() => setIsCookingMode(true)} className="px-8 py-4 bg-[#a13923] text-white rounded-full text-[15px] font-bold flex items-center gap-2 hover:bg-[#8b311e] transition-colors shadow-lg shadow-[#a13923]/30 hover:-translate-y-1">
+              <button onClick={() => {
+                if (!currentUser) {
+                  openAuthModal('nấu ăn và theo dõi nguyên liệu');
+                  return;
+                }
+                setIsCookingMode(true);
+              }} className="px-8 py-4 bg-[#a13923] text-white rounded-full text-[15px] font-bold flex items-center gap-2 hover:bg-[#8b311e] transition-colors shadow-lg shadow-[#a13923]/30 hover:-translate-y-1">
                 <Clock size={20} /> BẮT ĐẦU NẤU NGAY <ArrowLeft size={20} className="rotate-180 ml-1" />
               </button>
             </div>
@@ -713,7 +756,11 @@ export default function RecipeDetailPage() {
       </section>
 
       {isCookingMode && (
-        <CookingMode recipe={recipe} onClose={() => setIsCookingMode(false)} />
+        <CookingMode
+          recipe={recipe}
+          onClose={() => setIsCookingMode(false)}
+          onSuccess={() => refreshPantry()}
+        />
       )}
 
       <ShareRecipeModal 

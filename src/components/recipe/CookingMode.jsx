@@ -8,8 +8,9 @@ import api from '../../services/api';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200';
 
-const CookingMode = ({ recipe, onClose }) => {
+const CookingMode = ({ recipe, onClose, onSuccess }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [completing, setCompleting] = useState(false);
 
   // Lock body scroll when active
   useEffect(() => {
@@ -49,13 +50,39 @@ const CookingMode = ({ recipe, onClose }) => {
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
     } else {
+      // Bước cuối cùng — ghi nhận nấu ăn và tự động trừ kho
+      setCompleting(true);
       try {
-        await api.post(`/recipes/${recipe.id}/cook`);
-        toast.success('Chúc mừng bạn đã hoàn thành món ăn! Đã lưu vào sổ tay nấu ăn.');
+        const servings = recipe.baseServings || 2;
+        const res = await api.post(`/recipes/${recipe.id}/cook?servings=${servings}`);
+        const journal = res.data?.data;
+        const deductions = journal?.deductionSummary || [];
+
+        if (deductions.length > 0) {
+          toast.success(
+            <div>
+              <strong>🎉 Chúc mừng bạn đã hoàn thành món ăn!</strong>
+              <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>🧊 Đã trừ khỏi tủ lạnh:</div>
+                {deductions.map((d, i) => (
+                  <div key={i}>• {d.ingredientName}: -{d.deductedAmount} {d.unit}</div>
+                ))}
+              </div>
+            </div>,
+            { autoClose: 6000 }
+          );
+        } else {
+          toast.success('🎉 Chúc mừng! Đã hoàn thành món ăn và lưu vào sổ tay nấu ăn.');
+        }
+
+        onSuccess?.(journal);
       } catch (error) {
         console.error('Failed to log cook session', error);
+        toast.error('Có lỗi khi ghi nhận buổi nấu, nhưng bạn đã hoàn thành rất tốt!');
+      } finally {
+        setCompleting(false);
+        onClose();
       }
-      onClose();
     }
   };
 
@@ -64,6 +91,7 @@ const CookingMode = ({ recipe, onClose }) => {
       setCurrentStepIndex(currentStepIndex - 1);
     }
   };
+
 
   return createPortal(
     <div className={s.overlay}>
@@ -149,8 +177,15 @@ const CookingMode = ({ recipe, onClose }) => {
         <button 
           className={`${s.navButton} ${s.nextButton}`} 
           onClick={handleNext}
+          disabled={completing}
         >
-          {currentStepIndex === steps.length - 1 ? 'Hoàn thành' : 'Bước Tiếp Theo'} {currentStepIndex !== steps.length - 1 && <ChevronRight size={20} />}
+          {completing
+            ? 'Đang lưu...'
+            : currentStepIndex === steps.length - 1
+              ? 'Hoàn thành'
+              : 'Bước Tiếp Theo'
+          }
+          {currentStepIndex !== steps.length - 1 && !completing && <ChevronRight size={20} />}
         </button>
       </div>
     </div>,
