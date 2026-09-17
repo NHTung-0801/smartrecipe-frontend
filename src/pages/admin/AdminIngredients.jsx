@@ -99,10 +99,10 @@ export default function AdminIngredients() {
   const allPages = allData?.data?.totalPages ?? 0;
 
   // KPI Metrics
-  const totalIngredientsCount = allData?.data?.totalIngredients ?? pendingData?.data?.totalIngredients ?? (allTotal || 297);
+  const totalIngredientsCount = allData?.data?.totalIngredients ?? pendingData?.data?.totalIngredients ?? allTotal;
   const pendingReviewCount = pendingData?.data?.pendingCount ?? pendingTotal;
   const verifiedCount = Math.max(0, totalIngredientsCount - pendingReviewCount);
-  const totalAislesCount = aisles.length || (pendingData?.data?.totalAisles ?? 12);
+  const totalAislesCount = aisles.length || (pendingData?.data?.totalAisles ?? 0);
 
   // Automatically select the first item on initial load or tab switch
   useEffect(() => {

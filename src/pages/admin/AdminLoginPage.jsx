@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Eye, EyeOff, Lock, User, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Lock, User, ArrowLeft, Wifi } from 'lucide-react';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 import api from '../../services/api';
 import useAuthStore from '../../store/useAuthStore';
 import s from '../../styles/pages/admin/AdminLoginPage.module.css';
+
+// URL gốc của backend (không có /api/v1)
+const BACKEND_ORIGIN = import.meta.env.PROD
+  ? 'https://smartrecipe-backend.onrender.com'
+  : 'http://localhost:8080';
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -12,12 +18,32 @@ export default function AdminLoginPage() {
   const [form, setForm] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [slowLoadMsg, setSlowLoadMsg] = useState('');
+  const [serverReady, setServerReady] = useState(false);
+  const slowTimerRef = useRef(null);
+
+  // Tự động ping backend khi vào trang để Render wake up trước khi user ấn login
+  useEffect(() => {
+    let cancelled = false;
+    axios.get(`${BACKEND_ORIGIN}/actuator/health`, { timeout: 30000 })
+      .then(() => { if (!cancelled) setServerReady(true); })
+      .catch(() => { if (!cancelled) setServerReady(true); }); // silent fail — vẫn cho login
+    return () => { cancelled = true; };
+  }, []);
+
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSlowLoadMsg('');
+
+    // Sau 3 giây, hiện thông báo nếu server đang khởi động
+    slowTimerRef.current = setTimeout(() => {
+      setSlowLoadMsg('Server đang khởi động, vui lòng chờ thêm vài giây...');
+    }, 3000);
+
     try {
       const res = await api.post('/auth/login', form);
       const data = res.data?.data;
@@ -36,6 +62,8 @@ export default function AdminLoginPage() {
       const msg = err?.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không đúng.';
       toast.error(msg);
     } finally {
+      clearTimeout(slowTimerRef.current);
+      setSlowLoadMsg('');
       setLoading(false);
     }
   };
@@ -110,12 +138,31 @@ export default function AdminLoginPage() {
 
           <button type="submit" disabled={loading} className={s.submitBtn}>
             {loading ? (
-              <span className={s.spinner} />
+              <>
+                <span className={s.spinner} />
+                <span>Đang xác thực...</span>
+              </>
             ) : (
               <><ShieldCheck size={18} /> Đăng nhập</>
             )}
           </button>
+
+          {/* Thông báo khi server đang khởi động */}
+          {slowLoadMsg && (
+            <div className={s.slowLoadNotice}>
+              <Wifi size={14} />
+              <span>{slowLoadMsg}</span>
+            </div>
+          )}
         </form>
+
+        {/* Trạng thái server */}
+        <div className={s.serverStatus}>
+          <span className={serverReady ? s.statusDotOnline : s.statusDotPending} />
+          <span className={s.statusText}>
+            {serverReady ? 'Server đã sẵn sàng' : 'Đang kết nối server...'}
+          </span>
+        </div>
 
         <div className={s.switchBackArea}>
           <Link to="/" className={s.backToClientLink}>
