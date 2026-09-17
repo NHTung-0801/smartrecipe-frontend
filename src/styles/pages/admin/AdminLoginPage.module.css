@@ -211,38 +211,151 @@
   to { transform: rotate(360deg); }
 }
 
-/* ─── Switch Back to Client Area ─── */
-.switchBackArea {
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid #f0e6e0;
+/* ─── Secondary Navigation Section ─── */
+.navSection {
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.navDivider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.navDividerLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ebdcd5 50%, transparent);
+}
+
+.navDividerText {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a8a29e;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  user-select: none;
+}
+
+.navGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.navCard {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.65rem;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid #ebdcd5;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(161, 57, 35, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.navCard:hover {
+  background: #ffffff;
+  border-color: #f97316;
+  box-shadow: 0 6px 18px rgba(161, 57, 35, 0.12);
+  transform: translateY(-2px);
+}
+
+.navCard:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.navIconBox {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #fff3ee;
+  color: #c2410c;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-shrink: 0;
+  transition: all 0.22s ease;
 }
 
-.backToClientLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #78716c;
-  text-decoration: none;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  transition: all 0.2s ease;
+.navIconBoxUser {
+  background: #fff7ed;
+  color: #ea580c;
 }
 
-.backToClientLink:hover {
-  color: #a13923;
-  transform: translateX(-1px);
+.navCard:hover .navIconBox {
+  background: #a13923;
+  color: #ffffff;
+  transform: scale(1.06);
 }
 
-.dividerDot {
-  color: #d6d3d1;
+.navCard:hover .navIconBoxUser {
+  background: #c2410c;
+  color: #ffffff;
+  transform: scale(1.06);
+}
+
+.navTextBox {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  min-width: 0;
+  flex: 1;
+}
+
+.navTitle {
   font-size: 0.8rem;
+  font-weight: 700;
+  color: #292524;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  transition: color 0.2s ease;
+}
+
+.navCard:hover .navTitle {
+  color: #a13923;
+}
+
+.navSubtitle {
+  font-size: 0.68rem;
+  color: #78716c;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.navArrow {
+  color: #a8a29e;
+  opacity: 0.5;
+  transition: all 0.22s ease;
+  flex-shrink: 0;
+}
+
+.navCard:hover .navArrow {
+  opacity: 1;
+  color: #a13923;
+  transform: translateX(2px);
+}
+
+@media (max-width: 380px) {
+  .navGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
 }
 
 /* ─── Server Status ─── */

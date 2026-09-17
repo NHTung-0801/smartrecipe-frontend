@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -6,49 +6,46 @@ import { userService } from '../services/userService';
 import useAuthStore from '../store/useAuthStore';
 import useAuthPromptStore from '../store/useAuthPromptStore';
 
-const FollowButton = ({ userId, initialIsFollowing = false, className = '' }) => {
-  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
-  // Ref luôn phản ánh giá trị mới nhất — tránh stale closure trong mutationFn
-  const isFollowingRef = useRef(initialIsFollowing);
+const FollowButton = ({ userId, initialIsFollowing = false, onFollowChange, className = '' }) => {
+  const [isFollowing, setIsFollowing] = useState(Boolean(initialIsFollowing));
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
   const openAuthModal = useAuthPromptStore((s) => s.openModal);
 
   useEffect(() => {
-    setIsFollowing(initialIsFollowing);
-    isFollowingRef.current = initialIsFollowing;
+    setIsFollowing(Boolean(initialIsFollowing));
   }, [initialIsFollowing]);
 
   const toggleFollowMutation = useMutation({
-    mutationFn: async () => {
-      // Đọc từ ref (không phải closure) để luôn có giá trị mới nhất
-      if (isFollowingRef.current) {
+    mutationFn: async (currentlyFollowing) => {
+      // currentlyFollowing là trạng thái trước khi người dùng click
+      if (currentlyFollowing) {
         return await userService.unfollowUser(userId);
       } else {
         return await userService.followUser(userId);
       }
     },
-    onMutate: async () => {
-      // Capture trạng thái TRƯỚC khi thay đổi (dùng cho message và rollback)
-      const wasFollowing = isFollowingRef.current;
-      // Cập nhật cả state (UI) và ref (logic) ngay lập tức (optimistic)
-      isFollowingRef.current = !wasFollowing;
-      setIsFollowing(!wasFollowing);
-      return { wasFollowing }; // context để dùng trong onSuccess/onError
+    onMutate: async (currentlyFollowing) => {
+      // Optimistic update: đảo trạng thái ngay lập tức trên UI
+      const nextStatus = !currentlyFollowing;
+      setIsFollowing(nextStatus);
+      onFollowChange?.(nextStatus);
+      return { wasFollowing: currentlyFollowing };
     },
-    onSuccess: (data, _variables, context) => {
-      // Dùng context.wasFollowing (trạng thái TRƯỚC khi click) để xác định action
-      const actionMsg = context?.wasFollowing ? 'Đã hủy theo dõi' : 'Đã theo dõi thành công! 🎉';
+    onSuccess: (data, currentlyFollowing, context) => {
+      const wasFollowing = context?.wasFollowing ?? currentlyFollowing;
+      const actionMsg = wasFollowing ? 'Đã hủy theo dõi' : 'Đã theo dõi thành công! 🎉';
       toast.success(data?.message || actionMsg);
-      queryClient.invalidateQueries({ queryKey: ['publicProfile', userId] });
-      queryClient.invalidateQueries({ queryKey: ['followers', userId] });
+      queryClient.invalidateQueries({ queryKey: ['publicProfile', String(userId)] });
+      queryClient.invalidateQueries({ queryKey: ['publicProfile', Number(userId)] });
+      queryClient.invalidateQueries({ queryKey: ['followers', String(userId)] });
+      queryClient.invalidateQueries({ queryKey: ['followers', Number(userId)] });
+      queryClient.invalidateQueries({ queryKey: ['following'] });
     },
-    onError: (error, _variables, context) => {
-      // Rollback về trạng thái TRƯỚC khi click dùng context
-      if (context?.wasFollowing !== undefined) {
-        isFollowingRef.current = context.wasFollowing;
-        setIsFollowing(context.wasFollowing);
-      }
+    onError: (error, currentlyFollowing, context) => {
+      const rollbackStatus = context?.wasFollowing ?? currentlyFollowing;
+      setIsFollowing(rollbackStatus);
+      onFollowChange?.(rollbackStatus);
       toast.error(error?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
     }
   });
@@ -60,7 +57,10 @@ const FollowButton = ({ userId, initialIsFollowing = false, className = '' }) =>
       openAuthModal('Vui lòng đăng nhập để theo dõi đầu bếp này và nhận thông báo công thức mới!');
       return;
     }
-    toggleFollowMutation.mutate();
+    if (toggleFollowMutation.isPending) return;
+
+    // Truyền trực tiếp trạng thái hiện tại vào mutate
+    toggleFollowMutation.mutate(isFollowing);
   };
 
   if (isFollowing) {

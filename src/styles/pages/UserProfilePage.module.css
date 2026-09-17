@@ -4,9 +4,9 @@
 
 .pageContainer {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 40px 60px 40px;
+  padding: 16px 32px 60px 32px;
 }
 
 @media (max-width: 768px) {
@@ -67,3 +67,18 @@
     padding: 16px;
   }
 }
+
+.followersScrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.followersScrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.followersScrollbar::-webkit-scrollbar-thumb {
+  background: #f0e3d9;
+  border-radius: 9999px;
+}
+.followersScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d8c2b5;
+}
+

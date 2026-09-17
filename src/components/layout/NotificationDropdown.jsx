@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, BellOff, CheckCheck, Clock } from 'lucide-react';
+import { Bell, BellOff, CheckCheck, Clock, Copy, Heart, MessageCircle, UserCheck } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import { notificationService } from '../../services/notificationService';
 import UserAvatar from '../ui/UserAvatar';
@@ -21,6 +21,38 @@ const formatRelativeTime = (dateStr) => {
   if (diffHours < 24) return `${diffHours} giờ trước`;
   if (diffDays < 7) return `${diffDays} ngày trước`;
   return date.toLocaleDateString('vi-VN');
+};
+
+const renderTypeBadge = (type) => {
+  switch (type) {
+    case 'RECIPE_CLONE':
+      return (
+        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-xs border border-white" title="Sao chép công thức">
+          <Copy size={9} />
+        </span>
+      );
+    case 'RECIPE_LIKE':
+      return (
+        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-xs border border-white" title="Yêu thích">
+          <Heart size={9} fill="currentColor" />
+        </span>
+      );
+    case 'RECIPE_COMMENT':
+    case 'COMMENT_REPLY':
+      return (
+        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-xs border border-white" title="Bình luận">
+          <MessageCircle size={9} />
+        </span>
+      );
+    case 'NEW_FOLLOWER':
+      return (
+        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs border border-white" title="Người theo dõi mới">
+          <UserCheck size={9} />
+        </span>
+      );
+    default:
+      return null;
+  }
 };
 
 export default function NotificationDropdown() {
@@ -153,6 +185,7 @@ export default function NotificationDropdown() {
                       name={notif.actor?.displayName || notif.actor?.username || 'U'}
                       className="w-9 h-9 text-xs border border-[#e4d5cc]"
                     />
+                    {renderTypeBadge(notif.type)}
                   </div>
                   <div className={s.contentWrapper}>
                     <p className={s.message}>{notif.message}</p>

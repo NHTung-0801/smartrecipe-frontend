@@ -1,0 +1,191 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  font-family: var(--sr-font-body, system-ui, sans-serif);
+  color: var(--sr-on-surface, #1f1b17);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconWrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fceddf, #f9dfce);
+  border: 1px solid rgba(161, 57, 35, 0.2);
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(161, 57, 35, 0.12);
+}
+
+.titleArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.mainTitle {
+  font-family: var(--sr-font-heading, system-ui, sans-serif);
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #1f1b17;
+  margin: 0;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.recipeName {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sr-primary, #a13923);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.deductionBox {
+  background: rgba(246, 236, 229, 0.55);
+  border: 1px solid rgba(222, 192, 185, 0.65);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.deductionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  font-weight: 750;
+  color: var(--sr-on-surface-variant, #57423d);
+}
+
+.deductionBadge {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(161, 57, 35, 0.1);
+  color: var(--sr-primary, #a13923);
+  font-weight: 750;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 155px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: rgba(222, 192, 185, 0.8);
+  border-radius: 4px;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(222, 192, 185, 0.4);
+  border-radius: 9px;
+  font-size: 0.8rem;
+  transition: background-color 0.15s ease;
+}
+
+.itemRow:hover {
+  background: #ffffff;
+  border-color: rgba(161, 57, 35, 0.3);
+}
+
+.itemNameArea {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.itemIcon {
+  font-size: 0.95rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.itemName {
+  font-weight: 600;
+  color: var(--sr-on-surface, #1f1b17);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemDeducted {
+  font-family: var(--sr-font-heading, system-ui, sans-serif);
+  font-weight: 800;
+  font-size: 0.74rem;
+  color: #a13923;
+  background: #fbeae5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 750;
+  color: var(--sr-primary, #a13923);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 4px 6px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+  background: rgba(161, 57, 35, 0.08);
+  transform: translateX(2px);
+}
+
+.journalBtn {
+  color: var(--sr-on-surface-variant, #57423d);
+}
+
+.journalBtn:hover {
+  color: var(--sr-primary, #a13923);
+  background: rgba(161, 57, 35, 0.08);
+}

@@ -39,10 +39,18 @@
   .pageTitle { font-size: 24px; }
 }
 
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 .rightSection {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+  flex-shrink: 0;
 }
 
 /* Search Bar */
@@ -186,3 +194,107 @@
     display: none;
   }
 }
+
+/* ── Rotating Food Quote Banner ── */
+.quoteChip {
+  display: none; /* ẩn trên mobile */
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex: 1;
+  width: 100%;
+  margin: 0 20px;
+  height: 42px;
+  padding: 0 20px;
+  background: linear-gradient(90deg, rgba(161, 57, 35, 0.035) 0%, rgba(161, 57, 35, 0.07) 50%, rgba(161, 57, 35, 0.035) 100%);
+  border: 1px solid rgba(161, 57, 35, 0.15);
+  border-radius: 9999px;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 6px rgba(161, 57, 35, 0.04);
+}
+
+.quoteChip:hover {
+  background: linear-gradient(90deg, rgba(161, 57, 35, 0.06) 0%, rgba(161, 57, 35, 0.11) 50%, rgba(161, 57, 35, 0.06) 100%);
+  border-color: rgba(161, 57, 35, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(161, 57, 35, 0.07);
+}
+
+@media (min-width: 900px) {
+  .quoteChip { 
+    display: flex; 
+  }
+}
+
+.quoteIcon {
+  color: var(--sr-primary, #a13923);
+  opacity: 0.88;
+  flex-shrink: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quoteIconSpin {
+  transform: rotate(180deg) scale(1.15);
+}
+
+.quoteTextWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  height: 26px;
+  max-width: 100%;
+}
+
+.quoteText {
+  font-family: var(--sr-font-body, 'Be Vietnam Pro', sans-serif);
+  font-size: 14.5px;
+  font-weight: 500;
+  font-style: italic;
+  color: #722718;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+  display: inline-block;
+  line-height: 26px;
+}
+
+.quoteTextEntering {
+  animation: quoteSlideInUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.quoteTextExiting {
+  animation: quoteSlideOutUp 0.35s cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+
+@keyframes quoteSlideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes quoteSlideOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+    filter: blur(2px);
+  }
+}
+

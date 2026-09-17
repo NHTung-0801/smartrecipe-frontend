@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, Gauge, Hash, Package, Save, Trash2, X, Tags } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { aisleService } from '../../services/ingredientService';
+import { aisleService, ingredientService } from '../../services/ingredientService';
 import s from '../../styles/pages/PantryPage.module.css';
 import ConfirmModal from '../ui/ConfirmModal';
 import { getIngredientIcon } from './PantryItemCard';

@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, PackageOpen, ChevronLeft, ChevronRight, Soup } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import s from '../../styles/components/CookingMode.module.css';
 
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import CookSuccessToast from './CookSuccessToast';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200';
 
 const CookingMode = ({ recipe, onClose, onSuccess }) => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completing, setCompleting] = useState(false);
 
@@ -58,22 +63,21 @@ const CookingMode = ({ recipe, onClose, onSuccess }) => {
         const journal = res.data?.data;
         const deductions = journal?.deductionSummary || [];
 
-        if (deductions.length > 0) {
-          toast.success(
-            <div>
-              <strong>🎉 Chúc mừng bạn đã hoàn thành món ăn!</strong>
-              <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
-                <div style={{ fontWeight: 600, marginBottom: 4 }}>🧊 Đã trừ khỏi tủ lạnh:</div>
-                {deductions.map((d, i) => (
-                  <div key={i}>• {d.ingredientName}: -{d.deductedAmount} {d.unit}</div>
-                ))}
-              </div>
-            </div>,
-            { autoClose: 6000 }
-          );
-        } else {
-          toast.success('🎉 Chúc mừng! Đã hoàn thành món ăn và lưu vào sổ tay nấu ăn.');
-        }
+        queryClient.invalidateQueries({ queryKey: ['pantry'] });
+        queryClient.invalidateQueries({ queryKey: ['pantry-summary'] });
+
+        toast.success(
+          <CookSuccessToast
+            recipeTitle={recipe.title}
+            deductions={deductions}
+            onNavigatePantry={() => navigate('/pantry')}
+            onNavigateJournal={() => navigate('/cooking-journal')}
+          />,
+          {
+            icon: false,
+            autoClose: 8000,
+          }
+        );
 
         onSuccess?.(journal);
       } catch (error) {

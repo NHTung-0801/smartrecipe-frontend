@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, LogIn, UserPlus, ShieldCheck } from 'lucide-react';
+import { Menu, LogIn, UserPlus, ShieldCheck, UtensilsCrossed } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import useAuthPromptStore from '../../store/useAuthPromptStore';
 import UserAvatar from '../ui/UserAvatar';
@@ -22,6 +22,21 @@ const getPageTitle = (pathname) => {
   return 'Smart Recipe';
 };
 
+const FOOD_QUOTES = [
+  'Bữa ăn ngon nhất là bữa ăn được nấu bằng tình yêu.',
+  'Nấu ăn là nghệ thuật sẻ chia và gắn kết gia đình.',
+  'Mỗi bữa cơm sum vầy là một kỷ niệm đáng trân trọng.',
+  'Căn bếp ấm cúng là trái tim tràn ngập yêu thương.',
+  'Ẩm thực tinh tế bắt đầu từ sự tỉ mỉ trong từng nguyên liệu.',
+  'Hương vị quê nhà — nơi lưu giữ yêu thương và ký ức.',
+  'Mỗi món ăn ngon là một câu chuyện được kể bằng gia vị.',
+  'Nấu ăn ngon, quây quần bên người thân là niềm vui trọn vẹn nhất.',
+  'Người yêu ẩm thực là người biết trân quý cuộc sống.',
+  'Gia vị tuyệt vời nhất cho món ăn chính là sự chân thành.',
+  'Hương vị ngọt ngào nhất là hương vị được sẻ chia cùng nhau.',
+  'Món ăn ngon không chỉ no lòng, mà còn sưởi ấm tâm hồn.',
+];
+
 const TopHeader = ({ toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -30,6 +45,27 @@ const TopHeader = ({ toggleSidebar }) => {
   const openAuthModal = useAuthPromptStore((state) => state.openModal);
   
   const title = getPageTitle(location.pathname);
+
+  // Quote rotation state
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const nextQuote = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      setQuoteIndex((prev) => (prev + 1) % FOOD_QUOTES.length);
+      setIsExiting(false);
+    }, 380);
+  }, []);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      nextQuote();
+    }, 4800);
+    return () => clearInterval(timer);
+  }, [isPaused, nextQuote]);
 
   const handleProtectedClick = (featureName) => {
     if (!isAuthenticated) {
@@ -48,16 +84,28 @@ const TopHeader = ({ toggleSidebar }) => {
         <h1 className={s.pageTitle}>{title}</h1>
       </div>
 
-      <div className={s.rightSection}>
-        {/* Search Bar */}
-        <div className={s.searchWrapper}>
-          <Search size={18} className={s.searchIcon} />
-          <input 
-            type="text" 
-            placeholder="Tìm kiếm..."
-            className={s.searchInput}
-          />
+      {/* Rotating Food Quotes Carousel — center of header */}
+      <div 
+        className={s.quoteChip}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onClick={() => {
+          if (!isExiting) nextQuote();
+        }}
+        title="Nhấp để đổi câu cảm hứng ẩm thực khác"
+      >
+        <UtensilsCrossed size={16} className={`${s.quoteIcon} ${isExiting ? s.quoteIconSpin : ''}`} />
+        <div className={s.quoteTextWrapper}>
+          <span 
+            key={quoteIndex} 
+            className={`${s.quoteText} ${isExiting ? s.quoteTextExiting : s.quoteTextEntering}`}
+          >
+            {FOOD_QUOTES[quoteIndex]}
+          </span>
         </div>
+      </div>
+
+      <div className={s.rightSection}>
 
         {/* Action Area: Khách thấy [Đăng nhập] & [Đăng ký], Thành viên thấy Bell, Heart, Avatar */}
         {isAuthenticated ? (

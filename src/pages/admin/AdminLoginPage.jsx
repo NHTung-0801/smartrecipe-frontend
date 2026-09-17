@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Eye, EyeOff, Lock, User, ArrowLeft, Wifi } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Lock, User, ArrowLeft, Wifi, Globe, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import api from '../../services/api';
@@ -164,15 +164,36 @@ export default function AdminLoginPage() {
           </span>
         </div>
 
-        <div className={s.switchBackArea}>
-          <Link to="/" className={s.backToClientLink}>
-            <ArrowLeft size={14} />
-            <span>Quay lại trang chủ Website</span>
-          </Link>
-          <span className={s.dividerDot}>•</span>
-          <Link to="/login" className={s.backToClientLink}>
-            <span>Đăng nhập người dùng</span>
-          </Link>
+        <div className={s.navSection}>
+          <div className={s.navDivider}>
+            <span className={s.navDividerLine} />
+            <span className={s.navDividerText}>Lối tắt điều hướng</span>
+            <span className={s.navDividerLine} />
+          </div>
+
+          <div className={s.navGrid}>
+            <Link to="/" className={s.navCard} title="Quay lại giao diện website chính">
+              <div className={s.navIconBox}>
+                <Globe size={15} />
+              </div>
+              <div className={s.navTextBox}>
+                <span className={s.navTitle}>Trang chủ</span>
+                <span className={s.navSubtitle}>Về web chính</span>
+              </div>
+              <ChevronRight size={12} className={s.navArrow} />
+            </Link>
+
+            <Link to="/login" className={s.navCard} title="Đăng nhập tài khoản thành viên">
+              <div className={`${s.navIconBox} ${s.navIconBoxUser}`}>
+                <User size={15} />
+              </div>
+              <div className={s.navTextBox}>
+                <span className={s.navTitle}>Cổng User</span>
+                <span className={s.navSubtitle}>Tài khoản user</span>
+              </div>
+              <ChevronRight size={12} className={s.navArrow} />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

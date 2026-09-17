@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './styles/toast.css';
 
 import AppLayout from './components/layout/AppLayout';
 import HomePage from './pages/HomePage';
@@ -149,6 +150,16 @@ function App() {
           />
           <Route
             path="/recipes/new"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <RecipeFormPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recipes/:id/edit"
             element={
               <ProtectedRoute>
                 <AppLayout>
