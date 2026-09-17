@@ -278,6 +278,12 @@
   border: 1px solid #e5e7eb;
 }
 
+.statusClone {
+  background: rgba(124, 58, 237, 0.9);
+  color: #ffffff;
+  border: 1px solid rgba(167, 139, 250, 0.6);
+}
+
 .categoryBadge {
   position: absolute;
   bottom: 12px;

@@ -9,7 +9,7 @@ import useAuthStore from '../store/useAuthStore';
 import useAuthPromptStore from '../store/useAuthPromptStore';
 import useLikedRecipes from '../hooks/useLikedRecipes';
 import { 
-  Heart, Share2, Copy, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer, Sparkles
+  Heart, Share2, Copy, Edit3, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer, Sparkles
 } from 'lucide-react';
 import s from '../styles/pages/RecipeDetailPage.module.css';
 import CookingMode from '../components/recipe/CookingMode';
@@ -52,6 +52,7 @@ export default function RecipeDetailPage() {
   const isLiked = checkIsLiked(id);
   const [likeCount, setLikeCount] = useState(0);
   const [cloning, setCloning] = useState(false);
+  const [showCloneModal, setShowCloneModal] = useState(false);
   const [isCookingMode, setIsCookingMode] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [addingToGrocery, setAddingToGrocery] = useState(false);
@@ -180,19 +181,25 @@ export default function RecipeDetailPage() {
     toggleLike(id);
   };
 
-  const handleClone = async () => {
+  const handleCloneClick = () => {
     if (!currentUser) {
       openAuthModal('Sao chép công thức');
       return;
     }
-    if (!window.confirm('Bạn có muốn sao chép công thức này về bộ sưu tập của mình?')) return;
+    setShowCloneModal(true);
+  };
+
+  const executeClone = async () => {
+    setShowCloneModal(false);
     setCloning(true);
     try {
-      const cloned = await recipeService.clone(id);
-      toast.success('Đã sao chép công thức!');
-      navigate(`/recipes/${cloned?.id}`);
+      await recipeService.clone(id);
+      toast.success('Đã sao chép công thức vào bộ sưu tập của bạn!');
+      navigate('/recipes');
     } catch (err) {
-      toast.error('Có lỗi xảy ra khi clone');
+      console.error('Lỗi sao chép công thức:', err);
+      const errorMsg = err?.response?.data?.message || err?.message || 'Có lỗi xảy ra khi sao chép công thức';
+      toast.error(errorMsg);
     } finally {
       setCloning(false);
     }
@@ -259,17 +266,34 @@ export default function RecipeDetailPage() {
         <div className={s.heroContent}>
           <div className="flex justify-between items-end w-full gap-8">
             <div className="flex-1 max-w-[700px]">
-              <div className="flex flex-wrap gap-2 mb-4">
-                {recipe.tags && recipe.tags.length > 0 ? (
-                  recipe.tags.map(tag => (
-                    <span key={tag.id} className="px-3 py-1 bg-[#a13923] text-white text-xs font-semibold rounded-full shadow-md">
-                      {tag.name}
-                    </span>
-                  ))
-                ) : (
-                  <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md">
-                    Chưa có thẻ
-                  </span>
+              <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+                {/* Tags bên trái */}
+                <div className="flex flex-wrap gap-2">
+                  {recipe.tags && recipe.tags.length > 0 ? (
+                    recipe.tags.map(tag => (
+                      <span key={tag.id} className="px-3 py-1 bg-[#a13923] text-white text-xs font-semibold rounded-full shadow-md">
+                        {tag.name}
+                      </span>
+                    ))
+                  ) : (
+                    !recipe.clonedFromId && (
+                      <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md">
+                        Chưa có thẻ
+                      </span>
+                    )
+                  )}
+                </div>
+
+                {/* Badge Clone bên phải (đối diện tags) */}
+                {recipe.clonedFromId && (
+                  <Link
+                    to={`/recipes/${recipe.clonedFromId}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-600/90 hover:bg-purple-700 text-white text-xs font-semibold rounded-full shadow-md backdrop-blur-md transition-colors"
+                    title="Bấm để xem công thức gốc"
+                  >
+                    <Copy size={12} />
+                    <span>Clone</span>
+                  </Link>
                 )}
               </div>
               
@@ -351,8 +375,8 @@ export default function RecipeDetailPage() {
                   {recipe.status === 'PUBLIC' ? 'Công khai' : 'Riêng tư'}
                 </div>
               ) : (
-                <button onClick={handleClone} disabled={cloning} className="px-5 h-10 rounded-full bg-[#a13923] text-white hover:bg-[#8b311e] font-semibold text-sm flex items-center gap-2 transition-colors">
-                  <Copy size={16} /> {cloning ? 'Đang Clone...' : 'Clone'}
+                <button onClick={handleCloneClick} disabled={cloning} className="px-5 h-10 rounded-full bg-[#a13923] text-white hover:bg-[#8b311e] font-semibold text-sm flex items-center gap-2 transition-colors">
+                  <Copy size={16} /> {cloning ? 'Đang sao chép...' : 'Sao chép'}
                 </button>
               )}
             </div>
@@ -388,6 +412,7 @@ export default function RecipeDetailPage() {
               <FollowButton 
                 userId={recipe.author.id}
                 initialIsFollowing={isAuthorFollowing}
+                onFollowChange={setIsAuthorFollowing}
               />
             )}
           </div>
@@ -769,6 +794,40 @@ export default function RecipeDetailPage() {
         recipe={recipe} 
         onStatusChanged={setRecipe}
       />
+
+      {/* MODAL XÁC NHẬN SAO CHÉP CÔNG THỨC */}
+      {showCloneModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#f0e3d9] text-center transform transition-all animate-in zoom-in-95 duration-150">
+            <div className="w-14 h-14 rounded-2xl bg-[#fff5f2] border border-[#fbdcd5] text-[#a13923] flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <Copy size={26} />
+            </div>
+            <h3 className="text-xl font-bold font-heading text-[#3d271d] mb-2">
+              Sao chép công thức?
+            </h3>
+            <p className="text-sm text-[#796255] leading-relaxed mb-6">
+              Công thức <strong>"{recipe.title}"</strong> sẽ được nhân bản vào bộ sưu tập cá nhân của bạn dưới dạng riêng tư. Bạn có thể tự do điều chỉnh các nguyên liệu và bước nấu theo sở thích.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCloneModal(false)}
+                className="flex-1 py-3 px-4 rounded-xl border border-[#e4d5cc] font-semibold text-sm text-[#796255] hover:bg-[#f7ede7] transition-colors"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={executeClone}
+                disabled={cloning}
+                className="flex-1 py-3 px-4 rounded-xl bg-[#a13923] hover:bg-[#8b311e] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+              >
+                {cloning ? 'Đang sao chép...' : 'Xác nhận'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { recipeService } from '../services/recipeService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/useAuthStore';
-import { Plus, Clock, Zap, Flame, Star, Sparkles, Edit3, Trash2, MoreVertical, Utensils, CheckCircle2, Lock, FileText } from 'lucide-react';
+import { Plus, Clock, Zap, Flame, Star, Sparkles, Edit3, Trash2, MoreVertical, Utensils, CheckCircle2, Lock, FileText, Copy } from 'lucide-react';
 import s from '../styles/pages/MyRecipesPage.module.css';
 import fx from '../styles/effects.module.css';
 
@@ -256,6 +256,18 @@ export default function MyRecipesPage() {
             <div className={s.recipeImageWrapper}>
               {/* Status Badge */}
               {renderStatusBadge(recipe.status)}
+
+              {/* Cloned Badge */}
+              {recipe.clonedFromId && (
+                <div 
+                  className={`${s.statusBadge} ${s.statusClone}`}
+                  style={{ top: '42px' }}
+                  title="Công thức sao chép / biến tấu"
+                >
+                  <Copy size={11} />
+                  <span>Bản sao</span>
+                </div>
+              )}
 
               {recipe.imageUrl ? (
                 <img src={recipe.imageUrl} alt={recipe.title} className={s.recipeImage} />
