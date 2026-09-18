@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { journalService } from '../services/journalService';
 import { toast } from 'react-toastify';
@@ -70,21 +70,21 @@ export default function JournalDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const fetchJournal = async () => {
+  const fetchJournal = useCallback(async () => {
     try {
       const res = await journalService.getById(id);
       setJournal(res.data || res);
-    } catch (error) {
+    } catch {
       toast.error('Không tìm thấy nhật ký nấu ăn');
       navigate('/journal');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
   useEffect(() => {
     fetchJournal();
-  }, [id, navigate]);
+  }, [fetchJournal]);
 
   if (loading) {
     return (

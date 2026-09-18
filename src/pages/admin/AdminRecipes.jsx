@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ChefHat, CheckCircle, CheckCircle2, Lock, EyeOff, Trash2, RefreshCw,
-  AlertCircle, X, Clock, Users, Tag, ChevronRight, Eye,
-  Search, BookOpen, AlertTriangle, ShieldCheck, Flame, Utensils, Sparkles, Check
+  AlertCircle, X, Clock, ChevronRight, Eye,
+  Search, BookOpen, ShieldCheck, Flame, Utensils
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { adminService } from '../../services/adminService';

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  Camera, MoreVertical, Loader2, Plus, Clock, ChefHat, Bookmark, 
+  Camera, Loader2, Plus, Clock, ChefHat, 
   Sparkles, Trophy, Pencil, Star, Heart, Users, UserCheck, ChevronRight,
   Zap, Flame, Utensils, BookOpen
 } from 'lucide-react';

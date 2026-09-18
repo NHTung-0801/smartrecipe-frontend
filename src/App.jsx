@@ -29,7 +29,6 @@ import AdminRecipes from './pages/admin/AdminRecipes';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminMasterData from './pages/admin/AdminMasterData';
 import AdminSettings from './pages/admin/AdminSettings';
-import AdminPlaceholder from './pages/admin/AdminPlaceholder';
 import BenefitsPage from './pages/BenefitsPage';
 import useAuthStore from './store/useAuthStore';
 import { userService } from './services/userService';
@@ -248,16 +247,6 @@ function App() {
             }
           />
           <Route path="/inventory" element={<Navigate to="/pantry" replace />} />
-          <Route
-            path="/recipes/:id/edit"
-            element={
-              <ProtectedRoute>
-                <AppLayout>
-                  <RecipeFormPage />
-                </AppLayout>
-              </ProtectedRoute>
-            }
-          />
 
           {/* ── Admin routes ── */}
           <Route path="/admin/login" element={<AdminLoginPage />} />

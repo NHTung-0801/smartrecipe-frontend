@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Menu, LogIn, UserPlus, ShieldCheck, UtensilsCrossed } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
+import { Menu, UserPlus, ShieldCheck, UtensilsCrossed } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
-import useAuthPromptStore from '../../store/useAuthPromptStore';
 import UserAvatar from '../ui/UserAvatar';
 import NotificationDropdown from './NotificationDropdown';
 import s from '../../styles/layout/TopHeader.module.css';
@@ -39,10 +38,8 @@ const FOOD_QUOTES = [
 
 const TopHeader = ({ toggleSidebar }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const openAuthModal = useAuthPromptStore((state) => state.openModal);
   
   const title = getPageTitle(location.pathname);
 
@@ -66,14 +63,6 @@ const TopHeader = ({ toggleSidebar }) => {
     }, 4800);
     return () => clearInterval(timer);
   }, [isPaused, nextQuote]);
-
-  const handleProtectedClick = (featureName) => {
-    if (!isAuthenticated) {
-      openAuthModal(featureName);
-      return false;
-    }
-    return true;
-  };
 
   return (
     <header className={s.header}>

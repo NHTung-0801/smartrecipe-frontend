@@ -11,14 +11,8 @@ import {
   CheckCircle2, 
   XCircle, 
   Clock, 
-  ShieldCheck, 
-  Flame, 
   UtensilsCrossed, 
-  Heart,
-  Code2,
-  Cpu,
-  Layers,
-  Award
+  Heart
 } from 'lucide-react';
 import s from '../styles/pages/BenefitsPage.module.css';
 

@@ -4,7 +4,6 @@ import {
   Package,
   Layers,
   AlertTriangle,
-  AlertCircle,
   CheckCircle,
   Plus,
   Search,
@@ -74,7 +73,6 @@ export default function AdminIngredients() {
   const {
     data: pendingData,
     isLoading: pendingLoading,
-    refetch: refetchPending,
   } = useQuery({
     queryKey: ['admin-pending-ingredients', pendingPage],
     queryFn: () => adminService.getPendingIngredients(pendingPage, 20),
@@ -84,7 +82,6 @@ export default function AdminIngredients() {
   const {
     data: allData,
     isLoading: allLoading,
-    refetch: refetchAll,
   } = useQuery({
     queryKey: ['admin-all-ingredients', allPage, searchKeyword, filterAisle],
     queryFn: () => adminService.getAllIngredients(allPage, 20, searchKeyword, filterAisle),

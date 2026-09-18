@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Eye, EyeOff, Lock, User, ArrowLeft, Wifi, Globe, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Lock, User, Wifi, Globe, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import api from '../../services/api';

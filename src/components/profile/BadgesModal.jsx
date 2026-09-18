@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Award, CheckCircle2, Lock, Sparkles, ChevronRight, Trophy, ChefHat, Users, Calendar, Star } from 'lucide-react';
+import { X, Award, CheckCircle2, Lock, Sparkles, ChevronRight, Trophy, Star } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 export const BADGE_DEFINITIONS = [
