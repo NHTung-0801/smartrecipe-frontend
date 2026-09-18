@@ -1,499 +1,558 @@
-# 🍳 SmartRecipe — Frontend
+<div align="center">
 
-> **React SPA** (Single Page Application) cho nền tảng quản lý công thức nấu ăn và đi chợ thông minh. Giao tiếp với [SmartRecipe Backend](../smartrecipe-backend/README.md) qua REST API, tích hợp trợ lý AI gợi ý công thức từ tủ nguyên liệu sẵn có.
+# 🍳 SmartRecipe — Frontend Client
+
+**Nền tảng Quản lý Công thức Nấu ăn & Đi chợ Thông minh Tích hợp Trợ lý AI**
+
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-FF4154?style=for-the-badge&logo=react-query&logoColor=white)](https://tanstack.com/query)
+[![Zustand](https://img.shields.io/badge/Zustand-v5-4338CA?style=for-the-badge&logo=react&logoColor=white)](https://zustand-demo.pmnd.rs/)
+[![Vitest](https://img.shields.io/badge/Vitest-4.1-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+
+<p align="center">
+  Ứng dụng Single Page Application (SPA) hiện đại, trực quan và giàu tính tương tác dành cho những người yêu thích nấu nướng. Kết nối mượt mà với <b>Spring Boot REST API</b>, ứng dụng giúp tối ưu hóa tủ lạnh gia đình, tự động hóa danh sách đi chợ, gợi ý món ăn Zero-Waste từ Google Gemini AI, và cung cấp Cổng quản trị Admin chuyên sâu.
+</p>
+
+[Xem Bản Trực Tuyến (Live Demo)](https://smartrecipe-frontend.vercel.app) • [Tài liệu Backend API](../smartrecipe-backend/README.md) • [Báo cáo Lỗi](https://github.com/NHTung-0801/SmartRecipe-Project/issues)
+
+</div>
 
 ---
 
 ## 📋 Mục lục
 
-- [Tech Stack](#-tech-stack)
-- [Kiến trúc ứng dụng](#-kiến-trúc-ứng-dụng)
-- [Cấu trúc dự án](#-cấu-trúc-dự-án)
-- [Hệ thống Routing](#-hệ-thống-routing)
-- [Quản lý State](#-quản-lý-state)
-- [Luồng xác thực (Auth Flow)](#-luồng-xác-thực-auth-flow)
-- [Luồng Đi chợ thông minh](#-luồng-đi-chợ-thông-minh)
-- [Hệ thống Design](#-hệ-thống-design)
-- [Thiết lập & Chạy local](#-thiết-lập--chạy-local)
-- [Biến môi trường](#-biến-môi-trường)
-- [Scripts](#-scripts)
+- [✨ Tính năng Nổi bật](#-tính-năng-nổi-bật)
+- [🛠 Tech Stack & Công nghệ](#-tech-stack--công-nghệ)
+- [🏛 Kiến trúc Ứng dụng](#-kiến-trúc-ứng-dụng)
+- [🗺 Hệ thống Routing & Phân quyền](#-hệ-thống-routing--phân-quyền)
+- [📂 Cấu trúc Thư mục Dự án](#-cấu-trúc-thư-mục-dự-án)
+- [🗃 Quản lý State: Hai Tầng (Dual-Layer)](#-quản-lý-state-hai-tầng-dual-layer)
+- [🔐 Luồng Xác thực (Auth Flow & Auto-Refresh)](#-luồng-xác-thực-auth-flow--auto-refresh)
+- [🛒 Chu trình Đi chợ Thông minh (Smart Grocery Cycle)](#-chu-trình-đi-chợ-thông-minh-smart-grocery-cycle)
+- [🎨 Hệ thống Design & Giao diện](#-hệ-thống-design--giao-diện)
+- [🧪 Kiểm thử & Chất lượng (Unit Testing)](#-kiểm-thử--chất-lượng-unit-testing)
+- [⚙️ Thiết lập & Khởi chạy Local](#-thiết-lập--khởi-chạy-local)
+- [🐳 Docker & Triển khai Production](#-docker--triển-khai-production)
+- [🔄 CI/CD Pipeline (GitHub Actions & Vercel)](#-cicd-pipeline-github-actions--vercel)
 
 ---
 
-## 🛠 Tech Stack
+## ✨ Tính năng Nổi bật
 
-| Thành phần | Công nghệ | Phiên bản |
-|---|---|---|
-| **UI Framework** | React | 19.2 |
-| **Build Tool** | Vite | 8.2 |
-| **Routing** | React Router DOM | 7.18 |
-| **Server State** | TanStack Query (React Query) | 5.101 |
-| **Client State** | Zustand | 5.0 |
-| **HTTP Client** | Axios | 1.19 |
-| **Form & Validation** | React Hook Form + Zod | 7.84 / 4.4 |
-| **Styling** | CSS Modules + Tailwind CSS v4 | - |
-| **Icons** | Lucide React | 1.28 |
-| **Notifications** | React Toastify | 11.1 |
-| **Export PDF** | html2pdf.js | 0.14 |
-| **Hiệu ứng** | canvas-confetti | 1.9 |
-| **Linter** | OxLint | 1.75 |
-| **Testing** | Vitest + Testing Library + jsdom | 4.1 |
+### 1. 🤖 Trợ lý AI Bếp núc (Google Gemini Integration)
+- **Zero-Waste Generator**: Phân tích các nguyên liệu sắp hết hạn trong tủ lạnh để đề xuất ngay món ăn phù hợp nhất, giảm thiểu tối đa lãng phí thực phẩm.
+- **Feasible Recipe Finder**: Tìm kiếm và sáng tạo công thức nấu ăn linh hoạt dựa trên danh sách nguyên liệu người dùng nhập tùy ý.
+- **Tự động trích xuất dinh dưỡng**: AI tự tính toán Calo, Protein, Fat, Carbs và thời gian chuẩn bị cho từng công thức.
+
+### 2. 🧊 Tủ lạnh Thông minh (Smart Virtual Pantry)
+- **Phân loại 9 kệ siêu thị**: Tự động sắp xếp nguyên liệu vào 9 kệ chuẩn (Rau củ, Thịt, Hải sản, Gia vị, Đồ khô, Sữa & Trứng, Trái cây, Dầu mỡ, Các loại hạt).
+- **Hệ thống Cảnh báo Hạn dùng**: Đổi màu trực quan (Xanh: Còn hạn, Vàng: Sắp hết hạn trong 3 ngày, Đỏ: Đã quá hạn) cùng tính năng "Dọn tủ ngay".
+- **Quy đổi Đơn vị Tự động**: Hỗ trợ chuyển đổi mượt mà giữa các đơn vị thông dụng (`ml`, `g`, `kg`, `thìa canh`, `chén`,...).
+
+### 3. 🛒 Đi chợ Tự động (Smart Grocery Shopping)
+- **Công thức trừ kho thông minh**: Khi chọn một hoặc nhiều món ăn cần nấu, hệ thống tự tính:
+  $$\text{Số lượng cần mua} = \text{Tổng nguyên liệu công thức} - \text{Số lượng sẵn có trong tủ}$$
+- **Chế độ Đi chợ Thực tế (Shopping Mode)**: Giao diện toàn màn hình tối ưu cho thiết bị di động khi ở siêu thị, hỗ trợ tick chọn từng món và thanh tiến độ hoàn thành theo từng kệ.
+- **Tự động Cập nhật Kho (Auto Refill)**: Ngay khi nhấn "Hoàn thành chuyến đi chợ", toàn bộ nguyên liệu đã mua sẽ tự động được cộng dồn vào Tủ lạnh, kèm hiệu ứng Confetti rực rỡ.
+
+### 4. 📖 Khám phá & Sáng tạo Công thức
+- **Trình soạn thảo Công thức Đa bước**: Form nhập liệu thông minh với tính năng Autocomplete nguyên liệu, upload ảnh món ăn lên Cloudinary, quản lý từng bước thực hiện.
+- **Chế độ Nấu ăn Rảnh tay (Cooking Mode)**: Hướng dẫn từng bước với chữ to, hình ảnh minh họa, đồng hồ đếm ngược hẹn giờ.
+- **Xuất bản & Tương tác**: Hỗ trợ 4 trạng thái (`PUBLIC`, `PRIVATE`, `DRAFT`, `DELETED`), tính năng Sao chép (Clone) công thức, Thích (Like), Bình luận dạng cây phân cấp (Nested Comments), Xuất bản in và PDF.
+
+### 5. 🛡️ Cổng Quản trị Admin Toàn diện (`/admin/*`)
+- **Admin Dashboard**: Thống kê số lượng người dùng, công thức, nhật ký, tỷ lệ hoạt động và biểu đồ phân bổ.
+- **Quản lý Nguyên liệu Chuẩn**: CRUD hơn 297+ nguyên liệu dinh dưỡng USDA, hỗ trợ gán kệ hàng và chỉnh sửa chỉ số calo/macro.
+- **Kiểm duyệt & Quản trị Nội dung**: Quản lý trạng thái công thức của toàn bộ người dùng, quản lý tài khoản, danh mục Tags và Bảng quy đổi đơn vị đo lường.
 
 ---
 
-## 🏛 Kiến trúc ứng dụng
+## 🛠 Tech Stack & Công nghệ
+
+| Phân tầng | Công nghệ / Thư viện | Phiên bản | Vai trò trong dự án |
+|:---|:---|:---:|:---|
+| **Core Framework** | React | `19.2` | Thư viện xây dựng giao diện người dùng dựa trên Component |
+| **Build Tool** | Vite | `8.2` | Công cụ đóng gói siêu tốc với Hot Module Replacement (HMR) |
+| **Routing** | React Router DOM | `7.18` | Định tuyến client-side, dynamic routes, nested layouts |
+| **Server State** | TanStack Query (React Query) | `5.101` | Quản lý caching, background refetch, stale-while-revalidate |
+| **Client State** | Zustand | `5.0` | Global Store nhẹ, quản lý phiên đăng nhập (Auth Session) |
+| **HTTP Client** | Axios | `1.19` | Gọi REST API với Interceptors xử lý tự động refresh token JWT |
+| **Forms & Validation** | React Hook Form + Zod | `7.84 / 4.4` | Quản lý form hiệu năng cao và kiểm thực dữ liệu an toàn kiểu |
+| **Styling Strategy** | CSS Modules + Tailwind CSS | `v4.3` | Thiết kế giao diện linh hoạt, scoped styling chống xung đột CSS |
+| **Icons** | Lucide React | `1.28` | Bộ icon vector hiện đại, tối ưu dung lượng |
+| **Notifications** | React Toastify | `11.1` | Hiển thị thông báo trạng thái thao tác mượt mà |
+| **Document Export** | html2pdf.js + react-to-print | `0.14 / 3.3` | Xuất công thức thành tài liệu in ấn và file PDF tải về |
+| **Visual Effects** | canvas-confetti | `1.9` | Hiệu ứng pháo hoa chúc mừng khi hoàn tất chuyến đi chợ |
+| **Linter** | OxLint | `1.75` | Linter thế hệ mới bằng Rust, tốc độ kiểm tra vượt trội |
+| **Testing** | Vitest + Testing Library + jsdom | `4.1` | Môi trường kiểm thử tự động toàn diện cho components và services |
+
+---
+
+## 🏛 Kiến trúc Ứng dụng
+
+Hệ thống được thiết kế theo mô hình phân lớp rõ ràng (Separation of Concerns), đảm bảo tính module hóa và dễ bảo trì:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                        BROWSER                           │
-│                                                          │
-│  ┌─────────────────────────────────────────────────┐    │
-│  │               React Router DOM                   │    │
-│  │         Routing + ProtectedRoute guard           │    │
-│  └──────────────────────┬──────────────────────────┘    │
-│                         │                                │
-│  ┌──────────────────────▼──────────────────────────┐    │
-│  │                   Pages (13)                     │    │
-│  │    Orchestrate components + trigger queries      │    │
-│  └──────────┬──────────────────────────┬───────────┘    │
-│             │                          │                  │
-│  ┌──────────▼──────────┐  ┌───────────▼───────────┐    │
-│  │  Components (30+)   │  │  TanStack Query Cache  │    │
-│  │  UI + Business UI   │  │  staleTime: 5 phút     │    │
-│  └──────────┬──────────┘  └───────────┬───────────┘    │
-│             │                          │                  │
-│  ┌──────────▼──────────┐  ┌───────────▼───────────┐    │
-│  │  Zustand Auth Store │  │   Service Layer (9)    │    │
-│  │  isAuthenticated    │  │   authService          │    │
-│  │  user, tokens       │  │   recipeService        │    │
-│  └─────────────────────┘  │   groceryService ...   │    │
-│                            └───────────┬───────────┘    │
-│                                        │                  │
-│  ┌─────────────────────────────────────▼───────────┐    │
-│  │                  api.js (Axios Instance)          │    │
-│  │   Request Interceptor: auto-attach JWT           │    │
-│  │   Response Interceptor: auto-refresh token       │    │
-│  └─────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────┘
-                          │ HTTP/JSON
-┌─────────────────────────▼───────────────────────────────┐
-│              SmartRecipe Backend (Spring Boot)            │
-│                    localhost:8080                         │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            TRÌNH DUYỆT (CLIENT BROWSER)                     │
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │               React Router DOM v7 (Navigation & Guards)               │  │
+│  │   • Public Route       • ProtectedRoute (User)    • AdminGuard (Admin)│  │
+│  └───────────────────────────────────┬───────────────────────────────────┘  │
+│                                      │                                      │
+│  ┌───────────────────────────────────▼───────────────────────────────────┐  │
+│  │                    Layouts Layer (AppLayout / AdminLayout)             │  │
+│  │      Navbar, Sidebar, Notifications, Floating Action Triggers         │  │
+│  └───────────────────────────────────┬───────────────────────────────────┘  │
+│                                      │                                      │
+│  ┌───────────────────────────────────▼───────────────────────────────────┐  │
+│  │                       Pages Layer (21 Pages)                          │  │
+│  │  Home, Recipes, Pantry, Grocery, Journal, Profile, Admin Dashboard...│  │
+│  └───────────────┬───────────────────────────────────────┬───────────────┘  │
+│                  │                                       │                  │
+│  ┌───────────────▼───────────────┐       ┌───────────────▼───────────────┐  │
+│  │     Components Layer (40+)    │       │     State Management Layer    │  │
+│  │  • RecipeCard, CookingMode    │       │  • TanStack Query: API Cache  │  │
+│  │  • PantryGrid, ExpiryBanner   │◄─────►│    (5m staleTime, auto-retry) │  │
+│  │  • ShoppingMode, Confetti     │       │  • Zustand: useAuthStore      │  │
+│  │  • IngredientAutocomplete     │       │    (JWT Tokens + LocalStorage)│  │
+│  └───────────────┬───────────────┘       └───────────────┬───────────────┘  │
+│                  │                                       │                  │
+│  ┌───────────────▼───────────────────────────────────────▼───────────────┐  │
+│  │                   API Service Layer (12 Axios Services)               │  │
+│  │  authService, recipeService, pantryService, groceryService,           │  │
+│  │  aiService, adminService, userService, commentService, journalService │  │
+│  └───────────────────────────────────┬───────────────────────────────────┘  │
+│                                      │                                      │
+│  ┌───────────────────────────────────▼───────────────────────────────────┐  │
+│  │                     api.js (Axios Central Instance)                   │  │
+│  │   • Request Interceptor: Tự động đính kèm Authorization: Bearer JWT   │  │
+│  │   • Response Interceptor: Bắt lỗi 401, tự gọi /auth/refresh & retry   │  │
+│  └───────────────────────────────────┬───────────────────────────────────┘  │
+└──────────────────────────────────────┼──────────────────────────────────────┘
+                                       │ HTTP / JSON REST API
+┌──────────────────────────────────────▼──────────────────────────────────────┐
+│                  SmartRecipe Backend (Spring Boot 3 + TiDB)                 │
+│                          Production: Render.com                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📂 Cấu trúc dự án
+## 🗺 Hệ thống Routing & Phân quyền
+
+Toàn bộ 21 route được cấu hình tập trung trong [`src/App.jsx`](file:///d:/TTTN/SmartRecipe-Project/smartrecipe-frontend/src/App.jsx), kiểm soát chặt chẽ bằng các Route Guard:
+
+### 1. Phân quyền Người dùng (User Routes)
+
+| Đường dẫn (Path) | Tên Page Component | Quyền hạn | Mô tả tính năng |
+|:---|:---|:---:|:---|
+| `/` | `HomePage` | 🔓 Công khai | Feed công thức cộng đồng, thanh tìm kiếm real-time, bộ lọc tag |
+| `/features` | `BenefitsPage` | 🔓 Công khai | Giới thiệu hệ sinh thái Smart Recipe & đặc quyền thành viên |
+| `/login` | `LoginPage` | 🔓 Khách vãng lai | Đăng nhập tài khoản bằng Username / Password |
+| `/register` | `RegisterPage` | 🔓 Khách vãng lai | Đăng ký tài khoản mới với kiểm thực Zod |
+| `/recipes/:id` | `RecipeDetailPage` | 🔓 Công khai (Hạn chế) | Xem chi tiết món ăn, nguyên liệu, bước nấu, bình luận |
+| `/users/:id` | `UserProfilePage` | 🔓 Công khai | Xem thông tin hồ sơ và danh sách công thức của thành viên khác |
+| `/recipes` | `MyRecipesPage` | 🔒 Cần đăng nhập | Quản lý kho công thức cá nhân (Tất cả, Công khai, Bản nháp) |
+| `/recipes/new` | `RecipeFormPage` | 🔒 Cần đăng nhập | Soạn thảo công thức mới (Upload ảnh, Thêm bước nấu) |
+| `/recipes/:id/edit`| `RecipeFormPage` | 🔒 Cần đăng nhập | Chỉnh sửa công thức đã tạo |
+| `/profile` | `EditProfilePage` | 🔒 Cần đăng nhập | Cập nhật hồ sơ cá nhân, đổi ảnh đại diện (Avatar), đổi mật khẩu |
+| `/pantry` | `PantryPage` | 🔒 Cần đăng nhập | Quản lý tủ thực phẩm ảo theo 9 kệ hàng, cảnh báo hết hạn |
+| `/grocery` | `GroceryPage` | 🔒 Cần đăng nhập | Quản lý danh sách đi chợ, bật chế độ Shopping Mode |
+| `/grocery/history`| `GroceryHistoryPage` | 🔒 Cần đăng nhập | Xem lại lịch sử các chuyến đi chợ đã hoàn thành |
+| `/journal` | `CookingJournalPage` | 🔒 Cần đăng nhập | Nhật ký các bữa ăn đã nấu, lưu giữ trải nghiệm ẩm thực |
+| `/journal/:id` | `JournalDetailPage` | 🔒 Cần đăng nhập | Chi tiết nhật ký nấu ăn, hình ảnh thực tế và đánh giá sao |
+| `/ai-suggestion` | `AiSuggestionPage` | 🔒 Cần đăng nhập | Giao diện trợ lý AI: Zero-Waste Generator & Feasible Finder |
+| `/inventory` | — | Redirect | Tự động chuyển hướng về `/pantry` |
+
+### 2. Phân quyền Quản trị viên (Admin Portal)
+
+Tất cả các route quản trị đều được bảo vệ bởi [`AdminGuard`](file:///d:/TTTN/SmartRecipe-Project/smartrecipe-frontend/src/components/admin/AdminGuard.jsx), tự động kiểm tra `user.role === 'ADMIN'`:
+
+| Đường dẫn (Path) | Tên Page Component | Bảo vệ | Chức năng quản trị |
+|:---|:---|:---:|:---|
+| `/admin/login` | `AdminLoginPage` | Public | Đăng nhập dành riêng cho quản trị viên hệ thống |
+| `/admin/dashboard` | `AdminDashboard` | `AdminGuard` | Tổng quan số liệu hệ thống, biểu đồ tăng trưởng người dùng & công thức |
+| `/admin/ingredients`| `AdminIngredients` | `AdminGuard` | Quản lý từ điển 297+ nguyên liệu, tra cứu USDA, sửa thông số dinh dưỡng |
+| `/admin/recipes` | `AdminRecipes` | `AdminGuard` | Kiểm duyệt công thức nấu ăn, ẩn/xóa công thức vi phạm tiêu chuẩn |
+| `/admin/users` | `AdminUsers` | `AdminGuard` | Danh sách tài khoản, khóa tài khoản vi phạm, nâng quyền quản trị |
+| `/admin/masterdata` | `AdminMasterData` | `AdminGuard` | Quản lý 9 kệ hàng siêu thị (Aisles), Thẻ phân loại (Tags), Bảng quy đổi đơn vị |
+| `/admin/settings` | `AdminSettings` | `AdminGuard` | Cấu hình hệ thống, ngưỡng cảnh báo kho, tham số AI Gemini |
+| `/admin` | — | Redirect | Tự động chuyển hướng về `/admin/login` |
+
+---
+
+## 📂 Cấu trúc Thư mục Dự án
 
 ```
 smartrecipe-frontend/
-├── public/
-│
+├── public/                         # Static assets công khai
 ├── src/
+│   ├── main.jsx                    # Điểm khởi động: Mount React vào DOM
+│   ├── App.jsx                     # Router trung tâm, AppShell, QueryClientProvider
 │   │
-│   ├── main.jsx                   # Entry point: mount React app
-│   ├── App.jsx                    # Router, QueryClient, layout cấp cao
+│   ├── pages/                      # Toàn bộ 21 trang của ứng dụng
+│   │   ├── HomePage.jsx            # Trang chủ: Feed khám phá món ăn
+│   │   ├── LoginPage.jsx           # Trang đăng nhập người dùng
+│   │   ├── RegisterPage.jsx        # Trang đăng ký thành viên
+│   │   ├── RecipeDetailPage.jsx    # Chi tiết công thức, like, bookmark, bình luận
+│   │   ├── RecipeFormPage.jsx      # Tạo / Chỉnh sửa công thức đa bước
+│   │   ├── MyRecipesPage.jsx       # Quản lý kho công thức cá nhân
+│   │   ├── PantryPage.jsx          # Quản lý tủ lạnh 9 kệ hàng
+│   │   ├── GroceryPage.jsx         # Danh sách đi chợ & Shopping Mode
+│   │   ├── GroceryHistoryPage.jsx  # Lịch sử các lần đi chợ
+│   │   ├── CookingJournalPage.jsx  # Nhật ký nấu ăn gia đình
+│   │   ├── JournalDetailPage.jsx   # Xem chi tiết một lần nấu ăn
+│   │   ├── UserProfilePage.jsx     # Hồ sơ tác giả công khai
+│   │   ├── EditProfilePage.jsx     # Sửa thông tin cá nhân & đổi mật khẩu
+│   │   ├── AiSuggestionPage.jsx    # Trợ lý AI gợi ý món ăn
+│   │   ├── BenefitsPage.jsx        # Giới thiệu đặc quyền hệ thống
+│   │   │
+│   │   └── admin/                  # Cổng Quản trị Admin
+│   │       ├── AdminLayout.jsx     # Khung layout quản trị (Sidebar + Header)
+│   │       ├── AdminLoginPage.jsx  # Đăng nhập Admin
+│   │       ├── AdminDashboard.jsx  # Bảng điều khiển thống kê tổng quan
+│   │       ├── AdminIngredients.jsx# Quản lý từ điển nguyên liệu
+│   │       ├── AdminRecipes.jsx    # Kiểm duyệt công thức
+│   │       ├── AdminUsers.jsx      # Quản trị người dùng & phân quyền
+│   │       ├── AdminMasterData.jsx # Quản lý Kệ hàng, Thẻ Tags, Quy đổi
+│   │       └── AdminSettings.jsx   # Cài đặt hệ thống
 │   │
-│   ├── pages/                     # 13 trang ứng với 13 route
-│   │   ├── LoginPage.jsx          # Đăng nhập
-│   │   ├── RegisterPage.jsx       # Đăng ký
-│   │   ├── HomePage.jsx           # Feed công thức + tìm kiếm + AI gợi ý
-│   │   ├── MyRecipesPage.jsx      # Công thức của tôi (quản lý CRUD)
-│   │   ├── RecipeFormPage.jsx     # Tạo / Chỉnh sửa công thức (form phức tạp)
-│   │   ├── RecipeDetailPage.jsx   # Xem chi tiết công thức, bình luận, like
-│   │   ├── EditProfilePage.jsx    # Chỉnh sửa hồ sơ cá nhân, đổi avatar
-│   │   ├── UserProfilePage.jsx    # Xem profile người dùng khác, follow
-│   │   ├── PantryPage.jsx         # Tủ nguyên liệu (nhóm theo 9 kệ)
-│   │   ├── GroceryPage.jsx        # Danh sách đi chợ (tạo, mua, hoàn thành)
-│   │   ├── GroceryHistoryPage.jsx # Lịch sử danh sách đi chợ đã hoàn thành
-│   │   ├── CookingJournalPage.jsx # Nhật ký nấu ăn
-│   │   └── JournalDetailPage.jsx  # Chi tiết một lần nấu
-│   │
-│   ├── components/                # Reusable UI components
-│   │   ├── Navbar.jsx             # Thanh điều hướng chính
-│   │   ├── RecipeCard.jsx         # Card hiển thị công thức trong feed
-│   │   ├── FollowButton.jsx       # Nút theo dõi / bỏ theo dõi
+│   ├── components/                 # Các Component tái sử dụng
+│   │   ├── Navbar.jsx              # Thanh điều hướng chính (Responsive)
+│   │   ├── RecipeCard.jsx          # Thẻ hiển thị món ăn trong feed
+│   │   ├── FollowButton.jsx        # Nút Theo dõi / Hủy theo dõi linh hoạt
 │   │   │
 │   │   ├── layout/
-│   │   │   └── AppLayout.jsx      # Wrapper layout: Navbar + main content
+│   │   │   └── AppLayout.jsx       # Wrapper layout chung với Navbar
 │   │   │
-│   │   ├── recipe/                # Components cho công thức
-│   │   │   ├── AddJournalModal.jsx    # Modal ghi nhật ký nấu ăn
-│   │   │   ├── CookingMode.jsx        # Chế độ nấu ăn step-by-step
-│   │   │   ├── QuickFilterChips.jsx   # Bộ lọc nhanh (tag, độ khó...)
-│   │   │   ├── SearchBar.jsx          # Thanh tìm kiếm công thức
-│   │   │   └── ShareRecipeModal.jsx   # Modal chia sẻ công thức
+│   │   ├── admin/
+│   │   │   └── AdminGuard.jsx      # Bộ lọc bảo vệ truy cập dành cho Admin
 │   │   │
-│   │   ├── pantry/                # Components cho tủ nguyên liệu
-│   │   │   ├── PantryGrid.jsx         # Grid nhóm nguyên liệu theo kệ (dynamic)
-│   │   │   ├── PantryItemCard.jsx     # Card 1 nguyên liệu trong tủ
-│   │   │   ├── PantryDetailModal.jsx  # Modal xem + chỉnh sửa nguyên liệu
-│   │   │   ├── AddPantryItemModal.jsx # Modal thêm nguyên liệu vào tủ
-│   │   │   ├── ExpiryAlertBanner.jsx  # Banner cảnh báo sắp hết hạn
-│   │   │   └── PantrySummaryBar.jsx   # Thanh tóm tắt số lượng kệ/nguyên liệu
+│   │   ├── recipe/                 # Components liên quan đến công thức
+│   │   │   ├── CookingMode.jsx     # Chế độ nấu ăn từng bước (Step-by-step)
+│   │   │   ├── SearchBar.jsx       # Thanh tìm kiếm từ khóa real-time
+│   │   │   ├── QuickFilterChips.jsx# Bộ lọc nhanh (Ăn chay, Dưới 30 phút,...)
+│   │   │   ├── ShareRecipeModal.jsx# Hộp thoại chia sẻ liên kết công thức
+│   │   │   └── AddJournalModal.jsx # Hộp thoại ghi nhật ký sau khi nấu
 │   │   │
-│   │   ├── grocery/               # Components cho đi chợ
-│   │   │   ├── AisleGroupHeader.jsx   # Header kệ hàng (icon động theo tên kệ)
-│   │   │   ├── GenerateListModal.jsx  # Modal tạo danh sách từ công thức + AI
-│   │   │   ├── ShoppingModeView.jsx   # Chế độ đi chợ thực tế (tick mua)
-│   │   │   ├── AddGroceryItemModal.jsx # Modal thêm item thủ công
-│   │   │   ├── GroceryItemRow.jsx     # Hàng 1 item trong danh sách
-│   │   │   ├── HistoryDetailModal.jsx # Modal xem lại danh sách cũ
-│   │   │   └── CompleteSuccessModal.jsx # Modal chúc mừng hoàn thành
+│   │   ├── pantry/                 # Components quản lý tủ thực phẩm
+│   │   │   ├── PantryGrid.jsx      # Khung lưới phân nhóm 9 kệ hàng
+│   │   │   ├── PantryItemCard.jsx  # Thẻ hiển thị số lượng & hạn sử dụng món
+│   │   │   ├── AddPantryItemModal.jsx # Thêm nguyên liệu kèm autocomplete
+│   │   │   ├── PantryDetailModal.jsx  # Chỉnh sửa / Điều chỉnh tồn kho
+│   │   │   ├── ExpiryAlertBanner.jsx  # Banner cảnh báo thực phẩm sắp hết hạn
+│   │   │   └── PantrySummaryBar.jsx   # Thanh tổng kết số lượng nguyên liệu
 │   │   │
-│   │   ├── comment/               # Components bình luận
+│   │   ├── grocery/                # Components đi chợ thông minh
+│   │   │   ├── ShoppingModeView.jsx# Chế độ đi chợ toàn màn hình (Focus Mode)
+│   │   │   ├── AisleGroupHeader.jsx# Tiêu đề nhóm kệ kèm Icon tự động
+│   │   │   ├── GroceryItemRow.jsx  # Dòng nguyên liệu cần mua (Check / Uncheck)
+│   │   │   ├── GenerateListModal.jsx  # Tạo danh sách từ công thức & AI
+│   │   │   ├── AddGroceryItemModal.jsx# Thêm món thủ công vào danh sách
+│   │   │   ├── HistoryDetailModal.jsx # Xem lại chi tiết danh sách cũ
+│   │   │   └── CompleteSuccessModal.jsx # Popup chúc mừng kèm hiệu ứng pháo hoa
 │   │   │
-│   │   ├── effects/               # Visual effects (animations)
+│   │   ├── comment/                # Hệ thống bình luận
+│   │   │   ├── CommentSection.jsx  # Khung bình luận đa cấp
+│   │   │   └── CommentItem.jsx     # Bình luận đơn lẻ và luồng trả lời
 │   │   │
-│   │   └── ui/                    # Atomic UI components dùng chung
-│   │       ├── ConfirmModal.jsx       # Modal xác nhận (Delete, Reset...)
-│   │       ├── IngredientAutocomplete.jsx # Tìm kiếm nguyên liệu có gợi ý
-│   │       └── UnitAutocomplete.jsx   # Dropdown đơn vị có gợi ý thông minh
+│   │   └── ui/                     # Thành phần giao diện nguyên tử (Atomic UI)
+│   │       ├── ConfirmModal.jsx    # Hộp thoại xác nhận xóa / thao tác nguy hiểm
+│   │       ├── IngredientAutocomplete.jsx # Gợi ý nguyên liệu chuẩn khi gõ
+│   │       └── UnitAutocomplete.jsx# Gợi ý đơn vị đo lường thông minh
 │   │
-│   ├── services/                  # API Service Layer (Axios calls)
-│   │   ├── api.js                 # Axios instance + interceptors JWT auto-refresh
-│   │   ├── authService.js         # register, login, refreshToken
-│   │   ├── recipeService.js       # CRUD công thức, search, like, export
-│   │   ├── ingredientService.js   # search, getByAisle, createQuick
-│   │   ├── pantryService.js       # getMyPantry, add, update, delete
-│   │   ├── groceryService.js      # CRUD grocery lists, complete, export
-│   │   ├── commentService.js      # CRUD bình luận
-│   │   ├── journalService.js      # CRUD nhật ký nấu ăn
-│   │   └── userService.js         # getProfile, updateProfile, follow
+│   ├── services/                   # Tầng giao tiếp REST API (12 Services)
+│   │   ├── api.js                  # Axios instance trung tâm + Auto-refresh Token
+│   │   ├── authService.js          # Đăng nhập, đăng ký, refresh token
+│   │   ├── recipeService.js        # CRUD công thức, tìm kiếm, like, sao chép
+│   │   ├── pantryService.js        # Lấy danh sách tủ lạnh, thêm, sửa, xóa kho
+│   │   ├── groceryService.js       # Quản lý danh sách đi chợ, hoàn thành chuyến
+│   │   ├── ingredientService.js    # Tìm kiếm nguyên liệu, tạo nhanh (quick-create)
+│   │   ├── aiService.js            # Gợi ý Zero-Waste & Feasible Recipes từ Gemini
+│   │   ├── adminService.js         # API thống kê, kiểm duyệt, cấu hình cho Admin
+│   │   ├── userService.js          # Lấy hồ sơ cá nhân, cập nhật avatar, follow
+│   │   ├── notificationService.js  # Lấy thông báo, đánh dấu đã đọc
+│   │   ├── commentService.js       # Bình luận và phản hồi công thức
+│   │   └── journalService.js       # Quản lý nhật ký nấu ăn
 │   │
-│   ├── store/                     # Zustand Global State
-│   │   ├── authStore.js           # Auth state schema
-│   │   └── useAuthStore.js        # Hook: user, isAuthenticated, login/logout
+│   ├── store/                      # Quản lý Client State (Zustand)
+│   │   └── useAuthStore.js         # Lưu phiên đăng nhập, JWT, User profile
 │   │
-│   └── styles/                    # Design System
-│       ├── tokens.css             # CSS custom properties (màu sắc, spacing)
-│       ├── animations.css         # Keyframe animations dùng chung
-│       ├── effects.module.css     # Visual effects (glassmorphism, blur...)
-│       ├── components/            # Styles cho shared components
-│       ├── layout/                # Styles cho AppLayout, Navbar
-│       └── pages/                 # CSS Modules cho từng trang (10 modules)
+│   ├── styles/                     # Hệ thống định dạng & CSS Tokens
+│   │   ├── tokens.css              # Bảng mã màu, khoảng cách, bo góc chuẩn
+│   │   ├── animations.css          # Định nghĩa keyframes chuyển động mượt mà
+│   │   ├── effects.module.css      # Hiệu ứng kính mờ (Glassmorphism), bóng đổ
+│   │   ├── toast.css               # Tùy biến thanh thông báo React-Toastify
+│   │   └── pages/                  # CSS Modules độc lập cho từng trang
+│   │
+│   └── test/                       # Môi trường kiểm thử tự động
+│       └── setup.js                # Cấu hình Vitest, Testing Library và JSDOM
 │
-├── .env.example                   # Template biến môi trường
-├── vite.config.js                 # Vite + React plugin configuration
-└── package.json
+├── .env.example                    # Mẫu cấu hình biến môi trường
+├── vite.config.js                  # Cấu hình Vite, Tailwind CSS v4 & Vitest
+└── package.json                    # Danh sách thư viện phụ thuộc & scripts
 ```
 
 ---
 
-## 🗺 Hệ thống Routing
+## 🗃 Quản lý State: Hai Tầng (Dual-Layer)
 
-Toàn bộ route được bảo vệ bởi `ProtectedRoute` — redirect về `/login` nếu chưa xác thực.
-
-| Path | Page | Mô tả |
-|---|---|---|
-| `/login` | `LoginPage` | 🔓 Public |
-| `/register` | `RegisterPage` | 🔓 Public |
-| `/` | `HomePage` | Feed công thức cộng đồng + AI gợi ý |
-| `/recipes` | `MyRecipesPage` | Quản lý công thức cá nhân |
-| `/recipes/new` | `RecipeFormPage` | Soạn công thức mới |
-| `/recipes/:id` | `RecipeDetailPage` | Xem chi tiết công thức |
-| `/recipes/:id/edit` | `RecipeFormPage` | Chỉnh sửa công thức (reuse form) |
-| `/users/:id` | `UserProfilePage` | Hồ sơ người dùng + Follow |
-| `/profile` | `EditProfilePage` | Chỉnh sửa thông tin cá nhân |
-| `/pantry` | `PantryPage` | Tủ nguyên liệu (nhóm theo 9 kệ) |
-| `/grocery` | `GroceryPage` | Danh sách đi chợ hiện tại |
-| `/grocery/history` | `GroceryHistoryPage` | Lịch sử đi chợ |
-| `/journal` | `CookingJournalPage` | Nhật ký nấu ăn |
-| `/journal/:id` | `JournalDetailPage` | Chi tiết một lần nấu |
-| `/inventory` | — | Redirect → `/pantry` |
-
----
-
-## 🗃 Quản lý State
-
-Ứng dụng dùng **hai tầng state** theo nguyên tắc phân tách trách nhiệm:
+Để tối ưu hóa hiệu năng render và tốc độ phản hồi của ứng dụng, SmartRecipe áp dụng mô hình phân tách trạng thái rõ rệt:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│           TanStack Query (Server State)                  │
-│                                                          │
-│  Quản lý toàn bộ dữ liệu đến từ API:                   │
-│  · Fetch tự động khi component mount                    │
-│  · Cache kết quả 5 phút (staleTime)                    │
-│  · Background refetch khi window focus lại              │
-│  · Tự động retry 1 lần nếu lỗi                         │
-│  · Invalidate cache khi mutation thành công             │
-│                                                          │
-│  useQuery(['recipes'])  → danh sách công thức           │
-│  useQuery(['pantry'])   → nguyên liệu trong tủ          │
-│  useMutation(createRecipe) → tạo + invalidate cache     │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       TẦNG 1: SERVER STATE (TanStack Query)                 │
+│                                                                             │
+│  Chịu trách nhiệm cho toàn bộ dữ liệu đến từ Backend REST API:              │
+│  • staleTime: 5 phút — Tránh gọi lại API liên tục khi chuyển đổi trang      │
+│  • Automatic Background Refetching khi người dùng focus lại trình duyệt      │
+│  • Caching thông minh: useQuery(['recipes']), useQuery(['pantry'])          │
+│  • Invalidation chủ động: Khi thêm/sửa/xóa thành công, tự làm mới cache     │
+│  • Tự động Retry 1 lần khi mạng chập chờn                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────┐
-│               Zustand (Client State)                     │
-│                                                          │
-│  Chỉ quản lý Auth state (persist sang localStorage):    │
-│  · user: { id, username, email, role, avatarUrl }       │
-│  · isAuthenticated: boolean                             │
-│  · accessToken, refreshToken                            │
-│  · login(userData) / logout()                           │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       TẦNG 2: CLIENT STATE (Zustand)                        │
+│                                                                             │
+│  Chỉ quản lý trạng thái phiên đăng nhập và định danh người dùng:            │
+│  • useAuthStore: { user, accessToken, refreshToken, isAuthenticated }       │
+│  • Tự động đồng bộ với localStorage qua Zustand `persist` middleware        │
+│  • Cơ chế Phục hồi Role tự động (useRoleRecovery) trong AppShell            │
+│  • Hành vi login() và logout() dọn dẹp phiên triệt để                      │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔐 Luồng xác thực (Auth Flow)
+## 🔐 Luồng Xác thực (Auth Flow & Auto-Refresh)
+
+Cơ chế xác thực sử dụng chuẩn **JWT (JSON Web Token)** với cơ chế bảo vệ kép và làm mới token ngầm không làm gián đoạn trải nghiệm người dùng:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Người dùng
+    participant LoginPage as Trang Đăng nhập
+    participant AuthStore as Zustand Store
+    participant Axios as Axios Interceptor
+    participant Backend as Spring Boot API
+
+    User->>LoginPage: Nhập username & password
+    LoginPage->>Backend: POST /api/v1/auth/login
+    Backend-->>LoginPage: 200 OK: { accessToken, refreshToken, user }
+    LoginPage->>AuthStore: login({ user, accessToken, refreshToken })
+    AuthStore-->>User: Điều hướng vào Trang chủ (HomePage)
+
+    Note over Axios,Backend: Mọi request tiếp theo đều được tự động đính kèm Token
+    User->>Axios: Gọi API lấy dữ liệu (/recipes, /pantry,...)
+    Axios->>Backend: GET /recipes (Headers: Bearer accessToken)
+
+    alt Access Token còn hạn
+        Backend-->>User: 200 OK: Trả về dữ liệu
+    else Access Token hết hạn (401 Unauthorized)
+        Backend-->>Axios: 401 Unauthorized
+        Note over Axios: Interceptor chặn lỗi 401 & tự động gọi refresh token
+        Axios->>Backend: POST /api/v1/auth/refresh { refreshToken }
+        alt Refresh thành công
+            Backend-->>Axios: 200 OK: { accessToken mới }
+            Axios->>AuthStore: Cập nhật accessToken mới
+            Axios->>Backend: Thực hiện lại request ban đầu với token mới
+            Backend-->>User: 200 OK: Dữ liệu hiển thị mượt mà
+        else Refresh thất bại (Token hết hạn toàn bộ)
+            Axios->>AuthStore: logout()
+            AuthStore-->>User: Xóa phiên & chuyển hướng về /login
+        end
+    end
+```
+
+---
+
+## 🛒 Chu trình Đi chợ Thông minh (Smart Grocery Cycle)
+
+Một trong những điểm sáng tạo nhất của dự án là chu trình khép kín giữa **Công thức nấu ăn** ➔ **Tủ lạnh** ➔ **Danh sách đi chợ** ➔ **Cập nhật tồn kho tự động**:
 
 ```
-                     ┌─────────────────┐
-                     │    LoginPage     │
-                     └────────┬────────┘
-                              │ POST /auth/login
-                              ▼
-                    ┌──────────────────┐
-                    │  authService.js  │
-                    └────────┬─────────┘
-                             │ Nhận { accessToken, refreshToken, user }
-                             ▼
-                    ┌──────────────────┐
-                    │  useAuthStore    │   → Persist vào localStorage
-                    │  .login(data)    │     (Zustand persist middleware)
-                    └────────┬─────────┘
-                             │ Navigate → "/"
-                             ▼
-                    ┌──────────────────────────────┐
-                    │   api.js — Request Interceptor│
-                    │   Tự động attach JWT token    │
-                    │   vào mọi request             │
-                    └────────────┬──────────────────┘
+ ┌─────────────────────────┐           ┌─────────────────────────┐
+ │   Chọn Công thức Nấu    │    HOẶC   │   Gợi ý Món ăn từ AI    │
+ │ (Bò xào, Canh nấm,...)  │           │   (Google Gemini API)   │
+ └────────────┬────────────┘           └────────────┬────────────┘
+              │                                     │
+              └──────────────────┬──────────────────┘
                                  │
-                    ┌────────────▼──────────────────┐
-                    │  api.js — Response Interceptor │
-                    │  Nếu 401/403:                  │
-                    │  1. POST /auth/refresh         │
-                    │  2. Lưu accessToken mới        │
-                    │  3. Retry request gốc          │
-                    │  Nếu refresh thất bại:         │
-                    │  → logout() + redirect /login  │
-                    └───────────────────────────────-┘
+                                 ▼
+                 ┌───────────────────────────────┐
+                 │    Tủ lạnh gia đình (Pantry)  │
+                 │   Kiểm tra số lượng sẵn có    │
+                 └───────────────┬───────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 Hệ thống Tính toán Khối lượng Thiếu             │
+│            final_to_buy = total_needed - pantry_deducted        │
+│                Phân nhóm tự động theo 9 Kệ Hàng                 │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                                 ▼
+                 ┌───────────────────────────────┐
+                 │     Chế độ Shopping Mode      │
+                 │     Tick chọn từng món mua    │
+                 └───────────────┬───────────────┘
+                                 │
+                                 ▼
+                 ┌───────────────────────────────┐
+                 │  Hoàn thành Chuyến Đi Chợ     │
+                 │   • Pháo hoa Confetti 🎉      │
+                 │   • Tự động cộng vào Tủ lạnh  │
+                 └───────────────────────────────┘
 ```
 
 ---
 
-## 🛒 Luồng Đi chợ thông minh
+## 🎨 Hệ thống Design & Giao diện
 
-```
-User mở GroceryPage
-        │
-        ▼ Nhấn "Tạo danh sách mới"
-[GenerateListModal]
-        │
-        ├── Chọn công thức + số phần ăn
-        │         │
-        │    POST /grocery/lists/{id}/recipes
-        │    → Backend tính: tổng nguyên liệu cần
-        │                  - lượng đã có trong pantry
-        │                  = lượng cần mua (final_to_buy)
-        │                  + nhóm theo kệ hàng (aisle_id)
-        │
-        ├── Hoặc: AI gợi ý công thức từ tủ lạnh
-        │         │
-        │    GET /ai/suggest/pantry (Gemini API)
-        │    → Gợi ý từ nguyên liệu sắp hết hạn
-        │
-        ▼
-[GroceryPage - Items nhóm theo 9 kệ]
-  AisleGroupHeader + GroceryItemRow
-        │
-        ▼ Nhấn "Bắt đầu đi chợ"
-[ShoppingModeView]  ← Full-screen mode
-  Tick từng item khi mua ✓
-  Progress bar theo từng kệ
-        │
-        ▼ POST /grocery/lists/{id}/complete
-  Backend: pantry.quantity += item.final_to_buy
-           grocery_list.status = COMPLETED
-        │
-        ▼
-[CompleteSuccessModal] 🎉 confetti
-  Tủ lạnh tự động được cập nhật
-```
+Ứng dụng hướng tới trải nghiệm người dùng cao cấp, ấm cúng và sống động:
 
----
+### 1. Bảng màu Ẩm thực Chủ đạo (Design Tokens)
+- **Primary Color (Terracotta / Gạch nung ấm áp)**: Sắc đỏ gạch nung ấm cúng gian bếp Việt, tượng trưng cho ngọn lửa nấu nướng và gốm mộc (`--sr-primary: #a13923`, `--sr-primary-light: #c25138`).
+- **Accent Color (Warm Gold / Mật ong)**: Sắc vàng óng mật ong tạo điểm nhấn sang trọng cho badge và tương tác (`--sr-gold: #d4a853`).
+- **Surface & Backgrounds**: Tông nền kem ấm dịu mắt (`--sr-surface: #fff8f4`, container: `#f6ece5`), hạn chế mỏi mắt khi đọc công thức.
+- **Typography Chuẩn Ẩm thực**: Phông tiêu đề hiện đại `Plus Jakarta Sans` kết hợp phông nội dung tối ưu hiển thị tiếng Việt `Be Vietnam Pro`.
+- **Glassmorphism & Micro-animations**: Áp dụng hiệu ứng kính mờ và chuyển động tinh tế cho Navbar, Modal và Card công thức.
 
-## 🎨 Hệ thống Design
-
-### Design Tokens (`tokens.css`)
-Màu sắc, spacing, border-radius được định nghĩa là CSS Custom Properties:
-
-```css
-:root {
-  --color-primary: ...;
-  --color-surface: ...;
-  --radius-card: ...;
-}
-```
-
-### Styling Strategy
-
-| Loại | Cách style |
-|---|---|
-| Pages | CSS Module riêng (`PageName.module.css`) |
-| Shared Components | CSS Module hoặc Tailwind inline |
-| Keyframe Animations | `animations.css` (dùng chung) |
-| Visual Effects | `effects.module.css` (glassmorphism, blur) |
-| Design Tokens | `tokens.css` (CSS custom properties) |
-
-### Smart Icon Matching — `AisleGroupHeader` & `PantryGrid`
-Icon kệ hàng dùng **token matching theo từ** thay vì so khớp chuỗi cứng. Lý do: tên kệ trong DB có thể thay đổi qua API admin, chỉ cần đổi một chữ là mất icon nếu dùng `includes()` thông thường. Bên cạnh đó, chuỗi con `"cá"` nằm trong `"Các"` nên cần tách từ trước:
+### 2. Thuật toán Ghép Icon Kệ Hàng Thông minh (Smart Aisle Icon Matching)
+Thay vì so khớp chuỗi cứng dễ gây lỗi khi Admin thay đổi tên kệ, hệ thống sử dụng thuật toán tách từ Unicode:
 
 ```javascript
-// Tách từ đúng với tiếng Việt (không dùng \b — chỉ hiểu ASCII)
+// Hỗ trợ xử lý chuẩn xác ký tự tiếng Việt có dấu (Unicode RegExp)
 const words = (text) => text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 
-// Kiểm tra theo TỪ, không theo chuỗi con
-const hasWord = (list, ...targets) => targets.some(t => list.includes(t));
-
-// Thứ tự luật quan trọng: hẹp trước, rộng sau
+// So khớp linh hoạt theo từ khóa ngữ nghĩa
 if (hasPhrase(name, 'các loại hạt') || hasWord(w, 'hạt')) return '🥜';
-if (hasWord(w, 'cá', 'tôm', 'cua') || hasPhrase(name, 'hải sản')) return '🦐';
+if (hasWord(w, 'thịt', 'bò', 'heo', 'gà')) return '🥩';
+if (hasWord(w, 'cá', 'tôm', 'cua', 'hải sản')) return '🦐';
+if (hasWord(w, 'rau', 'củ', 'nấm')) return '🥦';
 ```
 
 ---
 
-## ⚙️ Thiết lập & Chạy local
+## 🧪 Kiểm thử & Chất lượng (Unit Testing)
 
-### Yêu cầu
-- Node.js 20+
-- npm 10+
-- Backend đang chạy tại `http://localhost:8080`
-
-### Cài đặt và chạy
+Dự án áp dụng quy trình kiểm thử tự động với **Vitest** và **React Testing Library**:
 
 ```bash
-cd smartrecipe-frontend
-npm install
-cp .env.example .env    # Điền VITE_API_BASE_URL nếu cần
-npm run dev
-```
-
-Ứng dụng chạy tại `http://localhost:5173` với Hot Module Replacement.
-
----
-
-## 🔧 Biến môi trường
-
-```env
-# .env
-VITE_API_BASE_URL=http://localhost:8080/api/v1
-```
-
-> **Lưu ý:** Vite chỉ expose biến có tiền tố `VITE_` ra client-side. Không đặt secret key trong `.env` frontend.
-
----
-
-## 📜 Scripts
-
-| Lệnh | Mô tả |
-|---|---|
-| `npm run dev` | Dev server với HMR |
-| `npm run build` | Build production bundle |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Lint toàn bộ code (OxLint) |
-| `npm run test` | Chạy unit tests (CI mode) |
-| `npm run test:watch` | Watch mode cho TDD |
-
----
-
-## 🧪 Unit Test
-
-Vitest + Testing Library, môi trường `jsdom`. Cấu hình nằm trong khối `test` của
-`vite.config.js`; `src/test/setup.js` nạp matcher của jest-dom và gọi `cleanup()`
-sau mỗi ca. Test đặt cạnh code trong thư mục `__tests__/`.
-
-```bash
+# Chạy toàn bộ 17 ca kiểm thử tự động
 npm test
+
+# Chạy kiểm thử ở chế độ theo dõi (Watch Mode) khi phát triển
+npm run test:watch
 ```
 
-17 ca:
+### Bảng Thống kê Ca Kiểm thử
 
-| File | Số ca | Phạm vi |
-|---|---|---|
-| `services/__tests__/ingredientService.test.js` | 4 | `createQuick` gọi đúng `/ingredients/quick` và chỉ gửi `name` + `aisleId`; `search` encode tiếng Việt |
-| `components/pantry/__tests__/AddPantryItemModal.test.jsx` | 4 | Auto-create dùng `createQuick` (không phải `create`); đơn vị gửi lên tủ là `baseUnit` backend trả về |
-| `components/pantry/__tests__/ExpiryAlertBanner.test.jsx` | 5 | Ẩn khi không có gì hết hạn; nút "Dọn tủ ngay" chỉ hiện khi `expiredCount > 0` |
-| `components/ui/__tests__/ConfirmModal.test.jsx` | 4 | Không render khi đóng; `onConfirm`/`onCancel` đúng nút; disable khi `isLoading` |
-
-`test.css = false` nên CSS Module trả về object rỗng trong test — component vẫn
-render bình thường, chỉ `className` thành `undefined`. Vì vậy assertion dựa vào
-role, text và label thay vì class.
+| Thư mục kiểm thử | Số ca | Đối tượng kiểm thử | Phạm vi kiểm tra |
+|:---|:---:|:---|:---|
+| `services/__tests__/` | **4** | `ingredientService.test.js` | Kiểm tra gọi đúng endpoint `/ingredients/quick`, chỉ gửi `name` + `aisleId`, mã hóa đúng tiếng Việt |
+| `components/pantry/__tests__/` | **4** | `AddPantryItemModal.test.jsx` | Xác minh cơ chế tạo nhanh nguyên liệu và gán đúng `baseUnit` chuẩn từ backend |
+| `components/pantry/__tests__/` | **5** | `ExpiryAlertBanner.test.jsx` | Ẩn khi không có thực phẩm hết hạn, hiển thị nút dọn tủ khi có cảnh báo |
+| `components/ui/__tests__/` | **4** | `ConfirmModal.test.jsx` | Kiểm tra render đóng/mở, sự kiện `onConfirm`/`onCancel`, trạng thái vô hiệu hóa khi đang tải |
+| **Tổng cộng** | **17** | **100% Passed** | **Thời gian chạy: ~3.3 giây** |
 
 ---
 
-## 📦 Tổng quan tính năng theo trang
+## ⚙️ Thiết lập & Khởi chạy Local
 
-| Trang | Tính năng nổi bật |
-|---|---|
-| **Home** | Feed công thức, tìm kiếm real-time, filter tag/độ khó, AI gợi ý từ tủ lạnh |
-| **RecipeForm** | Form nhiều bước, autocomplete nguyên liệu + đơn vị, preview ảnh |
-| **RecipeDetail** | Cooking Mode step-by-step, chia sẻ, export Word, bình luận |
-| **Pantry** | Grid 9 kệ động, cảnh báo hết hạn, thêm nhanh nguyên liệu |
-| **Grocery** | Tạo từ công thức hoặc AI, Shopping Mode full-screen, confetti khi hoàn thành |
-| **Journal** | Nhật ký nấu ăn có ảnh, đánh giá sao, ghi chú cải tiến |
-| **UserProfile** | Follow/Unfollow, xem công thức người dùng khác |
+### Yêu cầu Tiên quyết
+- **Node.js**: Phiên bản `20.x` hoặc `22.x` trở lên
+- **npm**: Phiên bản `10.x` trở lên
+- **Backend**: Đang chạy tại `http://localhost:8080` (xem [Hướng dẫn Backend](../smartrecipe-backend/README.md))
+
+### Các bước Cài đặt
+
+1. **Di chuyển vào thư mục frontend:**
+   ```bash
+   cd smartrecipe-frontend
+   ```
+
+2. **Cài đặt các gói phụ thuộc:**
+   ```bash
+   npm install
+   ```
+
+3. **Cấu hình biến môi trường:**
+   Sao chép file `.env.example` thành `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Nội dung file `.env`:
+   ```env
+   VITE_API_BASE_URL=http://localhost:8080/api/v1
+   ```
+
+4. **Khởi chạy máy chủ phát triển:**
+   ```bash
+   npm run dev
+   ```
+   Truy cập ứng dụng tại: 👉 `http://localhost:5173`
 
 ---
 
-## 🐳 Docker
+## 🐳 Docker & Triển khai Production
 
-Dùng cho local dev hoặc self-host (Vercel dùng CI/CD riêng, không cần Docker):
+Dự án cung cấp sẵn cấu hình Docker đa tầng (Multi-stage build) để chạy độc lập hoặc triển khai lên máy chủ riêng:
 
 ```bash
-# Build image
+# 1. Build image Docker
 docker build -t smartrecipe-frontend .
 
-# Chạy container
-docker run -p 80:80 smartrecipe-frontend
-# → http://localhost:80
+# 2. Chạy container trên cổng 80
+docker run -d -p 80:80 --name smartrecipe-web smartrecipe-frontend
 ```
 
-| Stage | Base Image | Mục đích |
-|---|---|---|
-| builder | `node:22-alpine` | Build React → `dist/` |
-| runtime | `nginx:alpine` | Serve static files + SPA routing |
-
-`nginx.conf` cấu hình `try_files $uri /index.html` để React Router hoạt động đúng khi F5.
+### Kiến trúc Dockerfile
+- **Stage 1 (Builder)**: Sử dụng base image `node:22-alpine` để cài đặt thư viện và build bundle production vào thư mục `dist/`.
+- **Stage 2 (Runtime)**: Sử dụng web server `nginx:alpine` siêu nhẹ để phục vụ static files, cấu hình file `nginx.conf` với luật `try_files $uri /index.html` để đảm bảo định tuyến React Router SPA không bị lỗi 404 khi tải lại trang.
 
 ---
 
-## 🔄 CI/CD (GitHub Actions)
+## 🔄 CI/CD Pipeline (GitHub Actions & Vercel)
 
-Pipeline tự động gồm 2 workflow trong `.github/workflows/`:
+Dự án đã được tích hợp quy trình Tích hợp và Triển khai liên tục (CI/CD) tự động:
 
-### `ci-frontend.yml` — Chạy khi push bất kỳ branch
-1. Setup Node.js 20
-2. Cache `node_modules`
-3. `npm ci` — cài packages sạch
-4. `npm run lint` — ESLint (OxLint)
-5. `npm test -- --run` — **17 Vitest tests**
-6. `npm run build` — build production bundle
-7. Upload `dist/` artifact
-
-### `cd-frontend.yml` — Chạy khi push `main` (sau CI pass)
-1. Vercel CLI pull environment info
-2. Build production với Vercel
-3. Deploy `--prod` → production URL
-4. Verify URL trả về HTTP 200
-
-**GitHub Secrets cần cấu hình:**
-
-| Secret | Lấy từ đâu |
-|---|---|
-| `VERCEL_TOKEN` | Vercel Dashboard → Settings → Tokens |
-| `VERCEL_ORG_ID` | `.vercel/project.json` sau khi `npx vercel link` |
-| `VERCEL_PROJECT_ID` | `.vercel/project.json` sau khi `npx vercel link` |
-
-```bash
-# Chạy tests thủ công (giống CI)
-npm test -- --run
+```
+                  ┌──────────────────────────────┐
+                  │    Git Push (Mọi nhánh)      │
+                  └──────────────┬───────────────┘
+                                 │
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │   Workflow ci-frontend.yml   │
+                  │   • Cài đặt npm ci           │
+                  │   • Chạy Linter (OxLint)     │
+                  │   • Chạy 17 Vitest Tests     │
+                  │   • Build Production Bundle  │
+                  └──────────────┬───────────────┘
+                                 │
+                    Khi merge vào nhánh master/main
+                                 │
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │   Workflow cd-frontend.yml   │
+                  │   • Tự động kết nối Vercel   │
+                  │   • Deploy lên Production    │
+                  │   • Kiểm tra HTTP Status 200 │
+                  └──────────────────────────────┘
 ```
 
 ---
 
-*Xây dựng với ❤️ — SmartRecipe Frontend v0.0.0*
+<div align="center">
+
+**SmartRecipe Platform** — Nấu ăn thông minh, Tiết kiệm mỗi ngày 🍳  
+*Được xây dựng với niềm đam mê công nghệ và ẩm thực.*
+
+</div>
