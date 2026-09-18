@@ -7,7 +7,9 @@ import { Eye, EyeOff, Loader2, Mail, Lock, UtensilsCrossed, ArrowRight, AlertCir
 import { toast } from 'react-toastify';
 import { authService } from '../services/authService';
 import useAuthStore from '../store/useAuthStore';
+import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
 import loginHero from '../assets/login-hero.png';
+
 
 // ── Shared effect styles & components ──
 import fx from '../styles/effects.module.css';
@@ -90,11 +92,16 @@ const LoginPage = () => {
   const { btnRef, createRipple } = useRipple();
   const { tiltRef, handleMouseMove: handleCardMouseMove, handleMouseLeave: handleCardMouseLeave } = useTilt();
 
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(loginSchema) });
+
 
   // Rotate quotes
   useEffect(() => {
@@ -236,9 +243,14 @@ const LoginPage = () => {
               <div className={s.fieldGroup}>
                 <div className={s.fieldLabelRow}>
                   <label className={s.fieldLabel} htmlFor="login-password">Mật khẩu</label>
-                  <button type="button" className={`${s.forgotLink} ${fx.linkUnderline}`}>
+                  <button
+                    type="button"
+                    className={`${s.forgotLink} ${fx.linkUnderline}`}
+                    onClick={() => setIsForgotModalOpen(true)}
+                  >
                     Quên mật khẩu?
                   </button>
+
                 </div>
                 <div className={s.inputWrapper}>
                   <span className={s.inputIcon}><Lock size={18} /></span>
@@ -331,8 +343,19 @@ const LoginPage = () => {
             <a href="#" className={`${s.footerLink} ${fx.linkUnderline}`}><Headset size={12} /> Liên hệ</a>
           </div>
       </div>
+
+      {/* Modal Quên mật khẩu qua Email OTP */}
+      <ForgotPasswordModal
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+        initialEmail={watch('username') || ''}
+        onSuccess={(resetEmail) => {
+          setValue('username', resetEmail);
+        }}
+      />
     </div>
   );
 };
+
 
 export default LoginPage;
