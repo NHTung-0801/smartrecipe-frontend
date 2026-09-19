@@ -436,10 +436,12 @@ export default function AdminSettings() {
       {/* ── Page Header ── */}
       <div className={s.header}>
         <div className={s.headerLeft}>
-          <span className={s.titleBadge}>
-            <Shield size={13} /> ADMIN SETTINGS
-          </span>
-          <h1 className={s.title}>Cài Đặt Hệ Thống & Quản Trị</h1>
+          <div className={s.titleRow}>
+            <h1 className={s.title}>Cài đặt hệ thống & Quản trị</h1>
+            <span className={s.titleBadge}>
+              <Shield size={13} /> ADMIN SETTINGS
+            </span>
+          </div>
           <p className={s.subtitle}>
             Quản lý thông tin tài khoản cá nhân, bảo mật phân quyền, giám sát hạ tầng kỹ thuật và trích xuất báo cáo dữ liệu.
           </p>

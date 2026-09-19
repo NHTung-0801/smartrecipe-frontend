@@ -13,11 +13,23 @@
   background: linear-gradient(180deg, #1a0a06 0%, #3d1208 100%);
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 0;
+  padding: 1.25rem 0 1rem;
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+
+  /* Ẩn hoàn toàn thanh cuộn chia cắt giữa sidebar và nội dung */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  width: 0;
+  height: 0;
 }
 
 .brand {
@@ -241,4 +253,21 @@
   padding: 1.8rem 2rem;
   min-height: 100vh;
   box-sizing: border-box;
+}
+
+.main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+}
+
+.main::-webkit-scrollbar-thumb:hover {
+  background: rgba(161, 57, 35, 0.4);
 }

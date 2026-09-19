@@ -247,8 +247,8 @@ export default function AdminMasterData() {
       <div className={s.header}>
         <div className={s.headerLeft}>
           <div className={s.titleRow}>
-            <span className={s.titleBadge}><Database size={13} /> Master Data</span>
             <h1 className={s.title}>Dữ Liệu Nền Tảng</h1>
+            <span className={s.titleBadge}><Database size={13} /> Master Data</span>
           </div>
           <p className={s.subtitle}>
             Quản lý chuẩn hóa quầy hàng nguyên liệu, thẻ phân loại công thức và hệ thống quy đổi đơn vị đo lường.
