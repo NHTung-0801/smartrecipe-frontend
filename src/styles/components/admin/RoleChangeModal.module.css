@@ -1,0 +1,333 @@
+/* RoleChangeModal.module.css */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 19, 12, 0.65);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 1rem;
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 25px 60px -15px rgba(43, 19, 12, 0.2),
+              0 15px 35px rgba(43, 19, 12, 0.15);
+  border: 1.5px solid #f0ede8;
+  overflow: hidden;
+  animation: scaleUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Be Vietnam Pro', sans-serif;
+  color: #2b130c;
+}
+
+.stripeAdmin {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+}
+
+.stripeUser {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #64748b 0%, #475569 100%);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 0.75rem;
+}
+
+.iconWrapAdmin {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+}
+
+.iconWrapUser {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.headerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #2b130c;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: #78716c;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #a8a29e;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.closeBtn:hover:not(:disabled) {
+  background: #f5f5f4;
+  color: #2b130c;
+}
+
+.body {
+  padding: 0.75rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: #fafaf9;
+  border: 1px solid #f0ede8;
+  border-radius: 16px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #e7e5e4;
+}
+
+.avatarFallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #a13923 0%, #7c2d12 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.userMeta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.displayName {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #2b130c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usernameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.username {
+  font-size: 0.78rem;
+  color: #78716c;
+  font-weight: 500;
+}
+
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.roleAdmin {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.roleUser {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.infoBoxAdmin {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  font-size: 0.82rem;
+  color: #92400e;
+  line-height: 1.45;
+}
+
+.infoBoxUser {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.35rem;
+  background: #fafaf9;
+  border-top: 1px solid #f0ede8;
+}
+
+.cancelBtn {
+  height: 38px;
+  padding: 0 1.25rem;
+  border-radius: 10px;
+  border: 1.5px solid #e7e5e4;
+  background: white;
+  color: #44403c;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #f5f5f4;
+  color: #1c1917;
+}
+
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitBtnAdmin {
+  height: 38px;
+  padding: 0 1.35rem;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.25);
+  font-family: inherit;
+}
+
+.submitBtnAdmin:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(217, 119, 6, 0.35);
+}
+
+.submitBtnUser {
+  height: 38px;
+  padding: 0 1.35rem;
+  border-radius: 10px;
+  border: none;
+  background: #475569;
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(71, 85, 105, 0.2);
+  font-family: inherit;
+}
+
+.submitBtnUser:hover:not(:disabled) {
+  background: #334155;
+  transform: translateY(-1px);
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

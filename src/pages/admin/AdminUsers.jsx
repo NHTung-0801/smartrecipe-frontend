@@ -8,6 +8,8 @@ import {
 import { toast } from 'react-toastify';
 import { adminService } from '../../services/adminService';
 import useAuthStore from '../../store/useAuthStore';
+import DeleteUserModal from '../../components/admin/DeleteUserModal';
+import RoleChangeModal from '../../components/admin/RoleChangeModal';
 import s from '../../styles/pages/admin/AdminUsers.module.css';
 
 // ─── User Profile Drawer (Slide-out từ bên phải) ──────────────────────────────
@@ -196,7 +198,7 @@ function UserDetailDrawer({ userId, isClosing, onClose, onRoleChange, onDeleteUs
               <button
                 type="button"
                 className={s.btnPromote}
-                onClick={() => onRoleChange(data.id, 'ADMIN')}
+                onClick={() => onRoleChange(data, 'ADMIN')}
                 title="Nâng người dùng này thành Quản trị viên"
               >
                 <ShieldCheck size={15} /> Thăng quyền ADMIN
@@ -206,7 +208,7 @@ function UserDetailDrawer({ userId, isClosing, onClose, onRoleChange, onDeleteUs
                 type="button"
                 className={s.btnDemote}
                 disabled={isSelf}
-                onClick={() => onRoleChange(data.id, 'USER')}
+                onClick={() => onRoleChange(data, 'USER')}
                 title={isSelf ? 'Không thể tự hạ quyền của chính mình' : 'Hạ quyền xuống Thành viên thường'}
               >
                 <UserCheck size={15} /> Hạ quyền USER
@@ -217,7 +219,7 @@ function UserDetailDrawer({ userId, isClosing, onClose, onRoleChange, onDeleteUs
               type="button"
               className={s.btnDeleteUser}
               disabled={isSelf}
-              onClick={() => onDeleteUser(data.id, data.username)}
+              onClick={() => onDeleteUser(data)}
               title={isSelf ? 'Không thể tự xóa chính mình' : 'Xóa tài khoản người dùng này'}
             >
               <Trash2 size={15} /> Xóa tài khoản
@@ -236,6 +238,8 @@ export default function AdminUsers() {
   const [page, setPage] = useState(0);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [isDrawerClosing, setIsDrawerClosing] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(null);
+  const [roleChangingUser, setRoleChangingUser] = useState(null);
 
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((state) => state.user);
@@ -252,6 +256,7 @@ export default function AdminUsers() {
     mutationFn: ({ id, role }) => adminService.updateUserRole(id, role),
     onSuccess: (res) => {
       toast.success(res?.message || 'Cập nhật vai trò thành công!');
+      setRoleChangingUser(null);
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
     },
@@ -266,6 +271,7 @@ export default function AdminUsers() {
     mutationFn: (id) => adminService.deleteUser(id),
     onSuccess: (res) => {
       toast.success(res?.message || 'Đã xóa người dùng thành công!');
+      setDeletingUser(null);
       handleCloseDrawer();
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
@@ -288,19 +294,20 @@ export default function AdminUsers() {
     setSelectedUserId(id);
   }, []);
 
-  const handleRoleChange = (id, role) => {
-    const confirmMsg = role === 'ADMIN'
-      ? 'Bạn có chắc chắn muốn cấp quyền QUẢN TRỊ VIÊN (ADMIN) cho tài khoản này?'
-      : 'Bạn có chắc muốn hạ quyền tài khoản này xuống THÀNH VIÊN (USER)?';
-    if (!window.confirm(confirmMsg)) return;
+  const handleRoleChange = (user, role) => {
+    setRoleChangingUser({ user, targetRole: role });
+  };
+
+  const handleConfirmRoleChange = ({ id, role }) => {
     roleMutation.mutate({ id, role });
   };
 
-  const handleDeleteUser = (id, username) => {
-    if (!window.confirm(`HÀNH ĐỘNG NGUY HIỂM: Bạn có chắc chắn muốn XÓA vĩnh viễn tài khoản @${username}?`)) {
-      return;
-    }
-    deleteMutation.mutate(id);
+  const handleDeleteUser = (user) => {
+    setDeletingUser(user);
+  };
+
+  const handleConfirmDelete = (user) => {
+    deleteMutation.mutate(user.id);
   };
 
   // Keyboard shortcut: ESC để đóng drawer
@@ -586,7 +593,7 @@ export default function AdminUsers() {
                           disabled={isSelf || deleteMutation.isPending}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteUser(u.id, u.username);
+                            handleDeleteUser(u);
                           }}
                         >
                           <Trash2 size={16} />
@@ -635,6 +642,25 @@ export default function AdminUsers() {
         onClose={handleCloseDrawer}
         onRoleChange={handleRoleChange}
         onDeleteUser={handleDeleteUser}
+      />
+
+      {/* ─── Delete User Modal ──────────────────────── */}
+      <DeleteUserModal
+        isOpen={!!deletingUser}
+        user={deletingUser}
+        isLoading={deleteMutation.isPending}
+        onConfirm={handleConfirmDelete}
+        onClose={() => !deleteMutation.isPending && setDeletingUser(null)}
+      />
+
+      {/* ─── Role Change Modal ───────────────────────── */}
+      <RoleChangeModal
+        isOpen={!!roleChangingUser}
+        user={roleChangingUser?.user}
+        targetRole={roleChangingUser?.targetRole}
+        isLoading={roleMutation.isPending}
+        onConfirm={handleConfirmRoleChange}
+        onClose={() => !roleMutation.isPending && setRoleChangingUser(null)}
       />
     </div>
   );
