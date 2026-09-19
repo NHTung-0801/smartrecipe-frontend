@@ -11,7 +11,7 @@ import CookSuccessToast from './CookSuccessToast';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200';
 
-const CookingMode = ({ recipe, onClose, onSuccess }) => {
+const CookingMode = ({ recipe, onClose, onSuccess, isPractice = false }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -55,7 +55,17 @@ const CookingMode = ({ recipe, onClose, onSuccess }) => {
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
     } else {
-      // Bước cuối cùng — ghi nhận nấu ăn và tự động trừ kho
+      // Nếu là chế độ Nấu thử (Practice Mode) -> không gọi API trừ kho
+      if (isPractice) {
+        toast.success(
+          '🎉 Bạn đã hoàn thành xem trước các bước nấu! Hãy chuẩn bị nguyên liệu và bắt đầu nấu thật bất cứ lúc nào.',
+          { autoClose: 5000 }
+        );
+        onClose();
+        return;
+      }
+
+      // Bước cuối cùng chế độ Nấu thật — ghi nhận nấu ăn và tự động trừ kho
       setCompleting(true);
       try {
         const servings = recipe.baseServings || 2;
@@ -71,7 +81,7 @@ const CookingMode = ({ recipe, onClose, onSuccess }) => {
             recipeTitle={recipe.title}
             deductions={deductions}
             onNavigatePantry={() => navigate('/pantry')}
-            onNavigateJournal={() => navigate('/cooking-journal')}
+            onNavigateJournal={() => navigate('/journal')}
           />,
           {
             icon: false,
@@ -106,8 +116,18 @@ const CookingMode = ({ recipe, onClose, onSuccess }) => {
         </button>
         
         <div className={s.headerTitle}>
-          <h2>{recipe.title}</h2>
-          <p>{steps.length} Bước {recipe.cookTime ? `• ${recipe.cookTime} phút` : ''}</p>
+          <div className="flex items-center justify-center gap-2">
+            <h2>{recipe.title}</h2>
+            {isPractice && (
+              <span className="bg-amber-100 text-amber-800 text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-300">
+                Nấu thử
+              </span>
+            )}
+          </div>
+          <p>
+            {steps.length} Bước {recipe.cookTime ? `• ${recipe.cookTime} phút` : ''} 
+            {isPractice ? ' • Chế độ trải nghiệm (không trừ kho)' : ''}
+          </p>
         </div>
         
         <button className={s.timerButton} onClick={() => alert('Chức năng hẹn giờ chưa được thiết lập.')}>

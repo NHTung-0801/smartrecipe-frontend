@@ -114,6 +114,14 @@ const GroceryPage = () => {
     fetchHistory();
   }, [fetchGroceryList, fetchHistory, location.state]);
 
+  // Tự động kích hoạt chế độ siêu thị nếu được chuyển hướng với mode=shopping hoặc startShopping
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('mode') === 'shopping' || location.state?.startShopping) {
+      setShoppingMode(true);
+    }
+  }, [location.search, location.state]);
+
   const formatHistoryDate = (dateStr) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);

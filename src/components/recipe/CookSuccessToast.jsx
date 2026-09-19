@@ -89,7 +89,7 @@ export default function CookSuccessToast({ recipeTitle, deductions = [], onNavig
             }}
           >
             <BookOpen size={13} />
-            <span>Sổ tay nấu ăn</span>
+            <span>Nhật ký nấu ăn</span>
           </button>
         ) : null}
       </div>

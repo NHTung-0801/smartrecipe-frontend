@@ -226,6 +226,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/cooking-journal" element={<Navigate to="/journal" replace />} />
           <Route
             path="/journal/:id"
             element={

@@ -9,10 +9,11 @@ import useAuthStore from '../store/useAuthStore';
 import useAuthPromptStore from '../store/useAuthPromptStore';
 import useLikedRecipes from '../hooks/useLikedRecipes';
 import { 
-  Heart, Share2, Copy, Edit3, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer, Sparkles
+  Heart, Share2, Copy, Edit3, ArrowLeft, Clock, ShoppingCart, Play, List, Utensils, Soup, Globe, Lock, Lightbulb, BarChart, Users, Timer, Sparkles, ChefHat
 } from 'lucide-react';
 import s from '../styles/pages/RecipeDetailPage.module.css';
 import CookingMode from '../components/recipe/CookingMode';
+import MissingIngredientsModal from '../components/recipe/MissingIngredientsModal';
 import ShareRecipeModal from '../components/recipe/ShareRecipeModal';
 import FollowButton from '../components/FollowButton';
 import CommentSection from '../components/comment/CommentSection';
@@ -54,6 +55,9 @@ export default function RecipeDetailPage() {
   const [cloning, setCloning] = useState(false);
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [isCookingMode, setIsCookingMode] = useState(false);
+  const [isPracticeMode, setIsPracticeMode] = useState(false);
+  const [showMissingModal, setShowMissingModal] = useState(false);
+  const [missingIngredients, setMissingIngredients] = useState([]);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [addingToGrocery, setAddingToGrocery] = useState(false);
   const [isAuthorFollowing, setIsAuthorFollowing] = useState(false);
@@ -222,6 +226,66 @@ export default function RecipeDetailPage() {
     } finally {
       setAddingToGrocery(false);
     }
+  };
+
+  const handleStartRealCook = () => {
+    if (!currentUser) {
+      openAuthModal('nấu ăn và theo dõi nguyên liệu');
+      return;
+    }
+
+    const missing = (recipe.ingredients || []).filter(ing => {
+      const available = pantryMap[ing.ingredientId] || 0;
+      return available < ing.amount;
+    }).map(ing => ({
+      ...ing,
+      available: pantryMap[ing.ingredientId] || 0,
+      missing: Math.round(((ing.amount || 0) - (pantryMap[ing.ingredientId] || 0)) * 100) / 100
+    }));
+
+    if (missing.length > 0) {
+      setMissingIngredients(missing);
+      setShowMissingModal(true);
+    } else {
+      setIsPracticeMode(false);
+      setIsCookingMode(true);
+    }
+  };
+
+  const handleStartPractice = () => {
+    setIsPracticeMode(true);
+    setIsCookingMode(true);
+  };
+
+  const handleGoShoppingFromModal = async () => {
+    try {
+      setAddingToGrocery(true);
+      const res = await groceryService.generateFromRecipe(id);
+      const listId = res.data?.id;
+      setShowMissingModal(false);
+      if (listId) {
+        navigate(`/grocery?list=${listId}&mode=shopping`, { state: { startShopping: true } });
+      } else {
+        navigate('/grocery?mode=shopping', { state: { startShopping: true } });
+      }
+    } catch (err) {
+      console.error('Failed to generate grocery list:', err);
+      toast.error('Không thể tự động thêm vào danh sách mua sắm');
+    } finally {
+      setAddingToGrocery(false);
+    }
+  };
+
+  const handleProceedCookAnyway = () => {
+    setShowMissingModal(false);
+    setIsPracticeMode(false);
+    setIsCookingMode(true);
+  };
+
+  const handleSwitchPracticeFromModal = () => {
+    setShowMissingModal(false);
+    setIsPracticeMode(true);
+    setIsCookingMode(true);
   };
 
   const toggleIngredient = (idx) => {
@@ -633,16 +697,18 @@ export default function RecipeDetailPage() {
             <h2 className={s.sectionTitle} style={{ marginBottom: 0 }}>
               <Utensils className="text-[#a13923]" size={24} /> Các bước thực hiện
             </h2>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2.5">
               <button 
-                onClick={() => {
-                  if (!currentUser) {
-                    openAuthModal('nấu ăn và theo dõi nguyên liệu');
-                    return;
-                  }
-                  setIsCookingMode(true);
-                }}
-                className="px-4 py-2 bg-[#a13923] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 hover:bg-[#8b311e] transition-colors shadow-sm"
+                onClick={handleStartPractice}
+                className="px-3.5 py-1.5 bg-white border border-[#d8c3b5] text-[#5e4336] hover:bg-[#fcf5f1] hover:text-[#a13923] rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+                title="Trải nghiệm các bước nấu và hẹn giờ mà không trừ kho"
+              >
+                <ChefHat size={14} className="text-[#a13923]" /> Nấu thử
+              </button>
+
+              <button 
+                onClick={handleStartRealCook}
+                className="px-4 py-1.5 bg-[#a13923] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 hover:bg-[#8b311e] transition-colors shadow-sm"
               >
                 <Play size={14} fill="currentColor" /> Bắt đầu nấu ăn
               </button>
@@ -684,15 +750,19 @@ export default function RecipeDetailPage() {
           </div>
 
           {recipe.steps?.length > 0 && (
-            <div className="mt-12 flex justify-center">
-              <button onClick={() => {
-                if (!currentUser) {
-                  openAuthModal('nấu ăn và theo dõi nguyên liệu');
-                  return;
-                }
-                setIsCookingMode(true);
-              }} className="px-8 py-4 bg-[#a13923] text-white rounded-full text-[15px] font-bold flex items-center gap-2 hover:bg-[#8b311e] transition-colors shadow-lg shadow-[#a13923]/30 hover:-translate-y-1">
-                <Clock size={20} /> BẮT ĐẦU NẤU NGAY <ArrowLeft size={20} className="rotate-180 ml-1" />
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+              <button 
+                onClick={handleStartPractice}
+                className="px-6 py-3.5 bg-white hover:bg-[#fcf5f1] border-2 border-[#d8c3b5] text-[#5e4336] hover:text-[#a13923] rounded-full text-[15px] font-bold flex items-center gap-2 transition-all shadow-md hover:-translate-y-0.5"
+              >
+                <ChefHat size={19} className="text-[#a13923]" /> NẤU THỬ TRẢI NGHIỆM
+              </button>
+
+              <button 
+                onClick={handleStartRealCook} 
+                className="px-8 py-4 bg-[#a13923] text-white rounded-full text-[15px] font-bold flex items-center gap-2 hover:bg-[#8b311e] transition-all shadow-lg shadow-[#a13923]/30 hover:-translate-y-1"
+              >
+                <Clock size={20} /> BẮT ĐẦU NẤU THẬT <ArrowLeft size={20} className="rotate-180 ml-1" />
               </button>
             </div>
           )}
@@ -783,10 +853,22 @@ export default function RecipeDetailPage() {
       {isCookingMode && (
         <CookingMode
           recipe={recipe}
+          isPractice={isPracticeMode}
           onClose={() => setIsCookingMode(false)}
           onSuccess={() => refreshPantry()}
         />
       )}
+
+      <MissingIngredientsModal
+        isOpen={showMissingModal}
+        onClose={() => setShowMissingModal(false)}
+        recipeTitle={recipe?.title}
+        missingIngredients={missingIngredients}
+        onGoShopping={handleGoShoppingFromModal}
+        onProceedCook={handleProceedCookAnyway}
+        onSwitchPractice={handleSwitchPracticeFromModal}
+        isAddingToGrocery={addingToGrocery}
+      />
 
       <ShareRecipeModal 
         isOpen={isShareModalOpen} 
