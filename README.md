@@ -16,7 +16,7 @@
   Ứng dụng Single Page Application (SPA) hiện đại, trực quan và giàu tính tương tác dành cho những người yêu thích nấu nướng. Kết nối mượt mà với <b>Spring Boot REST API</b>, ứng dụng giúp tối ưu hóa tủ lạnh gia đình, tự động hóa danh sách đi chợ, gợi ý món ăn Zero-Waste từ Google Gemini AI, và cung cấp Cổng quản trị Admin chuyên sâu.
 </p>
 
-[Xem Bản Trực Tuyến (Live Demo)](https://smartrecipe-frontend.vercel.app) • [Tài liệu Backend API](https://github.com/NHTung-0801/smartrecipe-backend#readme) • [Báo cáo Lỗi](https://github.com/NHTung-0801/SmartRecipe-Project/issues)
+[Xem Bản Trực Tuyến (Live Demo)](https://smartrecipe-platform.vercel.app) • [Tài liệu Backend API](https://github.com/NHTung-0801/smartrecipe-backend#readme) • [Báo cáo Lỗi](https://github.com/NHTung-0801/SmartRecipe-Project/issues)
 
 </div>
 
